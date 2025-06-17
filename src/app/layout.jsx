@@ -1,4 +1,5 @@
 import './globals.css';
+import Topbar from '@/components/layout/Topbar';
 
 export default function RootLayout({ children }) {
   return (
@@ -9,7 +10,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Topbar cartCount={3} />{' '}
+        {/* Sample cart count; replace with dynamic state */}
+        {children}
+      </body>
     </html>
   );
 }
