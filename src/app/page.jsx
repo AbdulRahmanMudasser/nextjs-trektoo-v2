@@ -1,7 +1,9 @@
 import React from 'react';
-import Navbar from '../components/layout/Navbar';
+import Navbar from '@/components/layout/Navbar';
 import HeroSection from '@/components/feature/HeroSection/HeroSection';
 import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
+import AdventuTours from '@/components/feature/AdventureTour';
+import Footer from '@/components/layout/Footer/Footer';
 
 export default function HomePage() {
   return (
@@ -9,6 +11,7 @@ export default function HomePage() {
       <Navbar />
       <HeroSection />
       <BrowseTypes />
+      <Footer />
     </main>
   );
 }
