@@ -91,7 +91,7 @@ function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="p-1.5 rounded-full text-white hover:bg-gray-900 transition-colors"
+                className="p-1.5 rounded-full text-white hover:bg-blue-400 transition-colors"
                 aria-label="Profile menu"
               >
                 <svg

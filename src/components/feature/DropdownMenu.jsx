@@ -36,14 +36,14 @@ function DropdownMenu({ title, items }) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
-        className="flex items-center gap-1 text-blue-300 hover:text-gray-900 transition-colors font-medium text-sm uppercase tracking-wide py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-left lg:text-center lg:w-auto"
+        className="flex items-center gap-1 text-white hover:text-blue-400 transition-colors font-medium text-sm uppercase tracking-wide py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-left lg:text-center lg:w-auto"
         aria-haspopup="true"
         aria-expanded={isOpen}
         aria-label={`Toggle ${title} menu`}
       >
         {title}
         <svg
-          className={`w-4 h-4 text-blue-300 transition-transform ${isOpen ? 'rotate-180' : ''} ml-auto lg:ml-1`}
+          className={`w-4 h-4 text-white transition-transform ${isOpen ? 'rotate-180' : ''} ml-auto lg:ml-1`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
