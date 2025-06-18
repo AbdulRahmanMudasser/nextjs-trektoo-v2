@@ -3,6 +3,7 @@ import Navbar from '@/components/layout/Navbar';
 import HeroSection from '@/components/feature/HeroSection/HeroSection';
 import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
 import Footer from '@/components/layout/Footer/Footer';
+import AdventureTours from '@/components/feature/AdventureSection/AdventureTours';
 
 export default function HomePage() {
   return (
@@ -10,6 +11,7 @@ export default function HomePage() {
       <Navbar />
       <HeroSection />
       <BrowseTypes />
+      <AdventureTours />
       <Footer />
     </main>
   );
