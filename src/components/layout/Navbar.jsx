@@ -26,17 +26,17 @@ const dropdownItems = {
   ],
 };
 
-function Navbar() {
+const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [topOffset, setTopOffset] = useState('top-10'); // Dynamic top position
+  const [topOffset, setTopOffset] = useState('top-10');
 
-  // Handle scroll effect for navbar position and transparency
+  // Handle scroll effect for navbar position and background
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-      // Adjust top offset based on scroll position (top bar height is 10px)
+      const scrolled = window.scrollY > 50;
+      setIsScrolled(scrolled);
       setTopOffset(window.scrollY > 10 ? 'top-0' : 'top-10');
     };
 
@@ -47,13 +47,19 @@ function Navbar() {
 
   return (
     <nav
-      className={`fixed ${topOffset} z-20 w-full bg-transparent backdrop-blur-sm transition-all duration-300`}
+      className={`fixed ${topOffset} z-20 w-full transition-all duration-300 ${
+        isScrolled ? 'bg-gray-900' : 'bg-transparent backdrop-blur-sm'
+      }`}
       aria-label="Main navigation"
     >
       <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
         <div className="flex h-12 items-center justify-between md:h-14 lg:h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 scale-100 md:scale-110 lg:scale-125">
+          <div
+            className={`flex-shrink-0 scale-100 md:scale-110 lg:scale-125 ${
+              isScrolled ? 'bg-white rounded-full p-1.5' : ''
+            }`}
+          >
             <Logo />
           </div>
           {/* Navigation and Profile */}
@@ -174,7 +180,7 @@ function Navbar() {
               <DropdownMenu title="News" items={dropdownItems.news} />
               <a
                 href="/contact"
-                className="block text-white hover:text-blue-500 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
               >
                 Contact
               </a>
@@ -184,10 +190,8 @@ function Navbar() {
       </div>
     </nav>
   );
-}
-
-Navbar.propTypes = {
-  // No props currently, but PropTypes included for future extensibility
 };
+
+Navbar.propTypes = {};
 
 export default Navbar;
