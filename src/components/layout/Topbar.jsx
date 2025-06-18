@@ -14,7 +14,7 @@ import {
 function Topbar({ cartCount }) {
   return (
     <header
-      className="bg-gray-900 text-white h-10 flex items-center w-full z-30"
+      className="bg-gray-900 text-white h-10 flex items-center w-full z-40"
       aria-label="Topbar"
     >
       <div className="container mx-auto px-4 flex justify-between items-center text-xs md:text-sm">

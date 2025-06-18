@@ -8,10 +8,6 @@ import SearchInput from '../ui/SearchInput';
 
 // Dropdown items configuration
 const dropdownItems = {
-  home: [
-    { href: '/home-1', label: 'Home Layout 1' },
-    { href: '/home-2', label: 'Home Layout 2' },
-  ],
   tours: [
     { href: '/tourslist', label: 'Tours List' },
     { href: '/tours/grid', label: 'Tours Grid' },
@@ -34,11 +30,14 @@ function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [topOffset, setTopOffset] = useState('top-10'); // Dynamic top position
 
-  // Handle scroll effect for navbar background
+  // Handle scroll effect for navbar position and transparency
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      // Adjust top offset based on scroll position (top bar height is 10px)
+      setTopOffset(window.scrollY > 10 ? 'top-0' : 'top-10');
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -48,22 +47,25 @@ function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-20 w-full transition-all duration-300 ${
-        isScrolled ? 'bg-gray-900 shadow-md' : 'bg-transparent backdrop-blur-sm'
-      }`}
+      className={`fixed ${topOffset} z-20 w-full bg-transparent backdrop-blur-sm transition-all duration-300`}
       aria-label="Main navigation"
     >
       <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
-        <div className="flex h-14 items-center justify-between md:h-16 lg:h-20">
+        <div className="flex h-12 items-center justify-between md:h-14 lg:h-16">
           {/* Logo */}
-          <div className="flex-shrink-0 scale-75 md:scale-90 lg:scale-100">
+          <div className="flex-shrink-0 scale-100 md:scale-110 lg:scale-125">
             <Logo />
           </div>
           {/* Navigation and Profile */}
           <div className="flex items-center gap-1 md:gap-3">
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-2">
-              <DropdownMenu title="Home" items={dropdownItems.home} />
+              <a
+                href="/"
+                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+              >
+                Home
+              </a>
               <DropdownMenu title="Tours page" items={dropdownItems.tours} />
               <DropdownMenu
                 title="Destination"
@@ -73,10 +75,11 @@ function Navbar() {
               <DropdownMenu title="News" items={dropdownItems.news} />
               <a
                 href="/contact"
-                className="text-blue-300 hover:text-gray-900 transition-colors font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 px-2"
+                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 Contact
               </a>
+              <span className="h-6 border-l border-gray-300 mx-2"></span>
             </div>
 
             {/* Search Input */}
@@ -88,7 +91,7 @@ function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="p-1.5 rounded-full text-blue-300 hover:bg-gray-900 transition-colors"
+                className="p-1.5 rounded-full text-white hover:bg-gray-900 transition-colors"
                 aria-label="Profile menu"
               >
                 <svg
@@ -127,7 +130,7 @@ function Navbar() {
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-1.5 text-blue-300 hover:text-gray-900 transition-colors"
+              className="lg:hidden p-1.5 text-white hover:text-blue-400 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
@@ -151,12 +154,17 @@ function Navbar() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-gray-900 rounded-lg shadow-lg fixed top-14 left-0 right-0 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+          <div className="lg:hidden bg-gray-900 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto">
             <div className="px-3 py-4 space-y-3">
               <div className="sm:hidden mb-3">
                 <SearchInput />
               </div>
-              <DropdownMenu title="Home" items={dropdownItems.home} />
+              <a
+                href="/"
+                className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+              >
+                Home
+              </a>
               <DropdownMenu title="Tours page" items={dropdownItems.tours} />
               <DropdownMenu
                 title="Destination"
@@ -166,7 +174,7 @@ function Navbar() {
               <DropdownMenu title="News" items={dropdownItems.news} />
               <a
                 href="/contact"
-                className="block text-blue-300 hover:text-gray-900 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5"
+                className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
               >
                 Contact
               </a>
