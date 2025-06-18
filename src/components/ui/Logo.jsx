@@ -12,12 +12,12 @@ function Logo() {
       className="flex items-center gap-2"
       aria-label="Trektoo Home"
     >
-      <div className="flex items-center justify-center w-20 h-20 md:w-25 md:h-25">
+      <div className="flex items-center justify-center w-24 h-24 md:w-30 md:h-30">
         <Image
           src="/images/logo.png"
           alt="Trektoo Logo"
-          width={100}
-          height={100}
+          width={120}
+          height={120}
           className="object-contain"
           priority
         />

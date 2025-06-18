@@ -174,7 +174,7 @@ function Navbar() {
               <DropdownMenu title="News" items={dropdownItems.news} />
               <a
                 href="/contact"
-                className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                className="block text-white hover:text-blue-500 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
               >
                 Contact
               </a>
