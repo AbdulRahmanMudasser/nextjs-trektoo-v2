@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Logo from '../ui/Logo';
-import DropdownMenu from '../feature/DropdownMenu';
-import SearchInput from '../ui/SearchInput';
+import Logo from '../ui/Custom/Logo';
+import DropdownMenu from '../feature/HeroSection/DropdownMenu';
+import SearchInput from '../ui/Custom/SearchInput';
 
 // Dropdown items configuration
 const dropdownItems = {
