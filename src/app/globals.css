@@ -15,6 +15,40 @@ body {
   background: #000; /* Matches hero overlay */
 }
 
+/* Add this to your global CSS file (e.g., globals.css) */
+
+@keyframes zoomIn {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes zoomInMobile {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05); /* Less zoom on mobile for better performance */
+  }
+}
+
+/* Ensure your topbar/navbar has proper z-index */
+.navbar,
+.topbar,
+header {
+  z-index: 50 !important; /* Higher than hero section */
+  position: relative; /* or fixed/absolute */
+}
+
+/* Optional: Add backdrop blur to topbar for better visibility */
+.topbar {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
 /* Ensure global font application */
 :root {
   font-family: var(--font-family-sans);
