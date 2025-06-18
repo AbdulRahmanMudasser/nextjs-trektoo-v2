@@ -1,10 +1,8 @@
-'use client';
-
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 
-function DropdownMenu({ title, items }) {
+const DropdownMenu = ({ title, items }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -71,7 +69,7 @@ function DropdownMenu({ title, items }) {
             className="block px-4 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900 transition-colors"
             role="menuitem"
             tabIndex={0}
-            onClick={() => setIsOpen(false)} // Close submenu on item click
+            onClick={() => setIsOpen(false)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -86,7 +84,7 @@ function DropdownMenu({ title, items }) {
       </div>
     </div>
   );
-}
+};
 
 DropdownMenu.propTypes = {
   title: PropTypes.string.isRequired,
