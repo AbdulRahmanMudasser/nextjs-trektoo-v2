@@ -79,7 +79,7 @@ const TextContent = () => {
       initial="hidden"
       animate="visible"
     >
-      <p className="text-2xl md:text-4xl text-gray-600 font-bold">
+      <p className="text-xl text-white mb-10 font-medium bg-blue-500 inline-block px-3 py-1 rounded-lg">
         Welcome to Trektoo
       </p>
       <h1 className="text-xl md:text-2xl font-400 text-white leading-tight">
@@ -107,7 +107,7 @@ const ActivityImage = () => {
 
   return (
     <motion.div
-      className="w-full max-w-[900px] h-[400px] md:h-[550px] relative rounded-t-[100px] overflow-hidden"
+      className="w-full max-w-[900px] h-[400px] md:h-[550px] relative rounded-xl overflow-hidden"
       variants={imageVariants}
       initial="hidden"
       animate="visible"
