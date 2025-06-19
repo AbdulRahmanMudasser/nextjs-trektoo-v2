@@ -4,6 +4,7 @@ import HeroSection from '@/components/feature/HeroSection/HeroSection';
 import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
 import Footer from '@/components/layout/Footer/Footer';
 import AdventureTours from '@/components/feature/AdventureSection/AdventureTours';
+import GoWildSection from '@/components/feature/GoWildSection/GoWildSection';
 
 export default function HomePage() {
   return (
@@ -12,6 +13,7 @@ export default function HomePage() {
       <HeroSection />
       <BrowseTypes />
       <AdventureTours />
+      <GoWildSection />
       <Footer />
     </main>
   );
