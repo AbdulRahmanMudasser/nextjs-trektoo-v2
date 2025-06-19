@@ -65,9 +65,15 @@ const BrowseTypes = () => {
 
   return (
     <div
-      className="relative text-center py-6"
+      className="relative text-center py-6 z-10 bg-transparent"
       aria-label="Browse Types Section"
     >
+      {/* Text */}
+      <div className="text-white text-center -mt-48 mb-10">
+        <p className="text-sm sm:text-base md:text-lg lg:text-2xl font-medium tracking-wide">
+          Or Browse Selected Types
+        </p>
+      </div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={scrollLeft}

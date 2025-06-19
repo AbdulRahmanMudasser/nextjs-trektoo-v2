@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
+import Navbar from '@/components/layout/Navbar/Navbar';
 import HeroSection from '@/components/feature/HeroSection/HeroSection';
 import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
 import Footer from '@/components/layout/Footer/Footer';
