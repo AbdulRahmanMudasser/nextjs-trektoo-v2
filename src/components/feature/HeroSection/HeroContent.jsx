@@ -4,7 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, User } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
-import { addDays } from 'date-fns';
+
+// Utility function to add days to a date
+const addDays = (date, days) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
 
 function HeroContent() {
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
@@ -74,12 +80,10 @@ function HeroContent() {
       alert('Please select a city, check-in date, and check-out date.');
       return;
     }
-
     if (totalGuests === 0) {
       alert('Please select at least one guest.');
       return;
     }
-
     const queryParams = new URLSearchParams({
       city: selectedCity,
       checkin: formatDateToApi(selectedDateFrom),
@@ -87,7 +91,6 @@ function HeroContent() {
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
-
     router.push(`/tourslist?${queryParams}`);
   };
 
@@ -95,35 +98,50 @@ function HeroContent() {
   today.setHours(0, 0, 0, 0);
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 text-center">
-      {/* Custom font styles */}
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 text-center -mt-8">
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
         .hero-title {
           font-family: 'Inter', sans-serif;
-          font-weight: 500;
+          font-weight: 600;
           letter-spacing: -0.02em;
         }
-
         .hero-subtitle {
           font-family: 'Inter', sans-serif;
           font-weight: 400;
           letter-spacing: 0.01em;
         }
+        .transition-wrapper {
+          transition:
+            background 0.3s,
+            border 0.3s,
+            border-radius 0.3s,
+            box-shadow 0.3s,
+            transform 0.4s;
+        }
+        .curved-arrow {
+          animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
       `}</style>
 
-      {/* Responsive Typography - Optimized for mobile, original for large */}
       <h1 className="hero-title text-xl sm:text-4xl md:text-5xl lg:text-5xl text-white mb-3 sm:mb-4">
-        Find Your Perfect Hotel
+        Where You Would Like To Go?
       </h1>
       <p className="hero-subtitle text-sm sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 px-2 sm:px-0">
-        Explore the world with our curated hotel selections
+        Checkout Beautiful Places Around The World
       </p>
 
-      <form onSubmit={(e) => e.preventDefault()} className="w-full">
+      <div onSubmit={(e) => e.preventDefault()} className="w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl border border-white/20">
-          {/* City Selection */}
           <div className="lg:col-span-1">
             <select
               value={selectedCity}
@@ -149,7 +167,6 @@ function HeroContent() {
             </select>
           </div>
 
-          {/* Check-in Date */}
           <div className="lg:col-span-1" ref={dateFromPickerRef}>
             <DateInput
               selectedDate={selectedDateFrom}
@@ -160,7 +177,6 @@ function HeroContent() {
             />
           </div>
 
-          {/* Check-out Date */}
           <div className="lg:col-span-1" ref={dateToPickerRef}>
             <DateInput
               selectedDate={selectedDateTo}
@@ -172,7 +188,6 @@ function HeroContent() {
             />
           </div>
 
-          {/* Guests Selection */}
           <div className="lg:col-span-1 relative" ref={guestsDropdownRef}>
             <button
               type="button"
@@ -201,7 +216,6 @@ function HeroContent() {
                 />
               </svg>
             </button>
-
             {isGuestsDropdownOpen && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 sm:mt-2 z-50 shadow-xl">
                 <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
@@ -240,7 +254,6 @@ function HeroContent() {
             )}
           </div>
 
-          {/* Search Button */}
           <div className="lg:col-span-1 sm:col-span-2">
             <button
               type="button"
@@ -252,7 +265,21 @@ function HeroContent() {
             </button>
           </div>
         </div>
-      </form>
+      </div>
+
+      {/* Browse Type Section with Curved Arrow */}
+      <div className="transition-wrapper mt-8 sm:mt-12 md:mt-16">
+        <div className="relative flex flex-col items-center">
+          {/* Curved Arrow Image */}
+          <div className="curved-arrow mb-4 sm:mb-6 absolute left-68 top-14 hidden sm:block">
+            <img
+              src="/images/line-arrow.png"
+              alt="Arrow pointing down"
+              className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-20 object-contain opacity-80"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

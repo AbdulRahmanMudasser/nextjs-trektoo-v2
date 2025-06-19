@@ -18,7 +18,6 @@ const TourCard = ({ imageUrl, tourCount, destination, index }) => {
   const [isHovered, setIsHovered] = useState(false);
   const country = destination.split('Travel to ')[1];
 
-  // Animation variants for tour card
   const cardVariants = {
     hidden: { opacity: 0, y: 50, scale: 0.95 },
     visible: (i) => ({
@@ -29,14 +28,13 @@ const TourCard = ({ imageUrl, tourCount, destination, index }) => {
     }),
     hover: {
       scale: 1.03,
-      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)',
       transition: { duration: 0.3, ease: 'easeOut' },
     },
   };
 
   return (
     <motion.div
-      className="relative bg-white rounded-2xl shadow-lg w-full max-w-[300px] min-w-[280px] overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="relative bg-white rounded-2xl w-full max-w-[300px] min-w-[280px] overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
       variants={cardVariants}
       initial="hidden"
       animate="visible"
@@ -57,6 +55,7 @@ const TourCard = ({ imageUrl, tourCount, destination, index }) => {
           style={{ transform: isHovered ? 'scale(1.1)' : 'scale(1)' }}
           loading="lazy"
           sizes="(max-width: 768px) 100vw, 300px"
+          quality={75}
         />
         <div
           className="absolute inset-0"
@@ -66,37 +65,24 @@ const TourCard = ({ imageUrl, tourCount, destination, index }) => {
             pointerEvents: 'none',
           }}
         />
-        <div className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wide">
+        <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wide">
           {tourCount} Tour{tourCount !== 1 ? 's' : ''}
         </div>
         <div className="absolute bottom-6 left-0 right-0 text-center space-y-1">
           <motion.h3
             className="text-xl font-light text-white bg-transparent m-0 relative z-10"
-            animate={{
-              y: isHovered ? -10 : 0,
-              color: isHovered ? '#1E3A8A' : '#FFFFFF',
-            }}
+            animate={{ y: isHovered ? -10 : 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             Travel to
           </motion.h3>
           <motion.h3
             className="text-2xl font-bold text-white m-0 relative z-10"
-            animate={{
-              y: isHovered ? -10 : 0,
-              color: isHovered ? '#1E3A8A' : '#FFFFFF',
-            }}
+            animate={{ y: isHovered ? -10 : 0 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             {country}
           </motion.h3>
-          <motion.div
-            className="absolute bottom-[-10px] left-0 right-0 h-[80px] bg-blue-100"
-            initial={{ width: 0 }}
-            animate={{ width: isHovered ? '100%' : 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            style={{ zIndex: 0 }}
-          />
         </div>
       </div>
     </motion.div>
@@ -136,13 +122,18 @@ const AdventureTours = () => {
       tourCount: 1,
       destination: 'Travel to Thailand',
     },
+    {
+      id: '5',
+      imageUrl: '/images/italy-adventure.png',
+      tourCount: 4,
+      destination: 'Travel to Italy',
+    },
   ]);
 
   const sliderRef = useRef(null);
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const [isMobile, setIsMobile] = useState(false);
 
-  // Handle responsive behavior
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     handleResize();
@@ -150,7 +141,6 @@ const AdventureTours = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Smooth scroll functionality
   const scrollLeft = () => {
     if (sliderRef.current) {
       sliderRef.current.scrollBy({ left: -300, behavior: 'smooth' });
@@ -163,110 +153,152 @@ const AdventureTours = () => {
     }
   };
 
-  // Animation variants for section
   const sectionVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.8, ease: 'easeOut' },
-    },
+    visible: { opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
+  };
+
+  const buttonVariants = {
+    hover: { scale: 1.1, rotate: 5 },
+    tap: { scale: 0.95 },
   };
 
   return (
-    <motion.section
-      ref={ref}
-      className="relative bg-gradient-to-b from-blue-50 to-white py-16 w-full max-w-[1440px] mx-auto"
-      variants={sectionVariants}
-      initial="hidden"
-      animate={inView ? 'visible' : 'hidden'}
-      aria-labelledby="adventure-tours-heading"
-    >
-      <div className="max-w-[1280px] mx-auto px-4">
-        <motion.h2
-          id="adventure-tours-heading"
-          className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 text-center tracking-tight"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        >
-          Explore Real Adventure
-        </motion.h2>
-        <div className="relative">
-          {!isMobile && (
-            <motion.button
-              onClick={scrollLeft}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 z-10 transition-colors duration-300"
-              aria-label="Scroll tours left"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </motion.button>
-          )}
-          <div
-            ref={sliderRef}
-            className={`flex ${isMobile ? 'flex-col items-center gap-6' : 'overflow-x-auto snap-x snap-mandatory scrollbar-none gap-4 p-4'}`}
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            <style jsx>{`
-              div::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-            <AnimatePresence>
-              {tours.map((tour, index) => (
-                <div
-                  key={tour.id}
-                  className={`flex-none ${isMobile ? 'w-full max-w-[320px]' : 'snap-center max-w-[300px] min-w-[280px]'}`}
-                >
-                  <TourCard
-                    imageUrl={tour.imageUrl}
-                    tourCount={tour.tourCount}
-                    destination={tour.destination}
-                    index={index}
-                  />
-                </div>
-              ))}
-            </AnimatePresence>
-          </div>
-          {!isMobile && (
-            <motion.button
-              onClick={scrollRight}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full w-12 h-12 flex items-center justify-center shadow-md hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 z-10 transition-colors duration-300"
-              aria-label="Scroll tours right"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </motion.button>
-          )}
+    <>
+      <motion.section
+        ref={ref}
+        className="relative w-full py-16 overflow-hidden"
+        variants={sectionVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
+        aria-labelledby="adventure-tours-heading"
+      >
+        {/* Background Image with Opacity */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src="/images/world-bg-2.png"
+            alt="World map background"
+            fill
+            className="object-cover opacity-45"
+            loading="lazy"
+            quality={75}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
-      </div>
-    </motion.section>
+
+        {/* Custom SVG Animation */}
+        <motion.svg
+          className="absolute top-0 left-0 w-full h-24 text-blue-500/20"
+          viewBox="0 0 1440 100"
+          initial={{ pathLength: 0 }}
+          animate={inView ? { pathLength: 1 } : {}}
+          transition={{ duration: 2, ease: 'easeInOut' }}
+        >
+          <path
+            d="M0,50 Q360,20 720,50 T1440,50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeDasharray="10 5"
+          />
+        </motion.svg>
+
+        <div className="relative max-w-full px-4 sm:px-6 lg:px-8 mx-auto">
+          <motion.h2
+            id="adventure-tours-heading"
+            className="text-4xl md:text-5xl font-extrabold text-center text-white mb-12 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          >
+            Explore Real Adventure
+          </motion.h2>
+          <div className="relative">
+            {!isMobile && (
+              <motion.button
+                onClick={scrollLeft}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-blue-500 rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
+                aria-label="Scroll tours left"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </motion.button>
+            )}
+            <div
+              ref={sliderRef}
+              className={`flex ${isMobile ? 'flex-col items-center gap-6' : 'overflow-x-auto snap-x snap-center gap-4 px-2 py-4 scrollbar-hidden'}`}
+            >
+              <AnimatePresence>
+                {tours.map((tour, index) => (
+                  <motion.div
+                    key={tour.id}
+                    className={`flex-none ${isMobile ? 'w-full max-w-[320px]' : 'max-w-[300px] min-w-[280px]'}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <TourCard
+                      imageUrl={tour.imageUrl}
+                      tourCount={tour.tourCount}
+                      destination={tour.destination}
+                      index={index}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+            {!isMobile && (
+              <motion.button
+                onClick={scrollRight}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-blue-500 rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
+                aria-label="Scroll tours right"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </motion.button>
+            )}
+          </div>
+        </div>
+      </motion.section>
+
+      <style jsx>{`
+        .scrollbar-hidden::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hidden {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+      `}</style>
+    </>
   );
 };
 
