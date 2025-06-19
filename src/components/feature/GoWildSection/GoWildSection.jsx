@@ -79,10 +79,10 @@ const TextContent = () => {
       initial="hidden"
       animate="visible"
     >
-      <p className="text-2xl md:text-4xl text-white font-bold">
+      <p className="text-2xl md:text-4xl text-gray-600 font-bold">
         Welcome to Trektoo
       </p>
-      <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+      <h1 className="text-xl md:text-2xl font-400 text-white leading-tight">
         We are the most exciting company for travel and adventure
       </h1>
       <p className="text-base text-white leading-relaxed">
