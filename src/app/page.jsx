@@ -6,6 +6,8 @@ import Footer from '@/components/layout/Footer/Footer';
 import AdventureTours from '@/components/feature/AdventureSection/AdventureTours';
 import GoWildSection from '@/components/feature/GoWildSection/GoWildSection';
 import WhoWeAreSection from '@/components/feature/WhoWeAreSection/WhoWeAre';
+import QA from '@/components/feature/QASection/QA';
+import Tour from '@/components/feature/TourSection/Tour';
 
 export default function HomePage() {
   return (
@@ -16,6 +18,8 @@ export default function HomePage() {
       <AdventureTours />
       <GoWildSection />
       <WhoWeAreSection />
+      <QA />
+      <Tour />
       <Footer />
     </main>
   );
