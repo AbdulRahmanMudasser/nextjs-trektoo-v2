@@ -8,6 +8,7 @@ import GoWildSection from '@/components/feature/GoWildSection/GoWildSection';
 import WhoWeAreSection from '@/components/feature/WhoWeAreSection/WhoWeAre';
 import QA from '@/components/feature/QASection/QA';
 import Tour from '@/components/feature/TourSection/Tour';
+import WhyChooseUs from '@/components/feature/WhyChooseUsSection/WhyChooseUs';
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
       <WhoWeAreSection />
       <QA />
       <Tour />
+      <WhyChooseUs />
       <Footer />
     </main>
   );
