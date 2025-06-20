@@ -227,7 +227,7 @@ function HeroContent() {
                       <span className="text-gray-700 capitalize font-medium flex-shrink-0 text-sm sm:text-base">
                         {category === 'adult' ? 'Adults' : 'Children'}
                       </span>
-                      <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-3 sm:gap-1">
                         <button
                           type="button"
                           onClick={() => handleGuestChange(category, false)}
