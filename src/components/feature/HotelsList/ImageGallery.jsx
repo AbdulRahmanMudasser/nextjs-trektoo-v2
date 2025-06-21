@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ImageGallery = () => {
   const galleryRef = useRef(null);
@@ -27,7 +28,7 @@ const ImageGallery = () => {
       scrollInterval = setInterval(() => {
         if (gallery) {
           const isAtEnd =
-            gallery.scrollLeft >= gallery.scrollWidth - gallery.clientWidth;
+            gallery.scrollLeft >= gallery.scrollWidth - gallery.clientWidth - 1;
           if (isAtEnd) {
             gallery.scrollLeft = 0;
           } else {
@@ -62,75 +63,100 @@ const ImageGallery = () => {
 
   const images = [
     '/images/hero-bg-1.jpg',
-    '/images/hero-bg-1.jpg',
-    '/images/hero-bg-1.jpg',
+    '/images/hero-bg-2.jpg',
+    '/images/hero-bg-3.jpg',
     '/images/hero-bg-1.jpg',
     '/images/hero-bg-2.jpg',
-    '/images/hero-bg-2.jpg',
+    '/images/hero-bg-3.jpg',
     '/images/hero-bg-2.jpg',
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 20,
+      },
+    },
+  };
+
   return (
-    <div className="relative w-full" tabIndex={0} onKeyDown={handleKeyDown}>
-      <button
-        onClick={scrollLeft}
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/50 p-2 rounded-r hover:bg-black/70 transition-all duration-300"
-        aria-label="Scroll left"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="white"
-          className="w-6 h-6"
+    <motion.div
+      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
+      <motion.div className="relative" variants={itemVariants}>
+        <motion.button
+          onClick={scrollLeft}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 -ml-6 sm:-ml-12 z-10 bg-blue-50 text-blue-500 p-3 rounded-full shadow-sm hover:bg-blue-500 hover:text-white transition-all duration-300"
+          aria-label="Scroll left"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15.75 19.5L8.25 12l7.5-7.5"
-          />
-        </svg>
-      </button>
-      <div
-        ref={galleryRef}
-        className="w-full overflow-x-hidden whitespace-nowrap cursor-pointer flex items-center gap-4 py-4"
-      >
-        {images.map((src, index) => (
-          <div
-            key={index}
-            className="relative w-full sm:w-1/2 md:w-1/3 lg:w-1/4 h-64 flex-shrink-0"
-          >
-            <Image
-              src={src}
-              alt={`Gallery Image ${index + 1}`}
-              fill
-              className="object-cover transition-all duration-300 hover:scale-105 hover:shadow-lg rounded-lg"
-            />
-          </div>
-        ))}
-      </div>
-      <button
-        onClick={scrollRight}
-        className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/50 p-2 rounded-l hover:bg-black/70 transition-all duration-300"
-        aria-label="Scroll right"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="white"
-          className="w-6 h-6"
+          <ChevronLeft className="h-6 w-6" />
+        </motion.button>
+        <div
+          ref={galleryRef}
+          className="w-full overflow-x-hidden whitespace-nowrap flex items-center gap-4 sm:gap-6 py-4"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M8.25 4.5l7.5 7.5-7.5 7.5"
-          />
-        </svg>
-      </button>
-    </div>
+          {images.map((src, index) => (
+            <motion.div
+              key={index}
+              className="relative w-full sm:w-1/2 md:w-1/3 lg:w-1/4 h-64 sm:h-72 lg:h-80 flex-shrink-0 rounded-2xl overflow-hidden group"
+              variants={itemVariants}
+              whileHover={{ scale: 1.03, x: 5 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            >
+              <Image
+                src={src}
+                alt={`Gallery Image ${index + 1}`}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                placeholder="blur"
+                blurDataURL="/default-tour.jpg"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <motion.div
+                className="absolute bottom-4 left-4 bg-blue-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100"
+                initial={{ y: 10 }}
+                animate={{ y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                View Details
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+        <motion.button
+          onClick={scrollRight}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 -mr-6 sm:-mr-12 z-10 bg-blue-50 text-blue-500 p-3 rounded-full shadow-sm hover:bg-blue-500 hover:text-white transition-all duration-300"
+          aria-label="Scroll right"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <ChevronRight className="h-6 w-6" />
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 };
 

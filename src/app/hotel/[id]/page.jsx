@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSearchParams } from 'next/navigation';
-import TourHeader from '@/components/feature/HotelsList/TourHeader';
+import HotelHeader from '@/components/feature/HotelsList/HotelHeader';
 import ImageGallery from '@/components/feature/HotelsList/ImageGallery';
 import TourBooking from '@/components/feature/HotelsList/TourBooking';
 import TourInformation from '@/components/feature/HotelsList/TourInformation';
@@ -33,7 +33,7 @@ const TourDetail = () => {
 
   return (
     <div className="font-sans">
-      <TourHeader
+      <HotelHeader
         id={id}
         title={title}
         location={location}

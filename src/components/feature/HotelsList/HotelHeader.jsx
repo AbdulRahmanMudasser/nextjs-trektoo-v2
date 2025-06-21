@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const TourHeader = ({
+const HotelHeader = ({
   id,
   title = 'Unnamed Tour',
   location = 'Unknown Location',
@@ -103,7 +103,7 @@ const TourHeader = ({
               {[
                 { icon: ThumbsUp, label: 'From', value: price },
                 { icon: Clock, label: 'Duration', value: duration },
-                { icon: Leaf, label: 'Tour Type', value: discount || 'Luxury' },
+                { icon: Leaf, label: 'Tour Type', value: 'Luxury' },
                 ...(discount
                   ? [{ icon: Percent, label: 'Discount', value: discount }]
                   : []),
@@ -215,7 +215,7 @@ const TourHeader = ({
   );
 };
 
-TourHeader.propTypes = {
+HotelHeader.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string,
   location: PropTypes.string,
@@ -227,4 +227,4 @@ TourHeader.propTypes = {
   image: PropTypes.string,
 };
 
-export default TourHeader;
+export default HotelHeader;
