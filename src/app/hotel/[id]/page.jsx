@@ -3,15 +3,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSearchParams } from 'next/navigation';
-import TourHeader from '@/components/feature/HotelDetails/TourHeader';
-import ImageGallery from '@/components/feature/HotelDetails/ImageGallery';
-import TourBooking from '@/components/feature/HotelDetails/TourBooking';
-import TourInformation from '@/components/feature/HotelDetails/TourInformation';
-import TourPlan from '@/components/feature/HotelDetails/TourPlan';
-import Map from '@/components/feature/HotelDetails/Map';
-import CalendarPrice from '@/components/feature/HotelDetails/CalendarPrice';
-import ReviewScores from '@/components/feature/HotelDetails/ReviewScores';
-import TourComments from '@/components/feature/HotelDetails/TourComments';
+import TourHeader from '@/components/feature/HotelsList/TourHeader';
+import ImageGallery from '@/components/feature/HotelsList/ImageGallery';
+import TourBooking from '@/components/feature/HotelsList/TourBooking';
+import TourInformation from '@/components/feature/HotelsList/TourInformation';
+import TourPlan from '@/components/feature/HotelsList/TourPlan';
+import Map from '@/components/feature/HotelsList/Map';
+import CalendarPrice from '@/components/feature/HotelsList/CalendarPrice';
+import ReviewScores from '@/components/feature/HotelsList/ReviewScores';
+import TourComments from '@/components/feature/HotelsList/TourComments';
 
 const TourDetail = () => {
   const searchParams = useSearchParams();
