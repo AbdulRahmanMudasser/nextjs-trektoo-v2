@@ -22,7 +22,7 @@ function Topbar({ cartCount }) {
         <div className="hidden sm:flex flex-row gap-4">
           <span className="flex items-center">
             <svg
-              className="w-3 h-3 mr-1"
+              className="w-4 h-4 mr-1"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -39,7 +39,7 @@ function Topbar({ cartCount }) {
           </span>
           <span className="flex items-center">
             <svg
-              className="w-3 h-3 mr-1"
+              className="w-4 h-4 mr-1"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
