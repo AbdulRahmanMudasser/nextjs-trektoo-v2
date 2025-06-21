@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import BookingForm from './BookingForm';
 
-const HotelBooking = ({ id, description = 'None' }) => {
+const HotelDetails = ({ id, description = 'None' }) => {
   const capitalizeFirstLetter = (str) => {
     if (!str) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -218,9 +218,9 @@ const HotelBooking = ({ id, description = 'None' }) => {
   );
 };
 
-HotelBooking.propTypes = {
+HotelDetails.propTypes = {
   id: PropTypes.string.isRequired,
   description: PropTypes.string,
 };
 
-export default HotelBooking;
+export default HotelDetails;

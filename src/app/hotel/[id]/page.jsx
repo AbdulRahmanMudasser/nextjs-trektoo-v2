@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useSearchParams } from 'next/navigation';
 import HotelHeader from '@/components/feature/HotelsList/HotelHeader';
 import ImageGallery from '@/components/feature/HotelsList/ImageGallery';
-import HotelBooking from '@/components/feature/HotelsList/HotelBooking';
+import HotelDetails from '@/components/feature/HotelsList/HotelDetails';
 import TourInformation from '@/components/feature/HotelsList/TourInformation';
 import TourPlan from '@/components/feature/HotelsList/TourPlan';
 import Map from '@/components/feature/HotelsList/Map';
@@ -45,7 +45,7 @@ const TourDetail = () => {
         image={image}
       />
       <ImageGallery />
-      <HotelBooking id={id} description={description} />
+      <HotelDetails id={id} description={description} />
       <TourInformation />
       <TourPlan />
       <Map />

@@ -84,7 +84,7 @@ const BookingForm = ({ id }) => {
           className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-4 border-l-4 border-blue-500 pl-3"
           variants={itemVariants}
         >
-          Book Your Tour
+          Book Your Hotel
         </motion.h3>
         <form onSubmit={handleSubmit} className="space-y-6">
           <motion.div variants={itemVariants}>
@@ -246,7 +246,7 @@ const BookingForm = ({ id }) => {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center text-base transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
               disabled={!startDate || !timeSlot}
-              aria-label="Book tour"
+              aria-label="Book Hotel"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
