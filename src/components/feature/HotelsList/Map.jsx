@@ -2,26 +2,62 @@
 
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
+import { MapPin } from 'lucide-react';
 
 const Map = () => {
   const [modeOfTravel, setModeOfTravel] = useState('Walking');
   const mapRef = useRef(null);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 20,
+      },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-white flex ml-5 flex-col items-start p-4">
-      <div className="w-full max-w-2xl bg-white rounded-lg shadow-md p-4">
-        <h1
-          className="text-2xl font-bold mb-4"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+    <motion.div
+      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div
+        className="w-full bg-white rounded-2xl shadow-sm p-6 sm:p-8 border border-blue-50"
+        variants={itemVariants}
+      >
+        <motion.h1
+          className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-6 border-l-4 border-blue-500 pl-3"
+          variants={itemVariants}
         >
-          Location
-        </h1>
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="flex items-center space-x-2">
+          Tour Location
+        </motion.h1>
+        <motion.div
+          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6"
+          variants={itemVariants}
+        >
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <label
               htmlFor="modeOfTravel"
-              className="text-sm font-medium text-gray-700"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="text-base font-medium text-gray-700"
             >
               Mode of Travel:
             </label>
@@ -29,8 +65,7 @@ const Map = () => {
               id="modeOfTravel"
               value={modeOfTravel}
               onChange={(e) => setModeOfTravel(e.target.value)}
-              className="border border-gray-300 rounded-md p-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#A3BFFA]"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="w-full sm:w-auto border border-blue-100 rounded-md p-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-blue-50/50"
             >
               <option value="Walking">Walking</option>
               <option value="Driving">Driving</option>
@@ -38,51 +73,54 @@ const Map = () => {
               <option value="Cycling">Cycling</option>
             </select>
           </div>
-          <div className="flex-grow">
+          <div className="relative flex-grow w-full">
             <input
               type="text"
               placeholder="Enter your address"
-              className="w-full border border-gray-300 rounded-md p-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#A3BFFA]"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="w-full border border-blue-100 rounded-md p-2.5 pl-10 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-blue-50/50"
             />
+            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-500" />
           </div>
-        </div>
-        <div className="relative w-full h-64 rounded-md overflow-hidden border-2 border-gray-300">
+        </motion.div>
+        <motion.div
+          className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden border border-blue-50 shadow-sm"
+          variants={itemVariants}
+        >
           <div
             ref={mapRef}
-            className="w-full h-full"
-            style={{ display: 'block' }}
+            className="w-full h-full flex items-center justify-center bg-blue-50/50"
           >
-            <p
-              className="text-center text-gray-500"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            <motion.p
+              className="text-center text-gray-600 text-base sm:text-lg"
+              variants={itemVariants}
             >
-              Map feature is temporarily disabled.
-            </p>
+              Map feature is temporarily disabled. Please contact us for
+              location details.
+            </motion.p>
           </div>
-        </div>
-        <div
-          className="flex justify-between items-center mt-2 text-xs text-gray-500"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        </motion.div>
+        <motion.div
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 text-sm text-gray-500"
+          variants={itemVariants}
         >
           <span>Map ©2025 Google</span>
-          <div className="space-x-2">
-            <a href="#" className="hover:underline">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 sm:mt-0">
+            <a href="#" className="hover:text-blue-500 transition">
               Keyboard shortcuts
             </a>
-            <a href="#" className="hover:underline">
+            <a href="#" className="hover:text-blue-500 transition">
               Map data ©2025 Google
             </a>
-            <a href="#" className="hover:underline">
+            <a href="#" className="hover:text-blue-500 transition">
               Terms
             </a>
-            <a href="#" className="hover:underline">
+            <a href="#" className="hover:text-blue-500 transition">
               Report a map error
             </a>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
