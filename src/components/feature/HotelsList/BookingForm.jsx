@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
 import { CalendarIcon, ShoppingCart } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import DateInput from '@/components/ui/Custom/DateInput';
@@ -44,21 +45,52 @@ const BookingForm = ({ id }) => {
     });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 20,
+      },
+    },
+  };
+
   return (
-    <div className="w-full md:w-1/3">
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 transition-all hover:shadow-xl">
-        <h3
-          className="text-xl font-bold text-gray-800 mb-4 border-l-4 border-[#A3BFFA] pl-3"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
+    <motion.div
+      className="w-full"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        className="bg-white/95 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-sm border border-blue-50 transition-all hover:shadow-md"
+        variants={itemVariants}
+      >
+        <motion.h3
+          className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-4 border-l-4 border-blue-500 pl-3"
+          variants={itemVariants}
         >
           Book Your Tour
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+        </motion.h3>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <motion.div variants={itemVariants}>
             <label
               htmlFor={`from-${id}`}
-              className="block text-gray-700 mb-1 text-sm font-medium"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="block text-gray-700 mb-1 text-base font-medium"
             >
               From:
             </label>
@@ -73,14 +105,14 @@ const BookingForm = ({ id }) => {
                 placeholder="Select tour start date"
                 minDate={new Date()}
                 aria-label="Select tour start date"
+                className="w-full border border-blue-100 rounded-md p-3 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-blue-50/50"
               />
             </div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={itemVariants}>
             <label
               htmlFor={`time-${id}`}
-              className="block text-gray-700 mb-1 text-sm font-medium"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="block text-gray-700 mb-1 text-base font-medium"
             >
               Time:
             </label>
@@ -91,9 +123,8 @@ const BookingForm = ({ id }) => {
                 setTimeSlot(e.target.value);
                 setError('');
               }}
-              className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-[#A3BFFA] focus:border-[#A3BFFA] transition"
+              className="w-full border border-blue-100 rounded-md p-3 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-blue-50/50"
               aria-label="Select tour time slot"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
               <option value="" disabled>
                 Select time
@@ -104,12 +135,11 @@ const BookingForm = ({ id }) => {
                 </option>
               ))}
             </select>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={itemVariants}>
             <label
               htmlFor={`tickets-${id}`}
-              className="block text-gray-700 mb-1 text-sm font-medium"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              className="block text-gray-700 mb-1 text-base font-medium"
             >
               Tickets:
             </label>
@@ -123,136 +153,110 @@ const BookingForm = ({ id }) => {
               min={1}
               max={10}
               disabled={!startDate}
-              className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-[#A3BFFA] focus:border-[#A3BFFA] transition disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="w-full border border-blue-100 rounded-md p-3 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-blue-50/50 disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder={
                 startDate
                   ? 'Enter number of tickets'
                   : 'Please select date first'
               }
               aria-label="Number of tickets"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
             />
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id={`service-booking-${id}`}
-                checked={serviceBooking}
-                onChange={(e) => setServiceBooking(e.target.checked)}
-                className="h-4 w-4 text-[#A3BFFA] border-gray-300 rounded focus:ring-[#A3BFFA] cursor-pointer"
-                aria-label="Service per booking"
-              />
-              <label
-                htmlFor={`service-booking-${id}`}
-                className="ml-2 text-gray-700 text-sm cursor-pointer"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
-                Service per booking
-              </label>
+          </motion.div>
+          <motion.div className="space-y-4" variants={itemVariants}>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`service-booking-${id}`}
+                  checked={serviceBooking}
+                  onChange={(e) => setServiceBooking(e.target.checked)}
+                  className="h-4 w-4 text-blue-500 border-blue-200 rounded focus:ring-blue-500 cursor-pointer"
+                  aria-label="Service per booking"
+                />
+                <label
+                  htmlFor={`service-booking-${id}`}
+                  className="ml-2 text-gray-700 text-base cursor-pointer"
+                >
+                  Service per booking
+                </label>
+              </div>
+              <span className="text-gray-700 font-medium text-base">
+                $30.00
+              </span>
             </div>
-            <span
-              className="text-gray-700 font-medium text-sm"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
-            >
-              $30.00
-            </span>
-          </div>
-          <div>
-            <h4
-              className="text-lg font-bold text-gray-800 mb-2"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
-            >
-              Add Extras
-            </h4>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`service-person-${id}`}
-                    checked={servicePerson}
-                    onChange={(e) => setServicePerson(e.target.checked)}
-                    className="h-4 w-4 text-[#A3BFFA] border-gray-300 rounded focus:ring-[#A3BFFA] cursor-pointer"
-                    aria-label="Service per person"
-                  />
-                  <label
-                    htmlFor={`service-person-${id}`}
-                    className="ml-2 text-gray-700 text-sm cursor-pointer"
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}
-                  >
-                    Service per person
-                  </label>
+            <div>
+              <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                Add Extras
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`service-person-${id}`}
+                      checked={servicePerson}
+                      onChange={(e) => setServicePerson(e.target.checked)}
+                      className="h-4 w-4 text-blue-500 border-blue-200 rounded focus:ring-blue-500 cursor-pointer"
+                      aria-label="Service per person"
+                    />
+                    <label
+                      htmlFor={`service-person-${id}`}
+                      className="ml-2 text-gray-700 text-base cursor-pointer"
+                    >
+                      Service per person
+                    </label>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pl-6">
+                  <span className="text-gray-600 text-base">Children:</span>
+                  <span className="text-gray-700 font-medium text-base">
+                    $18.00
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pl-6">
+                  <span className="text-gray-600 text-base">Youth:</span>
+                  <span className="text-gray-700 font-medium text-base">
+                    $16.00
+                  </span>
                 </div>
               </div>
-              <div className="flex justify-between items-center pl-6">
-                <span
-                  className="text-gray-600 text-sm"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  Children:
-                </span>
-                <span
-                  className="text-gray-700 font-medium text-sm"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  $18.00
-                </span>
-              </div>
-              <div className="flex justify-between items-center pl-6">
-                <span
-                  className="text-gray-600 text-sm"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  Youth:
-                </span>
-                <span
-                  className="text-gray-700 font-medium text-sm"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  $16.00
-                </span>
-              </div>
             </div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={itemVariants}>
             <div className="flex justify-between items-center mb-4">
-              <span
-                className="text-lg font-bold text-gray-800"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
+              <span className="text-lg sm:text-xl font-bold text-gray-900">
                 Total:
               </span>
-              <span
-                className="text-lg font-bold text-gray-800"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
-              >
+              <span className="text-lg sm:text-xl font-bold text-gray-900">
                 ${totalCost.toFixed(2)}
               </span>
             </div>
             {error && (
-              <p
-                className="text-red-500 text-sm mb-2"
+              <motion.p
+                className="text-red-500 text-base mb-3"
                 role="alert"
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
                 {error}
-              </p>
+              </motion.p>
             )}
-            <button
+            <motion.button
               type="submit"
-              className="w-full border border-gray-200 bg-[#A3BFFA] hover:bg-[#8aa9ff] text-white font-bold py-2 px-4 rounded-md flex items-center justify-center text-sm transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center text-base transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
               disabled={!startDate || !timeSlot}
               aria-label="Book tour"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <ShoppingCart className="h-4 w-4 mr-2" />
+              <ShoppingCart className="h-5 w-5 mr-2" />
               Book Now
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
