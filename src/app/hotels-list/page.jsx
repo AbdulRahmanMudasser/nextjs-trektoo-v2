@@ -146,14 +146,6 @@ const cities = [
   },
 ];
 
-// /* Commented out logic for data fetching, geocoding, and image validation
-// const fetchWithRetry = async (url, options, retries = 3, delay = 300) => { ... };
-// const fetchCoordinates = async (city) => { ... };
-// const reverseGeocode = async (latitude, longitude) => { ... };
-// const isValidImageUrl = async (url) => { ... };
-// const getLowestPrice = (rooms) => { ... };
-// */
-
 const FilterCheckbox = ({ label, value, checked, onChange }) => (
   <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer group">
     <input
@@ -567,7 +559,13 @@ const TourListSection = ({ tours, loading }) => {
                   <span className="mr-1">📷</span> {tour.photoCount}
                 </div>
                 <Link
-                  href={{ pathname: '/tour-details', query: { ...tour } }}
+                  href={{
+                    pathname: `/hotel/${tour.id}`,
+                    query: {
+                      ...tour,
+                      hotel_name: tour.title.replace(/\s+/g, '-'),
+                    },
+                  }}
                   className="mt-4 inline-block w-full text-center bg-blue-500 text-white font-medium py-2 px-6 rounded-xl hover:bg-blue-600 transition-colors"
                 >
                   Explore Now
@@ -743,14 +741,13 @@ const HeaderSection = () => (
       priority
       quality={80}
     />
-    {/* <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 to-blue-700/30" /> */}
     <div className="relative z-10 flex items-center justify-center h-full px-4">
       <HeaderContent />
     </div>
   </section>
 );
 
-const ToursList = () => {
+const HotelsList = () => {
   const [loading] = useState(false);
 
   return (
@@ -773,14 +770,14 @@ const ToursList = () => {
       ) : (
         <ToursListMain tours={mockTours} loading={loading} />
       )}
-      <style jsx global>{`
-        // @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        // body {
-        //   font-family: 'Inter', sans-serif;
-        // }
-      `}</style>
+      {/* <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+        body {
+          font-family: 'Montserrat', sans-serif;
+        }
+      `}</style> */}
     </>
   );
 };
 
-export default ToursList;
+export default HotelsList;
