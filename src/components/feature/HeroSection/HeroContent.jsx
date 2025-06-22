@@ -91,7 +91,7 @@ function HeroContent() {
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
-    router.push(`/tourslist?${queryParams}`);
+    router.push(`/hotels-list?${queryParams}`);
   };
 
   const today = new Date();
