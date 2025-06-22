@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { FaPlay } from 'react-icons/fa';
+import { useInView } from 'react-intersection-observer';
 
 const PlayButton = ({ onClick, isPlaying }) => {
   if (isPlaying) return null;
@@ -69,7 +70,7 @@ const ExpandableItem = ({ question, answer, isExpandedByDefault = false }) => {
 
   return (
     <motion.div
-      className="border border-blue-100 rounded-xl p-4 mb-4 bg-white shadow-sm hover:shadow-md transition-shadow"
+      className="border border-blue-50 rounded-xl p-4 mb-4 bg-white/95 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -120,6 +121,7 @@ ExpandableItem.propTypes = {
 
 const QASection = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   useEffect(() => {
     const handleResize = () => {
@@ -134,81 +136,74 @@ const QASection = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.8, staggerChildren: 0.2 },
+      transition: { duration: 0.8, ease: 'easeOut', staggerChildren: 0.2 },
     },
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-blue-50 to-white py-16 px-4 sm:px-6 lg:px-8">
-      {/* Background Decorative Elements
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <svg
-          className="absolute top-0 left-0 w-full h-full opacity-10"
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="#3B82F6"
-            d="M0,96L48,90.7C96,85,192,75,288,69.3C384,64,480,64,576,80C672,96,768,128,864,133.3C960,139,1056,117,1152,106.7C1248,96,1344,96,1392,96L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-          />
-        </svg>
-      </div> */}
-
-      <motion.div
-        className={`max-w-7xl mx-auto flex ${isMobile ? 'flex-col' : 'flex-row'} items-start gap-8`}
-        variants={sectionVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Video Section */}
+    <motion.section
+      ref={ref}
+      className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 mb-4 sm:mb-6"
+      variants={sectionVariants}
+      initial="hidden"
+      animate={inView ? 'visible' : 'hidden'}
+      aria-labelledby="qa-section-heading"
+    >
+      <div className="w-full">
         <motion.div
-          className={isMobile ? 'w-full' : 'flex-1 max-w-[60%]'}
+          className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
           variants={sectionVariants}
         >
-          <VideoSection />
-        </motion.div>
-
-        {/* Q&A Sidebar */}
-        <motion.div
-          className={isMobile ? 'w-full' : 'flex-1 max-w-[40%]'}
-          variants={sectionVariants}
-        >
-          <div className="p-6">
-            {/* Availability Label */}
+          <motion.div
+            className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-start gap-8`}
+            variants={sectionVariants}
+          >
+            {/* Video Section */}
             <motion.div
-              className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg inline-block mb-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              AVAILABILITY
-            </motion.div>
-
-            <motion.h2
-              className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight mb-6"
+              className={isMobile ? 'w-full' : 'flex-1 max-w-[60%]'}
               variants={sectionVariants}
             >
-              Enjoy Real Adventure
-            </motion.h2>
+              <VideoSection />
+            </motion.div>
 
-            {/* Expandable Items */}
-            <ExpandableItem
-              question="How Much Price About Tour & Travels?"
-              answer="Our tours are priced competitively, offering premium experiences starting from $129. From kayaking in Phuket to luxurious villas in the Maldives, we tailor adventures to your budget."
-              isExpandedByDefault={true}
-            />
-            <ExpandableItem
-              question="What Services Do You Provide?"
-              answer="We offer comprehensive travel planning, including guided tours, accommodations, transportation, and 24/7 support to ensure a seamless and unforgettable journey."
-            />
-            <ExpandableItem
-              question="Why Choose Our Travel Agency?"
-              answer="With years of expertise, we curate personalized adventures to the world’s most stunning destinations, delivering exceptional service and memorable experiences."
-            />
-          </div>
+            {/* Q&A Sidebar */}
+            <motion.div
+              className={isMobile ? 'w-full' : 'flex-1 max-w-[40%]'}
+              variants={sectionVariants}
+            >
+              <motion.p
+                className="text-lg text-white font-semibold bg-blue-500 inline-block px-4 py-2 rounded-md shadow-sm"
+                whileHover={{ scale: 1.05 }}
+              >
+                Availability
+              </motion.p>
+
+              <motion.h2
+                className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-6 mt-6"
+                variants={sectionVariants}
+              >
+                Enjoy Real Adventure
+              </motion.h2>
+
+              {/* Expandable Items */}
+              <ExpandableItem
+                question="How Much Price About Tour & Travels?"
+                answer="Our tours are priced competitively, offering premium experiences starting from $129. From kayaking in Phuket to luxurious villas in the Maldives, we tailor adventures to your budget."
+                isExpandedByDefault={true}
+              />
+              <ExpandableItem
+                question="What Services Do You Provide?"
+                answer="We offer comprehensive travel planning, including guided tours, accommodations, transportation, and 24/7 support to ensure a seamless and unforgettable journey."
+              />
+              <ExpandableItem
+                question="Why Choose Our Travel Agency?"
+                answer="With years of expertise, we curate personalized adventures to the world’s most stunning destinations, delivering exceptional service and memorable experiences."
+              />
+            </motion.div>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </div>
+      </div>
+    </motion.section>
   );
 };
 
