@@ -143,7 +143,7 @@ const QASection = () => {
   return (
     <motion.section
       ref={ref}
-      className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 mb-4 sm:mb-6"
+      className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 "
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
