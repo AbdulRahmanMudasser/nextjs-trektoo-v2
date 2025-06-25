@@ -238,7 +238,7 @@ const Tour = () => {
   return (
     <motion.section
       ref={ref}
-      className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 mb-4 sm:mb-6"
+      className="relative w-full py-12 sm:py-1 px-0"
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
@@ -246,7 +246,7 @@ const Tour = () => {
     >
       <div className="w-full">
         <motion.div
-          className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
+          className="bg-white/95 p-6 sm:p-8 border max-w-8xl mx-auto"
           variants={sectionVariants}
         >
           <div className="text-center mb-8 sm:mb-10">
@@ -257,20 +257,12 @@ const Tour = () => {
               Discover Extraordinary Adventures
             </motion.h2>
             <motion.p
-              className="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed"
+              className="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600 max-w-3xl mx-auto mb-4 leading-relaxed"
               variants={sectionVariants}
             >
               Embark on unforgettable journeys to the world’s most breathtaking
               destinations.
             </motion.p>
-            <motion.button
-              className="mt-5 sm:mt-6 bg-blue-500 text-white text-sm sm:text-base font-semibold px-5 sm:px-8 py-2 sm:py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-              variants={sectionVariants}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Explore Featured Tours
-            </motion.button>
           </div>
           <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
             <AnimatePresence>
