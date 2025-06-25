@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
-import { RefreshCw, Loader2, Plus, Minus, X } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { RefreshCw, Loader2, Plus, Minus, X } from 'lucide-react';
 
 // Mock data with Unsplash images
 const mockTours = [
@@ -257,9 +258,9 @@ const FilterSidebar = () => {
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6 }}
-      className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-3xl shadow-lg sticky top-40 border border-gray-100"
+      className="bg-white/95 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-xl sticky top-40 border border-blue-50"
     >
-      <h3 className="text-2xl font-bold text-gray-900 mb-6">
+      <h3 className="text-2xl font-extrabold text-gray-900 mb-6">
         Plan Your Adventure
       </h3>
       <GuestSelector
@@ -295,7 +296,7 @@ const FilterSidebar = () => {
           </div>
         </div>
       </div>
-      <h3 className="text-xl font-bold text-gray-900 mb-4">
+      <h3 className="text-xl font-extrabold text-gray-900 mb-4">
         Last Minute Deals
       </h3>
       <div className="space-y-4">
@@ -384,7 +385,7 @@ const Pagination = ({
       <select
         value={itemsPerPage}
         onChange={(e) => setItemsPerPage(+e.target.value)}
-        className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        className="border border-blue-50 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/95"
       >
         <option value={2}>2 per page</option>
         <option value={4}>4 per page</option>
@@ -406,15 +407,18 @@ const TourListHeader = ({ tourCount, sortBy, onSortChange }) => (
   <motion.div
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
     className="flex justify-between items-center mb-8"
   >
-    <h3 className="text-2xl font-bold text-gray-900">{tourCount} Adventures</h3>
+    <h3 className="text-2xl font-extrabold text-gray-900">
+      {tourCount} Adventures
+    </h3>
     <div className="flex items-center gap-3">
       <span className="text-sm text-gray-600 font-medium">Sort by:</span>
       <select
         value={sortBy}
         onChange={(e) => onSortChange(e.target.value)}
-        className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        className="border border-blue-50 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/95"
       >
         <option value="price">Price</option>
         <option value="rating">Rating</option>
@@ -431,12 +435,14 @@ TourListHeader.propTypes = {
 };
 
 const TourCardSkeleton = () => (
-  <div className="relative bg-white rounded-3xl shadow-lg overflow-hidden animate-pulse h-80">
-    <div className="w-full h-full bg-gray-200"></div>
-    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-6 flex flex-col justify-end">
-      <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
-      <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+  <div className="relative bg-white/95 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row h-64 animate-pulse border border-blue-50">
+    <div className="w-full md:w-1/2 h-64 bg-gray-200"></div>
+    <div className="p-6 flex flex-col justify-between w-full md:w-1/2">
+      <div>
+        <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+        <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+      </div>
       <div className="h-8 bg-gray-300 rounded w-1/3"></div>
     </div>
   </div>
@@ -446,6 +452,7 @@ const TourListSection = ({ tours, loading }) => {
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(2);
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const totalTours = tours.length;
   const totalPages = Math.ceil(totalTours / itemsPerPage);
 
@@ -464,125 +471,190 @@ const TourListSection = ({ tours, loading }) => {
     currentPage * itemsPerPage
   );
 
+  const sectionVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.8, ease: 'easeOut', staggerChildren: 0.2 },
+    },
+  };
+
   if (loading) {
     return (
-      <div className="space-y-6">
-        {[...Array(itemsPerPage)].map((_, i) => (
-          <TourCardSkeleton key={i} />
-        ))}
-      </div>
+      <motion.section
+        ref={ref}
+        className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 mb-4 sm:mb-6"
+        variants={sectionVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
+      >
+        <div className="w-full">
+          <motion.div
+            className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
+            variants={sectionVariants}
+          >
+            <div className="space-y-6">
+              {[...Array(itemsPerPage)].map((_, i) => (
+                <TourCardSkeleton key={i} />
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
     );
   }
 
   if (!tours.length) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center text-gray-600 text-lg font-medium py-12"
+      <motion.section
+        ref={ref}
+        className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 mb-4 sm:mb-6"
+        variants={sectionVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
       >
-        No tours found. Try adjusting your search.
-      </motion.div>
+        <div className="w-full">
+          <motion.div
+            className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
+            variants={sectionVariants}
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-gray-600 text-lg font-medium py-12"
+            >
+              No tours found. Try adjusting your search.
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <TourListHeader
-        tourCount={totalTours}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-      />
-      <div className="grid grid-cols-1 gap-8">
-        <AnimatePresence>
-          {paginatedTours.map((tour, index) => (
-            <motion.div
-              key={tour.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative bg-white rounded-3xl shadow-xl overflow-hidden h-80"
-              role="article"
-              aria-label={`Tour: ${tour.title}`}
-            >
-              <Image
-                src={tour.image}
-                alt={tour.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 640px"
-                className="object-cover transition-transform duration-700 hover:scale-105"
-                placeholder="blur"
-                blurDataURL="/images/fallback-tour.jpg"
-                loading="lazy"
-                quality={80}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-6 flex flex-col justify-end">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-400 text-lg">
-                    {'★'.repeat(tour.rating) + '☆'.repeat(5 - tour.rating)}
-                  </span>
-                  <span className="text-gray-300 text-xs font-medium">
-                    ({tour.rating})
-                  </span>
-                </div>
-                <h3 className="text-xl font-semibold text-white truncate">
-                  {tour.title}
-                </h3>
-                <div className="flex items-center text-gray-200 text-sm font-medium">
-                  <span className="mr-2">📍</span> {tour.location}
-                </div>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-2xl font-bold text-white">
-                    {tour.price}
-                  </span>
-                  <span className="text-sm text-gray-300 font-medium">
-                    /night
-                  </span>
-                </div>
-                <div className="flex items-center text-sm text-gray-200 font-medium gap-4 mt-1">
-                  <span className="flex items-center">
-                    <span className="mr-1">⏰</span>
-                    {tour.duration}
-                  </span>
-                  <span className="flex items-center">
-                    <span className="mr-1">👥</span>
-                    {tour.groupSize}
-                  </span>
-                </div>
-                {tour.discount && (
-                  <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                    {tour.discount}
-                  </div>
-                )}
-                <div className="absolute top-4 right-4 bg-black/50 text-white text-xs font-medium px-3 py-1 rounded-full flex items-center">
-                  <span className="mr-1">📷</span> {tour.photoCount}
-                </div>
-                <Link
-                  href={{
-                    pathname: `/hotel/${tour.id}`,
-                    query: {
-                      ...tour,
-                      hotel_name: tour.title.replace(/\s+/g, '-'),
-                    },
-                  }}
-                  className="mt-4 inline-block w-full text-center bg-blue-500 text-white font-medium py-2 px-6 rounded-xl hover:bg-blue-600 transition-colors"
-                >
-                  Explore Now
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+    <motion.section
+      ref={ref}
+      className="relative w-full bg-blue-50/50 px-0 mb-4 sm:mb-6"
+      variants={sectionVariants}
+      initial="hidden"
+      animate={inView ? 'visible' : 'hidden'}
+      aria-labelledby="tour-list-heading"
+    >
+      <div className="w-full">
+        <motion.div
+          className=" border-blue-50 max-w-7xl mx-auto"
+          variants={sectionVariants}
+        >
+          <div className="space-y-8">
+            <TourListHeader
+              tourCount={totalTours}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+            />
+            <div className="grid grid-cols-1 gap-8">
+              <AnimatePresence>
+                {paginatedTours.map((tour, index) => (
+                  <motion.div
+                    key={tour.id}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="relative bg-white/95 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row h-auto border border-blue-50"
+                    role="article"
+                    aria-label={`Tour: ${tour.title}`}
+                  >
+                    {/* Image Section */}
+                    <div className="relative w-full md:w-1/2 h-80">
+                      <Image
+                        src={tour.image}
+                        alt={tour.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        placeholder="blur"
+                        blurDataURL="/images/fallback-tour.jpg"
+                        loading="lazy"
+                        quality={80}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      {tour.discount && (
+                        <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                          {tour.discount}
+                        </div>
+                      )}
+                      <div className="absolute top-4 right-4 bg-black/50 text-white text-xs font-medium px-3 py-1 rounded-full flex items-center">
+                        <span className="mr-1">📷</span> {tour.photoCount}
+                      </div>
+                    </div>
+                    {/* Content Section */}
+                    <div className="p-6 flex flex-col justify-between w-full md:w-1/2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-blue-500 text-lg">
+                            {'★'.repeat(tour.rating) +
+                              '☆'.repeat(5 - tour.rating)}
+                          </span>
+                          <span className="text-gray-600 text-xs font-medium">
+                            ({tour.rating})
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 truncate mb-2">
+                          {tour.title}
+                        </h3>
+                        <div className="flex items-center text-gray-600 text-sm font-medium mb-2">
+                          <span className="mr-2">📍</span> {tour.location}
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                          {tour.description}
+                        </p>
+                        <div className="flex items-baseline gap-2 mb-2">
+                          <span className="text-2xl font-bold text-gray-900">
+                            {tour.price}
+                          </span>
+                          <span className="text-sm text-gray-600 font-medium">
+                            /night
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600 font-medium gap-4">
+                          <span className="flex items-center">
+                            <span className="mr-1">⏰</span>
+                            {tour.duration}
+                          </span>
+                          <span className="flex items-center">
+                            <span className="mr-1">👥</span>
+                            {tour.groupSize}
+                          </span>
+                        </div>
+                      </div>
+                      <Link
+                        href={{
+                          pathname: `/hotel/${tour.id}`,
+                          query: {
+                            ...tour,
+                            hotel_name: tour.title.replace(/\s+/g, '-'),
+                          },
+                        }}
+                        className="mt-4 inline-block w-full text-center bg-blue-500 text-white font-medium py-2 sm:py-2.5 px-5 sm:px-8 rounded-xl hover:bg-blue-600 transition-colors"
+                      >
+                        Explore Now
+                      </Link>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={setItemsPerPage}
+            />
+          </div>
+        </motion.div>
       </div>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        itemsPerPage={itemsPerPage}
-        setItemsPerPage={setItemsPerPage}
-      />
-    </div>
+    </motion.section>
   );
 };
 
@@ -613,7 +685,7 @@ const PopularDestinations = () => {
         transition={{ duration: 0.6 }}
         className="flex justify-between items-center mb-8"
       >
-        <h2 className="text-3xl font-bold text-gray-900">
+        <h2 className="text-3xl font-extrabold text-gray-900">
           Popular Destinations
         </h2>
         <div className="flex items-center gap-3">
@@ -624,7 +696,7 @@ const PopularDestinations = () => {
               setSelectedCity(e.target.value);
               setCurrentPage(1);
             }}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="border border-blue-50 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/95"
           >
             <option value="all">All Cities</option>
             {cities.map((city) => (
@@ -643,7 +715,7 @@ const PopularDestinations = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative bg-white rounded-2xl shadow-lg overflow-hidden h-64"
+              className="relative bg-white/95 rounded-2xl shadow-lg overflow-hidden h-64 border border-blue-50"
             >
               <Image
                 src={city.image}
@@ -757,10 +829,10 @@ const HotelsList = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="max-w-2xl mx-auto p-8 text-center bg-white rounded-3xl shadow-xl my-12"
+          className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl my-12 border border-blue-50"
         >
           <Loader2 className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
-          <h3 className="text-2xl font-bold text-gray-800 mt-4">
+          <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
             Curating Your Adventures
           </h3>
           <p className="text-gray-600 text-sm mt-2">
