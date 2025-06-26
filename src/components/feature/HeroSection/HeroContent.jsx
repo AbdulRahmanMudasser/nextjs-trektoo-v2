@@ -27,21 +27,10 @@ function HeroContent() {
   const totalGuests = guests.children + guests.adult;
 
   const cities = [
-    'Seoul',
-    'Beijing',
-    'Dubai',
-    'Cairo',
-    'Luxor',
-    'Tokyo',
-    'Kyoto',
-    'Osaka',
-    'Singapore',
     'Paris',
-    'Rome',
-    'Barcelona',
-    'Bangkok',
-    'Chiang Mai',
-    'Phuket',
+    'New York',
+    'California', 
+    'Los Angeles'
   ];
 
   useEffect(() => {
