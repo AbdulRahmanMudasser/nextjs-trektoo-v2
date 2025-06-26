@@ -805,7 +805,7 @@ const HeaderContent = () => (
 const HeaderSection = () => (
   <section className="relative w-full h-[500px]">
     <Image
-      src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+      src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
       alt="Travel hero"
       fill
       sizes="100vw"
