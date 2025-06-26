@@ -13,19 +13,53 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const ImageWithFallback = ({ src, alt, ...props }) => {
+  const [hasError, setHasError] = React.useState(false);
+  const proxiedSrc = src.includes('staging.trektoo.com')
+    ? `/api/image/proxy?url=${encodeURIComponent(src)}`
+    : src;
+
+  return (
+    <div className="relative w-full h-full">
+      {hasError ? (
+        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">
+          <span className="text-gray-600 text-sm font-medium">
+            Image Unavailable
+          </span>
+        </div>
+      ) : (
+        <Image
+          src={proxiedSrc}
+          alt={alt}
+          onError={(e) => {
+            console.error('Image load error:', { src, error: e.message });
+            setHasError(true);
+          }}
+          {...props}
+        />
+      )}
+    </div>
+  );
+};
+
+ImageWithFallback.propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+};
+
 const HotelHeader = ({
   id,
-  title = 'Unnamed Tour',
+  title = 'Unnamed Hotel',
   location = 'Unknown Location',
-  price = '$199.99',
-  duration = '3 Days',
-  rating = 3,
-  photoCount = 5,
+  price = '0',
+  duration = 'Per Night',
+  rating = 0,
+  photoCount = 0,
   discount = '',
-  image = '/default-tour.jpg',
+  image = '/default-hotel.jpg',
 }) => {
-  const numericRating = parseFloat(rating.toString()) || 3;
-  const numericPhotoCount = parseInt(photoCount.toString()) || 5;
+  const numericRating = parseFloat(rating) || 0;
+  const numericPhotoCount = parseInt(photoCount) || 0;
   const fullStars = Math.floor(numericRating);
   const hasHalfStar = numericRating % 1 >= 0.5;
 
@@ -55,25 +89,21 @@ const HotelHeader = ({
 
   return (
     <motion.div
-      className=" bg-gradient-to-b from-blue-50 to-white"
+      className="bg-gradient-to-b from-blue-50 to-white"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       {/* Hero Image Section */}
       <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden">
-        <Image
+        <ImageWithFallback
           src={image}
           alt={title}
           fill
           className="object-cover transform transition-transform duration-1000 hover:scale-105"
-          placeholder="blur"
-          blurDataURL="/default-tour.jpg"
           priority
-          onError={(e) => {
-            console.warn(`Failed to load header image for ${title}: ${image}`);
-            e.currentTarget.src = '/default-tour.jpg';
-          }}
+          sizes="100vw"
+          quality={80}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50" />
       </div>
@@ -101,9 +131,9 @@ const HotelHeader = ({
               variants={containerVariants}
             >
               {[
-                { icon: ThumbsUp, label: 'From', value: price },
+                { icon: ThumbsUp, label: 'From', value: `$${parseFloat(price).toFixed(2)}` },
                 { icon: Clock, label: 'Duration', value: duration },
-                { icon: Leaf, label: 'Tour Type', value: 'Luxury' },
+                { icon: Leaf, label: 'Hotel Type', value: 'Luxury' },
                 ...(discount
                   ? [{ icon: Percent, label: 'Discount', value: discount }]
                   : []),
@@ -183,7 +213,7 @@ const HotelHeader = ({
                 )}
               </div>
               <span className="ml-3 text-base text-gray-600 font-medium">
-                {numericRating.toFixed(2)} ({numericPhotoCount} reviews)
+                {numericRating.toFixed(1)} ({numericPhotoCount} reviews)
               </span>
             </motion.div>
             <motion.div
@@ -191,7 +221,7 @@ const HotelHeader = ({
               variants={containerVariants}
             >
               {[
-                { icon: Share2, label: 'SHARE', aria: 'Share tour' },
+                { icon: Share2, label: 'SHARE', aria: 'Share hotel' },
                 { icon: MessageCircle, label: 'REVIEWS', aria: 'View reviews' },
                 { icon: Heart, label: 'WISHLIST', aria: 'Add to wishlist' },
               ].map((button, index) => (
@@ -219,7 +249,7 @@ HotelHeader.propTypes = {
   id: PropTypes.string.isRequired,
   title: PropTypes.string,
   location: PropTypes.string,
-  price: PropTypes.string,
+  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   duration: PropTypes.string,
   rating: PropTypes.number,
   photoCount: PropTypes.number,

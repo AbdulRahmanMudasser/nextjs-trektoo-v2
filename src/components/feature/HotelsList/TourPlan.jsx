@@ -1,18 +1,46 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { ChevronDown, Star } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
-const TourPlan = () => {
-  const [openDay, setOpenDay] = useState(null);
+const ImageWithFallback = ({ src, alt, ...props }) => {
+  const [hasError, setHasError] = React.useState(false);
+  const proxiedSrc = src.includes('staging.trektoo.com')
+    ? `/api/image/proxy?url=${encodeURIComponent(src)}`
+    : src;
 
-  const toggleDay = (dayNumber) => {
-    setOpenDay(openDay === dayNumber ? null : dayNumber);
-  };
+  return (
+    <div className="relative w-full h-full">
+      {hasError ? (
+        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">
+          <span className="text-gray-600 text-sm font-medium">
+            Image Unavailable
+          </span>
+        </div>
+      ) : (
+        <Image
+          src={proxiedSrc}
+          alt={alt}
+          onError={(e) => {
+            console.error('Image load error:', { src, error: e.message });
+            setHasError(true);
+          }}
+          {...props}
+        />
+      )}
+    </div>
+  );
+};
 
+ImageWithFallback.propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+};
+
+const TourPlan = ({ relatedHotels = [] }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -44,168 +72,65 @@ const TourPlan = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <div className="flex flex-col md:flex-row gap-8">
-        <motion.div className="flex-1" variants={itemVariants}>
-          <motion.h2
-            className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-6 border-l-4 border-blue-500 pl-3"
-            variants={itemVariants}
-          >
-            Tour Plan
-          </motion.h2>
-          <motion.div className="space-y-4" variants={containerVariants}>
-            {[
-              {
-                day: 1,
-                title: 'Day 1st',
-                details: [
-                  'Morning: Breakfast at hotel',
-                  'Afternoon: City tour and sightseeing',
-                  'Evening: Welcome dinner at local restaurant',
-                ],
-              },
-              {
-                day: 2,
-                title: 'Day 2nd',
-                details: [
-                  'Morning: Visit to historical sites',
-                  'Afternoon: Shopping at local market',
-                  'Evening: Cultural show and dinner',
-                ],
-              },
-              {
-                day: 3,
-                title: 'Day 3rd',
-                details: [
-                  'Morning: Adventure activities',
-                  'Afternoon: Free time for relaxation',
-                  'Evening: Farewell dinner',
-                ],
-              },
-            ].map((day) => (
-              <motion.div
-                key={day.day}
-                className="rounded-2xl overflow-hidden border border-blue-50 shadow-sm"
-                variants={itemVariants}
-              >
-                <motion.button
-                  onClick={() => toggleDay(day.day)}
-                  className="w-full bg-blue-50 hover:bg-blue-100 text-gray-900 font-semibold py-4 px-6 flex justify-between items-center transition-all"
-                  aria-label={`Toggle ${day.title} details`}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <span className="text-base sm:text-lg">{day.title}</span>
-                  <motion.div
-                    animate={{ rotate: openDay === day.day ? 180 : 0 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                  >
-                    <ChevronDown className="h-5 w-5 text-blue-500" />
-                  </motion.div>
-                </motion.button>
-                {openDay === day.day && (
-                  <motion.div
-                    className="p-4 bg-white border-t border-blue-100"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-                  >
-                    {day.details.map((detail, index) => (
-                      <p
-                        key={index}
-                        className="text-gray-600 text-base sm:text-lg mb-2"
-                      >
-                        {detail}
-                      </p>
-                    ))}
-                  </motion.div>
-                )}
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-        <motion.div className="md:w-1/3" variants={itemVariants}>
-          <motion.div
-            className="bg-white/95 backdrop-blur-sm border border-blue-50 rounded-2xl p-6 sm:p-8 shadow-sm transition-all hover:shadow-md"
-            variants={itemVariants}
-          >
-            <motion.h3
-              className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-6 border-l-4 border-blue-500 pl-3"
+      <motion.h2
+        className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-6 border-l-4 border-blue-500 pl-3"
+        variants={itemVariants}
+      >
+        Related Hotels
+      </motion.h2>
+      {relatedHotels.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {relatedHotels.map((hotel, index) => (
+            <motion.div
+              key={index}
+              className="relative bg-white rounded-2xl shadow-md overflow-hidden"
               variants={itemVariants}
+              whileHover={{ scale: 1.03 }}
             >
-              Last Minute Deals
-            </motion.h3>
-            <motion.div className="space-y-6" variants={containerVariants}>
-              {[
-                {
-                  title: 'Walking the Amalfi Coast',
-                  image: '/images/singapore-adventure.jpg',
-                  rating: 4.5,
-                  price: '$129.00',
-                },
-                {
-                  title: 'Discovery Island Kayak Tour',
-                  image: '/images/uk-adventure.jpg',
-                  rating: 5,
-                  price: '$129.00',
-                },
-              ].map((deal, index) => (
-                <motion.div
-                  key={index}
-                  className="flex flex-col space-y-3 group"
-                  variants={itemVariants}
-                  whileHover={{ x: 5 }}
+              <ImageWithFallback
+                src={hotel.image}
+                alt={hotel.title}
+                className="w-full h-48 object-cover"
+                quality={80}
+                loading="lazy"
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {hotel.title}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {hotel.location?.name || 'Unknown Location'}
+                </p>
+                <Link
+                  href={`/hotel/${hotel.id}`}
+                  className="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
-                  <div className="flex space-x-4">
-                    <div className="w-20 h-20 relative rounded-md overflow-hidden shadow-sm">
-                      <Image
-                        src={deal.image}
-                        alt={deal.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        placeholder="blur"
-                        blurDataURL="/default-tour.jpg"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center mb-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < Math.floor(deal.rating)
-                                ? 'fill-blue-500 text-blue-500'
-                                : i < deal.rating
-                                  ? 'fill-blue-500 text-blue-500 fill-opacity-50'
-                                  : 'fill-gray-300 text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <h4 className="font-semibold text-gray-800 text-base sm:text-lg">
-                        {deal.title}
-                      </h4>
-                      <p className="text-base text-gray-600">
-                        From{' '}
-                        <span className="text-blue-500 font-medium">
-                          {deal.price}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  {index === 0 && (
-                    <div className="border-t border-blue-100 my-2"></div>
-                  )}
-                </motion.div>
-              ))}
+                  View Details
+                </Link>
+              </div>
             </motion.div>
-          </motion.div>
-        </motion.div>
-      </div>
+          ))}
+        </div>
+      ) : (
+        <motion.p className="text-gray-600 text-lg" variants={itemVariants}>
+          No related hotels available.
+        </motion.p>
+      )}
     </motion.div>
   );
 };
 
-TourPlan.propTypes = {};
+TourPlan.propTypes = {
+  relatedHotels: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      image: PropTypes.string.isRequired,
+      location: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+    })
+  ),
+};
 
 export default TourPlan;

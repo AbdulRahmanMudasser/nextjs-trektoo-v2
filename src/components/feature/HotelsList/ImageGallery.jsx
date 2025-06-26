@@ -1,11 +1,46 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ImageGallery = () => {
+const ImageWithFallback = ({ src, alt, ...props }) => {
+  const [hasError, setHasError] = React.useState(false);
+  const proxiedSrc = src.includes('staging.trektoo.com')
+    ? `/api/image/proxy?url=${encodeURIComponent(src)}`
+    : src;
+
+  return (
+    <div className="relative w-full h-full">
+      {hasError ? (
+        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">
+          <span className="text-gray-600 text-sm font-medium">
+            Image Unavailable
+          </span>
+        </div>
+      ) : (
+        <Image
+          src={proxiedSrc}
+          alt={alt}
+          onError={(e) => {
+            console.error('Image load error:', { src, error: e.message });
+            setHasError(true);
+          }}
+          {...props}
+        />
+      )}
+    </div>
+  );
+};
+
+ImageWithFallback.propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+};
+
+const ImageGallery = ({ images = [] }) => {
   const galleryRef = useRef(null);
 
   const scrollLeft = () => {
@@ -61,16 +96,6 @@ const ImageGallery = () => {
     }
   };
 
-  const images = [
-    '/images/hero-bg-1.jpg',
-    '/images/hero-bg-2.jpg',
-    '/images/hero-bg-3.jpg',
-    '/images/hero-bg-1.jpg',
-    '/images/hero-bg-2.jpg',
-    '/images/hero-bg-3.jpg',
-    '/images/hero-bg-2.jpg',
-  ];
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -94,6 +119,24 @@ const ImageGallery = () => {
       },
     },
   };
+
+  if (!images.length) {
+    return (
+      <motion.div
+        className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.p
+          className="text-center text-gray-600 text-lg"
+          variants={itemVariants}
+        >
+          No images available for this hotel.
+        </motion.p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -126,13 +169,13 @@ const ImageGallery = () => {
               whileHover={{ scale: 1.03, x: 5 }}
               transition={{ type: 'spring', stiffness: 200, damping: 20 }}
             >
-              <Image
+              <ImageWithFallback
                 src={src}
                 alt={`Gallery Image ${index + 1}`}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                placeholder="blur"
-                blurDataURL="/default-tour.jpg"
+                quality={80}
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <motion.div
@@ -160,6 +203,8 @@ const ImageGallery = () => {
   );
 };
 
-ImageGallery.propTypes = {};
+ImageGallery.propTypes = {
+  images: PropTypes.arrayOf(PropTypes.string),
+};
 
 export default ImageGallery;
