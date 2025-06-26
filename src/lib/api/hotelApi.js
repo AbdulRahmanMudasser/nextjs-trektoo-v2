@@ -30,3 +30,22 @@ export const fetchHotels = async (searchParams) => {
         throw error;
     }
 };
+
+/**
+ * Fetch hotel details by ID
+ * @param {string} id - Hotel ID
+ * @returns {Promise<Object>} Hotel data
+ */
+export const fetchHotelDetails = async (id) => {
+    try {
+        const response = await hotelApi.get(`/detail/${id}`);
+        return response.data.data || {};
+    } catch (error) {
+        console.error('Hotel Details API error:', {
+            message: error.message,
+            status: error.response?.status,
+            stack: error.stack,
+        });
+        throw error;
+    }
+};
