@@ -4,15 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import {
-  CreditCard,
-  Shirt,
-  Armchair,
-  Calendar,
-  Utensils,
-  Cigarette,
-} from 'lucide-react';
-import BookingForm from './BookingForm';
 
 const HotelDetails = ({ id, description = 'None' }) => {
   const capitalizeFirstLetter = (str) => {
@@ -64,15 +55,6 @@ const HotelDetails = ({ id, description = 'None' }) => {
   const { mainDescription, placesNearby, accessibility } =
     parseDescription(description);
 
-  const amenities = [
-    { name: 'Accepts Credit Cards', icon: CreditCard },
-    { name: 'Laundry Service', icon: Shirt },
-    { name: 'Outdoor Seating', icon: Armchair },
-    { name: 'Reservations', icon: Calendar },
-    { name: 'Restaurant', icon: Utensils },
-    { name: 'Smoking Allowed', icon: Cigarette },
-  ];
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -104,9 +86,9 @@ const HotelDetails = ({ id, description = 'None' }) => {
       animate="visible"
       variants={containerVariants}
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         <motion.div
-          className="md:col-span-2 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-blue-50"
+          className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-blue-50"
           variants={itemVariants}
         >
           <motion.h2
@@ -154,30 +136,6 @@ const HotelDetails = ({ id, description = 'None' }) => {
             </>
           )}
           <motion.h3
-            className="text-xl sm:text-2xl font-bold text-gray-900 mb-4"
-            variants={itemVariants}
-          >
-            Premium Amenities
-          </motion.h3>
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"
-            variants={containerVariants}
-          >
-            {amenities.map((amenity, index) => (
-              <motion.div
-                key={index}
-                className="flex items-center group"
-                variants={itemVariants}
-                whileHover={{ x: 5 }}
-              >
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mr-3 shadow-sm transition-shadow group-hover:shadow-md">
-                  <amenity.icon className="h-5 w-5 text-blue-500" />
-                </div>
-                <span className="text-gray-600 text-base">{amenity.name}</span>
-              </motion.div>
-            ))}
-          </motion.div>
-          <motion.h3
             className="text-xl sm:text-2xl font-bold text-gray-900 mb-3"
             variants={itemVariants}
           >
@@ -191,28 +149,23 @@ const HotelDetails = ({ id, description = 'None' }) => {
             guided by experts who bring every destination to life.
           </motion.p>
         </motion.div>
-        <div className="md:col-span-1 flex flex-col gap-6 sm:gap-8">
-          <motion.div
-            className="relative h-72 sm:h-96 rounded-2xl overflow-hidden shadow-md group"
-            variants={itemVariants}
-            whileHover={{ scale: 1.03 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-          >
-            <Image
-              src="/images/explore-1.jpg"
-              alt="Beautiful tour destination with scenic landscapes"
-              fill
-              priority
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              placeholder="blur"
-              blurDataURL="/default-tour.jpg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <BookingForm id={id} />
-          </motion.div>
-        </div>
+        <motion.div
+          className="relative h-72 sm:h-96 rounded-2xl overflow-hidden shadow-md group"
+          variants={itemVariants}
+          whileHover={{ scale: 1.03 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+        >
+          <Image
+            src="/images/explore-1.jpg"
+            alt="Beautiful tour destination with scenic landscapes"
+            fill
+            priority
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            placeholder="blur"
+            blurDataURL="/default-tour.jpg"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </motion.div>
       </div>
     </motion.div>
   );
