@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchHotels, fetchHotelDetails, fetchHotelReviews } from '@/lib/api/hotelApi';
+import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability } from '@/lib/api/hotelApi';
 
 /**
  * Custom hook to fetch hotels with React Query
@@ -56,6 +56,26 @@ export const useHotelReviews = (id, page = 1, perPage = 5) => {
         keepPreviousData: true,
         onError: (error) => {
             console.error('useHotelReviews error:', {
+                message: error.message,
+                status: error.response?.status,
+                stack: error.stack,
+            });
+        },
+    });
+};
+
+/**
+ * Custom hook to fetch hotel room availability by ID with React Query
+ * @param {string} id - Hotel ID
+ * @returns {Object} Query result with room availability, loading state, and error
+ */
+export const useHotelAvailability = (id) => {
+    return useQuery({
+        queryKey: ['hotelAvailability', id],
+        queryFn: () => fetchHotelAvailability(id),
+        enabled: !!id,
+        onError: (error) => {
+            console.error('useHotelAvailability error:', {
                 message: error.message,
                 status: error.response?.status,
                 stack: error.stack,

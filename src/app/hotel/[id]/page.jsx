@@ -9,6 +9,7 @@ import { Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
 import HotelHeader from '@/components/feature/HotelsList/HotelHeader';
 import ImageGallery from '@/components/feature/HotelsList/ImageGallery';
 import HotelDetails from '@/components/feature/HotelsList/HotelDetails';
+import RoomAvailability from '@/components/feature/HotelsList/RoomAvailability';
 import TourInformation from '@/components/feature/HotelsList/TourInformation';
 import TourPlan from '@/components/feature/HotelsList/TourPlan';
 import Map from '@/components/feature/HotelsList/Map';
@@ -16,7 +17,11 @@ import CalendarPrice from '@/components/feature/HotelsList/CalendarPrice';
 import ReviewScores from '@/components/feature/HotelsList/ReviewScores';
 import ReviewList from '@/components/feature/HotelsList/ReviewList';
 import { ErrorBoundary } from '@/components/feature/Error/ErrorBoundary';
-import { useHotelDetails, useHotelReviews } from '@/hooks/useHotels';
+import {
+  useHotelDetails,
+  useHotelReviews,
+  useHotelAvailability,
+} from '@/hooks/useHotels';
 
 const TourDetail = ({ params }) => {
   const { id } = React.use(params);
@@ -34,9 +39,15 @@ const TourDetail = ({ params }) => {
     isLoading: isReviewsLoading,
     error: reviewsError,
   } = useHotelReviews(id, currentPage, itemsPerPage);
+  const {
+    data: rooms = [],
+    isLoading: isRoomsLoading,
+    error: roomsError,
+  } = useHotelAvailability(id);
 
   console.log('Hotel data:', hotel);
   console.log('Reviews data:', reviewsData);
+  console.log('Rooms data:', rooms);
   console.log('Hotel policy:', hotel?.policy?.[0]?.title);
 
   if (isHotelLoading) {
@@ -122,6 +133,12 @@ const TourDetail = ({ params }) => {
           id={hotel.id}
           description={hotel.content}
           address={hotel.address}
+        />
+        <RoomAvailability
+          rooms={rooms}
+          loading={isRoomsLoading}
+          error={roomsError?.message}
+          hotelId={id}
         />
         <TourInformation
           facilities={hotel.terms?.['6']?.child || []}
