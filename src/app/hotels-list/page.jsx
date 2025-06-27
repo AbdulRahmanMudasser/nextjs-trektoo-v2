@@ -849,7 +849,7 @@ export default function HotelsList() {
               />
             </div>
           </div>
-          <PopularDestinations />
+          {/* <PopularDestinations /> */}
         </div>
       )}
     </ErrorBoundary>

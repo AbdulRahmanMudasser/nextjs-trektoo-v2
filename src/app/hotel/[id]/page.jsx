@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
 
 import HotelHeader from '@/components/feature/HotelsList/HotelHeader';
 import ImageGallery from '@/components/feature/HotelsList/ImageGallery';
@@ -12,56 +14,98 @@ import TourPlan from '@/components/feature/HotelsList/TourPlan';
 import Map from '@/components/feature/HotelsList/Map';
 import CalendarPrice from '@/components/feature/HotelsList/CalendarPrice';
 import ReviewScores from '@/components/feature/HotelsList/ReviewScores';
-import TourComments from '@/components/feature/HotelsList/TourComments';
-import { ErrorBoundary } from '@/components/feature/Error/ErrorBoundary';
-import { useHotelDetails } from '@/hooks/useHotels';
 import ReviewList from '@/components/feature/HotelsList/ReviewList';
+import { ErrorBoundary } from '@/components/feature/Error/ErrorBoundary';
+import { useHotelDetails, useHotelReviews } from '@/hooks/useHotels';
 
 const TourDetail = ({ params }) => {
-  const { id } = params;
-  const { data: hotel, isLoading, error } = useHotelDetails(id);
+  const { id } = React.use(params);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const {
+    data: hotel,
+    isLoading: isHotelLoading,
+    error: hotelError,
+  } = useHotelDetails(id);
+  const {
+    data: reviewsData,
+    isLoading: isReviewsLoading,
+    error: reviewsError,
+  } = useHotelReviews(id, currentPage, itemsPerPage);
 
   console.log('Hotel data:', hotel);
-  console.log('Hotel policy:', hotel?.policy[0].title);
+  console.log('Reviews data:', reviewsData);
+  console.log('Hotel policy:', hotel?.policy?.[0]?.title);
 
-  if (isLoading) {
+  if (isHotelLoading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl my-12 border border-blue-50"
-      >
-        <Loader2 className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
-        <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
-          Loading Hotel Details
-        </h3>
-        <p className="text-gray-600 text-sm mt-2">
-          Fetching the best accommodation details...
-        </p>
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl border border-blue-50"
+        >
+          <Loader2 className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
+          <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
+            Loading Hotel Details
+          </h3>
+          <p className="text-gray-600 text-sm mt-2">
+            Fetching the best accommodation details...
+          </p>
+        </motion.div>
+      </div>
     );
   }
 
-  if (error || !hotel) {
+  if (hotelError || !hotel) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl my-12 border border-blue-50"
-      >
-        <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
-          Error Loading Hotel
-        </h3>
-        <p className="text-gray-600 text-sm mt-2">
-          Unable to load hotel details. Please try again later.
-        </p>
-      </motion.div>
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl border border-blue-50"
+        >
+          <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
+            Error Loading Hotel
+          </h3>
+          <p className="text-gray-600 text-sm mt-2">
+            Unable to load hotel details. Please try again or explore other
+            hotels.
+          </p>
+          <div className="flex justify-center gap-4 mt-6">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => queryClient.invalidateQueries(['hotel', id])}
+              className="px-4 py-2 text-sm font-medium rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try Again
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => router.push('/hotels')}
+              className="px-4 py-2 text-sm font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-blue-100 transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Go to Hotels List
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
     );
   }
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <ErrorBoundary>
-      <div className="font-sans">
+      <div className="font-sans min-h-screen">
         <HotelHeader
           id={hotel.id}
           title={hotel.title}
@@ -104,7 +148,41 @@ const TourDetail = ({ params }) => {
           reviewStats={hotel.review_stats || []}
           rateScores={hotel.review_score?.rate_score || {}}
         />
-        <ReviewList reviews={hotel.review_lists?.data || []} />
+        {isReviewsLoading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="max-w-7xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl mt-12"
+          >
+            <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+            <p className="text-gray-600 text-sm mt-2">Loading reviews...</p>
+          </motion.div>
+        ) : reviewsError ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="max-w-7xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl mt-12"
+          >
+            <p className="text-gray-600 text-sm">
+              Failed to load reviews. Please try again later.
+            </p>
+          </motion.div>
+        ) : (
+          <ReviewList
+            reviews={reviewsData?.data || []}
+            pagination={{
+              current_page: reviewsData?.current_page || 1,
+              total_pages: reviewsData?.last_page || 1,
+              total: reviewsData?.total || 0,
+            }}
+            onPageChange={handlePageChange}
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={(value) => {
+              setItemsPerPage(value);
+              setCurrentPage(1);
+            }}
+          />
+        )}
       </div>
     </ErrorBoundary>
   );

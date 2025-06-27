@@ -3,12 +3,86 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { Star, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, User } from 'lucide-react';
+
+const PaginationButton = ({ label, active, onClick }) => (
+  <motion.button
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    onClick={onClick}
+    className={`px-4 py-2 text-sm font-medium rounded-full ${
+      active
+        ? 'bg-blue-500 text-white'
+        : 'bg-gray-100 text-gray-700 hover:bg-blue-100'
+    } transition-colors`}
+    data-testid={`pagination-${label.replace(/\s/g, '-')}`}
+  >
+    {label}
+  </motion.button>
+);
+
+PaginationButton.propTypes = {
+  label: PropTypes.string.isRequired,
+  active: PropTypes.bool,
+  onClick: PropTypes.func.isRequired,
+};
+
+const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  itemsPerPage,
+  setItemsPerPage,
+}) => (
+  <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
+    <div className="flex gap-3">
+      {Array.from({ length: totalPages }, (_, i) => (
+        <PaginationButton
+          key={i + 1}
+          label={(i + 1).toString()}
+          active={currentPage === i + 1}
+          onClick={() => onPageChange(i + 1)}
+        />
+      ))}
+      <PaginationButton
+        label="Next"
+        onClick={() =>
+          currentPage < totalPages && onPageChange(currentPage + 1)
+        }
+      />
+    </div>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-gray-600 font-medium">Show:</span>
+      <select
+        value={itemsPerPage}
+        onChange={(e) => setItemsPerPage(+e.target.value)}
+        className="border border-blue-50 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/95"
+        data-testid="items-per-page"
+      >
+        <option value={2}>2 per page</option>
+        <option value={4}>4 per page</option>
+        <option value={5}>5 per page</option>
+        <option value={6}>6 per page</option>
+        <option value={10}>10 per page</option>
+      </select>
+    </div>
+  </div>
+);
+
+Pagination.propTypes = {
+  currentPage: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  itemsPerPage: PropTypes.number.isRequired,
+  setItemsPerPage: PropTypes.func.isRequired,
+};
 
 const ReviewList = ({
   reviews = [],
-  pagination = {},
+  pagination = { current_page: 1, total_pages: 1, total: 0 },
   onPageChange = () => {},
+  itemsPerPage = 5,
+  setItemsPerPage = () => {},
 }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -48,19 +122,16 @@ const ReviewList = ({
     return `${content.substring(0, maxLength)}...`;
   };
 
-  const handlePageChange = (url, label) => {
-    if (url && label !== '« Previous' && label !== 'Next »') {
-      onPageChange(url);
-    } else if (url && label === '« Previous') {
-      onPageChange(url);
-    } else if (url && label === 'Next »') {
-      onPageChange(url);
-    }
-  };
+  // Ensure totalPages is at least 1 and handle API inconsistencies
+  const safeTotalPages = Math.max(1, pagination.total_pages || 1);
+  const safeCurrentPage = Math.min(
+    pagination.current_page || 1,
+    safeTotalPages
+  );
 
   return (
     <motion.div
-      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-10 px-6 sm:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white rounded-3xl shadow-lg"
+      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-10 px-6 sm:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white rounded-3xl shadow-lg mb-16"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -74,7 +145,7 @@ const ReviewList = ({
       </motion.h2>
       {reviews.length > 0 ? (
         <div className="space-y-8">
-          {reviews.map((review, index) => {
+          {reviews.map((review) => {
             const numericScore = parseFloat(review.rate_number) || 0;
             const fullStars = Math.floor(numericScore);
             const hasHalfStar = numericScore % 1 >= 0.5;
@@ -82,7 +153,7 @@ const ReviewList = ({
             return (
               <motion.div
                 key={review.id}
-                className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-4 hover:shadow-xl transition-shadow duration-300"
+                className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6 hover:shadow-xl transition-shadow duration-300"
                 variants={itemVariants}
                 data-testid={`review-${review.id}`}
               >
@@ -138,39 +209,17 @@ const ReviewList = ({
           className="text-gray-700 text-lg font-medium"
           data-testid="no-reviews"
         >
-          No reviews available for this hotel.
+          No reviews available for this hotel on this page.
         </p>
       )}
-      {pagination.links && pagination.links.length > 0 && (
-        <motion.div
-          className="mt-8 flex justify-center items-center gap-2"
-          variants={itemVariants}
-          data-testid="pagination"
-        >
-          {pagination.links.map((link, index) => (
-            <button
-              key={index}
-              onClick={() => handlePageChange(link.url, link.label)}
-              disabled={!link.url || link.active}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                link.active
-                  ? 'bg-blue-600 text-white'
-                  : link.url
-                    ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              }`}
-              data-testid={`pagination-${link.label}`}
-            >
-              {link.label === '« Previous' ? (
-                <ChevronLeft className="w-5 h-5" />
-              ) : link.label === 'Next »' ? (
-                <ChevronRight className="w-5 h-5" />
-              ) : (
-                link.label
-              )}
-            </button>
-          ))}
-        </motion.div>
+      {pagination.total > 0 && (
+        <Pagination
+          currentPage={safeCurrentPage}
+          totalPages={safeTotalPages}
+          onPageChange={onPageChange}
+          itemsPerPage={itemsPerPage}
+          setItemsPerPage={setItemsPerPage}
+        />
       )}
     </motion.div>
   );
@@ -190,16 +239,12 @@ ReviewList.propTypes = {
   ),
   pagination: PropTypes.shape({
     current_page: PropTypes.number,
-    last_page: PropTypes.number,
-    links: PropTypes.arrayOf(
-      PropTypes.shape({
-        url: PropTypes.string,
-        label: PropTypes.string.isRequired,
-        active: PropTypes.bool.isRequired,
-      })
-    ),
+    total_pages: PropTypes.number,
+    total: PropTypes.number,
   }),
   onPageChange: PropTypes.func,
+  itemsPerPage: PropTypes.number,
+  setItemsPerPage: PropTypes.func,
 };
 
 export default ReviewList;
