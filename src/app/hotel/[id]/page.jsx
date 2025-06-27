@@ -6,16 +6,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
 
-import HotelHeader from '@/components/feature/HotelsList/HotelHeader';
-import ImageGallery from '@/components/feature/HotelsList/ImageGallery';
-import HotelDetails from '@/components/feature/HotelsList/HotelDetails';
-import RoomAvailability from '@/components/feature/HotelsList/RoomAvailability';
-import TourInformation from '@/components/feature/HotelsList/TourInformation';
-import TourPlan from '@/components/feature/HotelsList/TourPlan';
-import Map from '@/components/feature/HotelsList/Map';
-import CalendarPrice from '@/components/feature/HotelsList/CalendarPrice';
-import ReviewScores from '@/components/feature/HotelsList/ReviewScores';
-import ReviewList from '@/components/feature/HotelsList/ReviewList';
+import HotelHeader from '@/components/feature/HotelDetails/HotelHeader';
+import ImageGallery from '@/components/feature/HotelDetails/ImageGallery';
+import HotelDetails from '@/components/feature/HotelDetails/HotelDetails';
+import RoomAvailability from '@/components/feature/HotelDetails/RoomAvailability';
+import TourInformation from '@/components/feature/HotelDetails/TourInformation';
+import TourPlan from '@/components/feature/HotelDetails/TourPlan';
+import Map from '@/components/feature/HotelDetails/Map';
+import CalendarPrice from '@/components/feature/HotelDetails/CalendarPrice';
+import ReviewScores from '@/components/feature/HotelDetails/ReviewScores';
+import ReviewList from '@/components/feature/HotelDetails/ReviewList';
 import { ErrorBoundary } from '@/components/feature/Error/ErrorBoundary';
 import {
   useHotelDetails,
