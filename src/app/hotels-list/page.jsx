@@ -49,7 +49,7 @@ const GuestSelector = ({ adults, setAdults, children, setChildren }) => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">Adults</span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
             className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
@@ -69,7 +69,7 @@ const GuestSelector = ({ adults, setAdults, children, setChildren }) => (
       </div>
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">Children</span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setChildren((prev) => Math.max(0, prev - 1))}
             className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
@@ -129,7 +129,7 @@ const FilterSidebar = ({
     setPriceRange([0, 5000]);
     setSelectedCategories([]);
     setAdults(1);
-    setChildren(1);
+    setChildren(0);
   };
 
   return (
@@ -512,7 +512,7 @@ const TourListSection = ({ hotels, loading, error }) => {
   return (
     <motion.section
       ref={ref}
-      className="relative w-full px-0 mb-4 sm:mb-6"
+      className="relative w-full bg-blue-50/50 px-0 mb-4 sm:mb-6"
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
@@ -600,15 +600,10 @@ const TourListSection = ({ hotels, loading, error }) => {
                         </div>
                       </div>
                       <Link
-                        href={{
-                          pathname: `/hotel/${hotel.id}`,
-                          query: {
-                            hotel_name: hotel.title.replace(/\s+/g, '-'),
-                          },
-                        }}
+                        href={`/hotel/${hotel.id}`}
                         className="mt-4 inline-block w-full text-center bg-blue-500 text-white font-medium py-2 sm:py-2.5 px-5 sm:px-8 rounded-xl hover:bg-blue-600 transition-colors"
                       >
-                        Book Now
+                        View Details
                       </Link>
                     </div>
                   </motion.div>
@@ -641,79 +636,24 @@ TourListSection.propTypes = {
 const PopularDestinations = () => {
   const cities = [
     {
-      name: 'Seoul',
-      image:
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Beijing',
-      image:
-        'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Dubai',
-      image:
-        'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Cairo',
-      image:
-        'https://images.unsplash.com/photo-1578469451440-5d0337ab1e22?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Luxor',
-      image:
-        'https://images.unsplash.com/photo-1598881645856-00f0101043e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Tokyo',
-      image:
-        'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Kyoto',
-      image:
-        'https://images.unsplash.com/photo-1493976040374-85c8e12f2c0e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Osaka',
-      image:
-        'https://images.unsplash.com/photo-1505060827556-4d6b58aa5da9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Singapore',
-      image:
-        'https://images.unsplash.com/photo-1513046892-d03f0c6f4856?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
       name: 'Paris',
       image:
         'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
     {
-      name: 'Rome',
+      name: 'New York',
       image:
-        'https://images.unsplash.com/photo-1552832230-c5457d3a94ee?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1496442226666-8d4d0e62f2e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
     {
-      name: 'Barcelona',
+      name: 'California',
       image:
-        'https://images.unsplash.com/photo-1583422323728-f9c1f3e3d873?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1547609631-54f781e47d18?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
     {
-      name: 'Bangkok',
+      name: 'Los Angeles',
       image:
-        'https://images.unsplash.com/photo-1563492065599-3520f775eeed?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Chiang Mai',
-      image:
-        'https://images.unsplash.com/photo-1588500121637-1854986176f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      name: 'Phuket',
-      image:
-        'https://images.unsplash.com/photo-1589393740083-60b3a7b2d870?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1591123120675-6f7f1aae1e5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
   ];
 
@@ -909,7 +849,7 @@ export default function HotelsList() {
               />
             </div>
           </div>
-          <PopularDestinations />
+          {/* <PopularDestinations /> */}
         </div>
       )}
     </ErrorBoundary>
