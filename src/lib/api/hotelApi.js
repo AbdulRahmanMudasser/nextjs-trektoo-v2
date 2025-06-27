@@ -70,3 +70,22 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
         throw error;
     }
 };
+
+/**
+ * Fetch hotel room availability by ID
+ * @param {string} id - Hotel ID
+ * @returns {Promise<Array>} Array of room data
+ */
+export const fetchHotelAvailability = async (id) => {
+    try {
+        const response = await hotelApi.get(`/availability/${id}`);
+        return response.data.data || [];
+    } catch (error) {
+        console.error('Hotel Availability API error:', {
+            message: error.message,
+            status: error.response?.status,
+            stack: error.stack,
+        });
+        throw error;
+    }
+};
