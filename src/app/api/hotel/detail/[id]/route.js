@@ -12,7 +12,7 @@ import axios from 'axios';
  * GET handler for hotel details
  */
 export async function GET(request, { params }) {
-    const { id } = params;
+    const { id } = await params; // Await params to resolve dynamic route parameters
 
     // Input validation
     if (!id || isNaN(parseInt(id))) {
@@ -85,4 +85,4 @@ export async function GET(request, { params }) {
             { status: error.response?.status || 500 }
         );
     }
-}           
+}
