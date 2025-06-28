@@ -2,20 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Logo from '../../ui/Custom/Logo';
+import Logo from '@/components/ui/Custom/Logo';
 import DropdownMenu from './DropdownMenu';
-import SearchInput from '../../ui/Custom/SearchInput';
+import SearchInput from '@/components/ui/Custom/SearchInput';
+import { useAuth } from '@/lib/api/auth';
 
 // Dropdown items configuration
 const dropdownItems = {
-  tours: [
-    { href: '/tourslist', label: 'Tours List' },
-    { href: '/tours/grid', label: 'Tours Grid' },
-  ],
-  destinations: [
-    { href: '/destinations/europe', label: 'Europe' },
-    { href: '/destinations/asia', label: 'Asia' },
-  ],
   pages: [
     { href: '/about', label: 'About Us' },
     { href: '/faq', label: 'FAQ' },
@@ -29,14 +22,12 @@ const dropdownItems = {
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [topOffset, setTopOffset] = useState('top-10');
+  const { user, logout } = useAuth();
 
-  // Handle scroll effect for navbar position and background
+  // Handle scroll effect for navbar position
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.scrollY > 50;
-      setIsScrolled(scrolled);
       setTopOffset(window.scrollY > 10 ? 'top-0' : 'top-10');
     };
 
@@ -47,19 +38,13 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed ${topOffset} z-20 w-full transition-all duration-300 ${
-        isScrolled ? 'bg-gray-900' : 'bg-transparent backdrop-blur-sm'
-      }`}
+      className={`fixed ${topOffset} z-20 w-full bg-gray-900 transition-all duration-300`}
       aria-label="Main navigation"
     >
       <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
         <div className="flex h-12 items-center justify-between md:h-14 lg:h-16">
           {/* Logo */}
-          <div
-            className={`flex-shrink-0 scale-100 md:scale-110 lg:scale-125 ${
-              isScrolled ? 'bg-white rounded-full p-1.5' : ''
-            }`}
-          >
+          <div className="flex-shrink-0 scale-100 md:scale-110 lg:scale-125">
             <Logo />
           </div>
           {/* Navigation and Profile */}
@@ -72,11 +57,6 @@ const Navbar = () => {
               >
                 Home
               </a>
-              <DropdownMenu title="Tours page" items={dropdownItems.tours} />
-              <DropdownMenu
-                title="Destination"
-                items={dropdownItems.destinations}
-              />
               <DropdownMenu title="Pages" items={dropdownItems.pages} />
               <DropdownMenu title="News" items={dropdownItems.news} />
               <a
@@ -118,18 +98,40 @@ const Navbar = () => {
 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-40 rounded-lg bg-white shadow-xl py-2 z-10 border border-blue-100">
-                  <a
-                    href="/login"
-                    className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
-                  >
-                    Login
-                  </a>
-                  <a
-                    href="/signup"
-                    className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
-                  >
-                    Sign Up
-                  </a>
+                  {user ? (
+                    <>
+                      <a
+                        href="/profile"
+                        className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                      >
+                        Profile
+                      </a>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setIsProfileOpen(false);
+                        }}
+                        className="block w-full text-left px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href="/login"
+                        className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                      >
+                        Login
+                      </a>
+                      <a
+                        href="/signup"
+                        className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                      >
+                        Sign Up
+                      </a>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -171,11 +173,6 @@ const Navbar = () => {
               >
                 Home
               </a>
-              <DropdownMenu title="Tours page" items={dropdownItems.tours} />
-              <DropdownMenu
-                title="Destination"
-                items={dropdownItems.destinations}
-              />
               <DropdownMenu title="Pages" items={dropdownItems.pages} />
               <DropdownMenu title="News" items={dropdownItems.news} />
               <a
