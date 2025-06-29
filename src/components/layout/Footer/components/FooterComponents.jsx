@@ -6,7 +6,7 @@ import { SocialIcon, ContactIcon } from './Icons';
 
 const SupportBanner = () => {
   return (
-    <div className="flex justify-between items-center py-4 border-b border-gray-600 mb-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 border-b border-gray-600 mb-6 gap-3 sm:gap-0">
       <div className="flex items-center">
         <svg
           className="w-4 h-4 text-indigo-200 mr-2"
@@ -59,7 +59,7 @@ const CompanyInfo = () => {
         Trek Too is a brand of TREK TOO LTD. Registered in England & Wales No.
         15766570
       </p>
-      <div className="flex">
+      <div className="flex flex-wrap gap-2">
         <SocialIcon type="twitter" />
         <SocialIcon type="facebook" />
         <SocialIcon type="instagram" />
@@ -109,17 +109,20 @@ const NewsletterForm = () => {
       <p className="text-sm text-gray-300 mb-3">
         Subscribe our newsletter to get our latest update & news.
       </p>
-      <form onSubmit={handleSubmit} className="flex items-center mb-3">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row items-stretch sm:items-center mb-3 gap-2"
+      >
         <input
           id="newsletter-email"
           type="email"
           placeholder="Email address"
           aria-label="Email address"
-          className="p-2 rounded-l-lg border border-blue-500 outline-none flex-1 text-sm h-9"
+          className="p-2 rounded-lg border border-blue-500 outline-none text-sm h-9 w-full sm:w-auto flex-1"
         />
         <button
           type="submit"
-          className="bg-blue-500 text-gray-900 p-2 rounded-r-lg border-none cursor-pointer h-9 flex items-center justify-center"
+          className="bg-blue-500 text-gray-900 p-2 rounded-lg border-none cursor-pointer h-9 flex items-center justify-center"
           aria-label="Subscribe"
         >
           <svg
@@ -140,9 +143,9 @@ const NewsletterForm = () => {
       </form>
       <label
         htmlFor="newsletter-email"
-        className="flex items-center text-xs text-gray-300"
+        className="flex items-start gap-2 text-xs text-gray-300"
       >
-        <input type="checkbox" className="mr-2" /> I agree to all terms and
+        <input type="checkbox" className="mt-1" /> I agree to all terms and
         policies
       </label>
     </div>
@@ -167,17 +170,19 @@ const ContactInfo = () => {
     <div>
       <h3 className="text-xl font-bold text-white mb-3">Contact</h3>
       {contacts.map((contact, index) => (
-        <div key={index} className="flex items-center mb-2">
+        <div key={index} className="flex items-start mb-2">
           <ContactIcon type={contact.type} />
           {contact.href ? (
             <a
               href={contact.href}
-              className="text-sm text-gray-300 ml-2 hover:text-indigo-200"
+              className="text-sm text-gray-300 ml-2 hover:text-indigo-200 break-words"
             >
               {contact.value}
             </a>
           ) : (
-            <span className="text-sm text-gray-300 ml-2">{contact.value}</span>
+            <span className="text-sm text-gray-300 ml-2 break-words">
+              {contact.value}
+            </span>
           )}
         </div>
       ))}
