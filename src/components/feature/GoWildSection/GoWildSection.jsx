@@ -20,13 +20,14 @@ const ActivityItem = ({ activity, rotation }) => {
     hover: {
       scale: 1.05,
       rotate: 0,
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
       transition: { duration: 0.3, ease: 'easeOut' },
     },
   };
 
   return (
     <motion.div
-      className="flex items-center bg-white/90 rounded-lg p-3 backdrop-blur-sm"
+      className="flex items-center bg-white/95 rounded-lg p-3 backdrop-blur-sm border border-blue-50"
       variants={itemVariants}
       initial="hidden"
       whileHover="hover"
@@ -79,17 +80,20 @@ const TextContent = () => {
       initial="hidden"
       animate="visible"
     >
-      <p className="text-xl text-white mb-10 font-medium bg-blue-500 inline-block px-3 py-1 rounded-lg">
-        Welcome to Trektoo
-      </p>
-      <h1 className="text-xl md:text-2xl font-400 text-white leading-tight">
+      <motion.p
+        className="text-lg text-white font-semibold bg-blue-500 inline-block px-4 py-2 rounded-md shadow-sm"
+        whileHover={{ scale: 1.05 }}
+      >
+        Go Wild
+      </motion.p>
+      <motion.h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight tracking-tight">
         We are the most exciting company for travel and adventure
-      </h1>
-      <p className="text-base text-white leading-relaxed">
+      </motion.h1>
+      <motion.p className="text-base text-gray-600 leading-relaxed">
         Discover unforgettable experiences with Trektoo. From thrilling
         adventures to serene escapes, our curated tours offer something for
         every traveler. Join us to explore the world in style and comfort.
-      </p>
+      </motion.p>
     </motion.div>
   );
 };
@@ -103,14 +107,19 @@ const ActivityImage = () => {
       scale: 1,
       transition: { duration: 0.8, ease: 'easeOut' },
     },
+    hover: {
+      scale: 1.03,
+      transition: { duration: 0.3, ease: 'easeOut' },
+    },
   };
 
   return (
     <motion.div
-      className="w-full max-w-[900px] h-[400px] md:h-[550px] relative rounded-xl overflow-hidden"
+      className="w-full max-w-[900px] h-[400px] sm:h-[500px] md:h-[550px] relative rounded-2xl overflow-hidden shadow-xl"
       variants={imageVariants}
       initial="hidden"
       animate="visible"
+      whileHover="hover"
     >
       <Image
         src="/images/welcome-image.jpg"
@@ -119,7 +128,9 @@ const ActivityImage = () => {
         className="object-cover"
         sizes="(max-width: 900px) 100vw, 900px"
         loading="lazy"
-        quality={75}
+        quality={85}
+        placeholder="blur"
+        blurDataURL="/images/welcome-image-placeholder.jpg"
       />
     </motion.div>
   );
@@ -140,79 +151,60 @@ const GoWildSection = () => {
 
   const sectionVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.8, ease: 'easeOut', staggerChildren: 0.2 },
+    },
   };
 
   return (
     <motion.section
       ref={ref}
-      className="relative w-full py-20 overflow-hidden"
+      className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0"
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : {}}
       aria-labelledby="go-wild-heading"
     >
-      {/* Background Image with Opacity */}
-      <div className="absolute inset-0 w-full h-full">
-        <Image
-          src="/images/welcome-bg.jpg"
-          alt="Adventure landscape background"
-          fill
-          className="object-cover opacity-45"
-          loading="lazy"
-          quality={75}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-      </div>
+      <div className="w-full">
+        <motion.div
+          className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
+          variants={sectionVariants}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
+            {/* Left Side: Text Content and Activities */}
+            <motion.div className="space-y-8" variants={sectionVariants}>
+              <TextContent />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {activities.map((activity, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{
+                      delay: index * 0.1,
+                      duration: 0.5,
+                      ease: 'easeOut',
+                    }}
+                  >
+                    <ActivityItem
+                      activity={activity}
+                      rotation={rotations[index % rotations.length]}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
-      {/* Custom SVG Animation */}
-      <motion.svg
-        className="absolute top-0 left-0 w-full h-24 text-blue-500/20"
-        viewBox="0 0 1440 100"
-        initial={{ pathLength: 0 }}
-        animate={inView ? { pathLength: 1 } : {}}
-        transition={{ duration: 2, ease: 'easeInOut' }}
-      >
-        <path
-          d="M0,50 Q360,20 720,50 T1440,50"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeDasharray="10 5"
-        />
-      </motion.svg>
-
-      <div className="relative max-w-full px-4 sm:px-6 lg:px-8 mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
-          {/* Left Side: Text Content and Activities */}
-          <div className="space-y-8">
-            <TextContent />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {activities.map((activity, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{
-                    delay: index * 0.1,
-                    duration: 0.5,
-                    ease: 'easeOut',
-                  }}
-                >
-                  <ActivityItem
-                    activity={activity}
-                    rotation={rotations[index % rotations.length]}
-                  />
-                </motion.div>
-              ))}
-            </div>
+            {/* Right Side: Image */}
+            <motion.div
+              className="flex justify-center md:justify-end"
+              variants={sectionVariants}
+            >
+              <ActivityImage />
+            </motion.div>
           </div>
-
-          {/* Right Side: Image */}
-          <div className="flex justify-center md:justify-end">
-            <ActivityImage />
-          </div>
-        </div>
+        </motion.div>
       </div>
     </motion.section>
   );

@@ -27,21 +27,10 @@ function HeroContent() {
   const totalGuests = guests.children + guests.adult;
 
   const cities = [
-    'Seoul',
-    'Beijing',
-    'Dubai',
-    'Cairo',
-    'Luxor',
-    'Tokyo',
-    'Kyoto',
-    'Osaka',
-    'Singapore',
     'Paris',
-    'Rome',
-    'Barcelona',
-    'Bangkok',
-    'Chiang Mai',
-    'Phuket',
+    'New York',
+    'California', 
+    'Los Angeles'
   ];
 
   useEffect(() => {
@@ -91,7 +80,7 @@ function HeroContent() {
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
-    router.push(`/tourslist?${queryParams}`);
+    router.push(`/hotels-list?${queryParams}`);
   };
 
   const today = new Date();

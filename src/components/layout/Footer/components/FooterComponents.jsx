@@ -1,3 +1,5 @@
+// FooterComponents.js
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { SocialIcon, ContactIcon } from './Icons';
@@ -11,6 +13,7 @@ const SupportBanner = () => {
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -32,6 +35,7 @@ const SupportBanner = () => {
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -45,8 +49,6 @@ const SupportBanner = () => {
   );
 };
 
-SupportBanner.propTypes = {};
-
 const CompanyInfo = () => {
   return (
     <div>
@@ -54,8 +56,8 @@ const CompanyInfo = () => {
         <h3 className="text-xl font-bold text-white">Trektoo</h3>
       </div>
       <p className="text-sm text-gray-300 mb-3">
-        To take trivial example which us ever undertakes laborious physical
-        exercise except obsome.
+        Trek Too is a brand of TREK TOO LTD. Registered in England & Wales No.
+        15766570
       </p>
       <div className="flex">
         <SocialIcon type="twitter" />
@@ -67,15 +69,13 @@ const CompanyInfo = () => {
   );
 };
 
-CompanyInfo.propTypes = {};
-
 const PagesLinks = () => {
   const links = [
-    'About us',
-    'Community Blog',
-    'Work with Us',
-    'Privacy Policy',
-    'Contact us',
+    { label: 'About us', href: '/about-us' },
+    { label: 'Community Blog', href: '/blog' },
+    { label: 'Work with Us', href: '/careers' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Contact us', href: '/contact' },
   ];
 
   return (
@@ -85,10 +85,10 @@ const PagesLinks = () => {
         {links.map((link, index) => (
           <li key={index} className="mb-2">
             <a
-              href="#"
+              href={link.href}
               className="text-sm text-gray-300 no-underline hover:text-indigo-200"
             >
-              {link}
+              {link.label}
             </a>
           </li>
         ))}
@@ -97,27 +97,37 @@ const PagesLinks = () => {
   );
 };
 
-PagesLinks.propTypes = {};
-
 const NewsletterForm = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // handle submission logic
+  };
+
   return (
     <div>
       <h3 className="text-xl font-bold text-white mb-3">Newsletter</h3>
       <p className="text-sm text-gray-300 mb-3">
         Subscribe our newsletter to get our latest update & news.
       </p>
-      <div className="flex items-center mb-3">
+      <form onSubmit={handleSubmit} className="flex items-center mb-3">
         <input
+          id="newsletter-email"
           type="email"
           placeholder="Email address"
+          aria-label="Email address"
           className="p-2 rounded-l-lg border border-blue-500 outline-none flex-1 text-sm h-9"
         />
-        <button className="bg-blue-500 text-gray-900 p-2 rounded-r-lg border-none cursor-pointer h-9 flex items-center justify-center">
+        <button
+          type="submit"
+          className="bg-blue-500 text-gray-900 p-2 rounded-r-lg border-none cursor-pointer h-9 flex items-center justify-center"
+          aria-label="Subscribe"
+        >
           <svg
             className="w-4 h-4 text-gray-900"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -127,22 +137,30 @@ const NewsletterForm = () => {
             />
           </svg>
         </button>
-      </div>
-      <label className="flex items-center text-xs text-gray-300">
-        <input type="checkbox" className="mr-2" />I agree to all terms and
+      </form>
+      <label
+        htmlFor="newsletter-email"
+        className="flex items-center text-xs text-gray-300"
+      >
+        <input type="checkbox" className="mr-2" /> I agree to all terms and
         policies
       </label>
     </div>
   );
 };
 
-NewsletterForm.propTypes = {};
-
 const ContactInfo = () => {
   const contacts = [
-    { type: 'phone', value: '00 (123) 456 889' },
-    { type: 'email', value: 'contact@example.com' },
-    { type: 'address', value: '583 Main Street, NY, USA' },
+    { type: 'phone', value: '0155 829 8719', href: 'tel:01558298719' },
+    {
+      type: 'email',
+      value: 'support@trek-too.com',
+      href: 'mailto:support@trek-too.com',
+    },
+    {
+      type: 'address',
+      value: '24-26 Arcadia Avenue, Fin009/15302, London, United Kingdom',
+    },
   ];
 
   return (
@@ -151,13 +169,20 @@ const ContactInfo = () => {
       {contacts.map((contact, index) => (
         <div key={index} className="flex items-center mb-2">
           <ContactIcon type={contact.type} />
-          <span className="text-sm text-gray-300">{contact.value}</span>
+          {contact.href ? (
+            <a
+              href={contact.href}
+              className="text-sm text-gray-300 ml-2 hover:text-indigo-200"
+            >
+              {contact.value}
+            </a>
+          ) : (
+            <span className="text-sm text-gray-300 ml-2">{contact.value}</span>
+          )}
         </div>
       ))}
     </div>
   );
 };
-
-ContactInfo.propTypes = {};
 
 export { SupportBanner, CompanyInfo, PagesLinks, NewsletterForm, ContactInfo };

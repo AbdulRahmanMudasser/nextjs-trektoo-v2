@@ -1,7 +1,21 @@
+'use client';
+
 import Footer from '@/components/layout/Footer/Footer';
-import './globals.css';
-import Topbar from '@/components/layout/Topbar';
 import Navbar from '@/components/layout/Navbar/Navbar';
+import Topbar from '@/components/layout/Topbar';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import './globals.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      cacheTime: 1000 * 60 * 30,
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function RootLayout({ children }) {
   return (
@@ -13,11 +27,12 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <Topbar cartCount={3} />{' '}
-        {/* Sample cart count; replace with dynamic state */}
-        <Navbar />
-        {children}
-        <Footer />
+        <QueryClientProvider client={queryClient}>
+          <Topbar cartCount={99} />
+          <Navbar />
+          {children}
+          <Footer />
+        </QueryClientProvider>
       </body>
     </html>
   );
