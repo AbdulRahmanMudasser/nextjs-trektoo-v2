@@ -1,13 +1,12 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import Logo from '@/components/ui/Custom/Logo';
 import DropdownMenu from './DropdownMenu';
 import SearchInput from '@/components/ui/Custom/SearchInput';
-import { useAuth } from '@/lib/api/auth';
+import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
+import Image from 'next/image';
 
-// Dropdown items configuration
 const dropdownItems = {
   pages: [
     { href: '/about', label: 'About Us' },
@@ -23,9 +22,15 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [topOffset, setTopOffset] = useState('top-10');
-  const { user, logout } = useAuth();
+  const {
+    user,
+    logout,
+    isAuthenticated,
+    authSuccess,
+    authError,
+    clearMessages,
+  } = useAuth();
 
-  // Handle scroll effect for navbar position
   useEffect(() => {
     const handleScroll = () => {
       setTopOffset(window.scrollY > 10 ? 'top-0' : 'top-10');
@@ -36,35 +41,57 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Clear auth messages when dropdown closes
+  useEffect(() => {
+    if (!isProfileOpen) {
+      clearMessages();
+    }
+  }, [isProfileOpen, clearMessages]);
+
+  const handleLogout = () => {
+    logout();
+    setIsProfileOpen(false);
+  };
+
   return (
     <nav
       className={`fixed ${topOffset} z-20 w-full bg-gray-900 transition-all duration-300`}
       aria-label="Main navigation"
     >
-      <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
+      {/* Success/Error Messages */}
+      {(authSuccess || authError) && (
+        <div
+          className={`absolute top-full left-0 right-0 z-30 ${authSuccess ? 'bg-green-500' : 'bg-red-500'} text-white text-center py-1`}
+        >
+          {authSuccess || authError}
+        </div>
+      )}
+
+      <div className="mx-auto max-w-7xl px2 sm:px-4 lg:px-6">
         <div className="flex h-12 items-center justify-between md:h-14 lg:h-16">
           {/* Logo */}
           <div className="flex-shrink-0 scale-100 md:scale-110 lg:scale-125">
             <Logo />
           </div>
+
           {/* Navigation and Profile */}
           <div className="flex items-center gap-1 md:gap-3">
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-2">
-              <a
+              <Link
                 href="/"
                 className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 Home
-              </a>
+              </Link>
               <DropdownMenu title="Pages" items={dropdownItems.pages} />
               <DropdownMenu title="News" items={dropdownItems.news} />
-              <a
+              <Link
                 href="/contact"
                 className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 Contact
-              </a>
+              </Link>
               <span className="h-6 border-l border-gray-300 mx-2"></span>
             </div>
 
@@ -77,59 +104,82 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="p-1.5 rounded-full text-white hover:bg-blue-400 transition-colors"
+                className="p-1.5 rounded-full text-white hover:bg-blue-400 transition-colors flex items-center gap-1"
                 aria-label="Profile menu"
               >
-                <svg
-                  className="h-4 w-4 md:h-5 md:w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                {user?.avatar_url ? (
+                  <Image
+                    src={user.avatar_url}
+                    alt={user.display_name || 'User'}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
                   />
-                </svg>
+                ) : (
+                  <svg
+                    className="h-4 w-4 md:h-5 md:w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                )}
+                {user && (
+                  <span className="hidden md:inline text-sm">
+                    {user.first_name}
+                  </span>
+                )}
               </button>
 
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-40 rounded-lg bg-white shadow-xl py-2 z-10 border border-blue-100">
-                  {user ? (
+                <div className="absolute right-0 mt-2 w-48 rounded-lg bg-white shadow-xl py-2 z-10 border border-blue-100">
+                  {isAuthenticated ? (
                     <>
-                      <a
+                      <div className="px-3 py-2 border-b">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.display_name || 'Welcome'}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user?.email}
+                        </p>
+                      </div>
+                      <Link
                         href="/profile"
-                        className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="block px-3 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
                       >
                         Profile
-                      </a>
+                      </Link>
                       <button
-                        onClick={() => {
-                          logout();
-                          setIsProfileOpen(false);
-                        }}
-                        className="block w-full text-left px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                        onClick={handleLogout}
+                        className="block w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
                       >
                         Logout
                       </button>
                     </>
                   ) : (
                     <>
-                      <a
+                      <Link
                         href="/login"
-                        className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="block px-3 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
                       >
                         Login
-                      </a>
-                      <a
+                      </Link>
+                      <Link
                         href="/signup"
-                        className="block px-3 py-1.5 text-xs md:text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="block px-3 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
                       >
                         Sign Up
-                      </a>
+                      </Link>
                     </>
                   )}
                 </div>
@@ -167,20 +217,68 @@ const Navbar = () => {
               <div className="sm:hidden mb-3">
                 <SearchInput />
               </div>
-              <a
+              <Link
                 href="/"
                 className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
-              </a>
-              <DropdownMenu title="Pages" items={dropdownItems.pages} />
-              <DropdownMenu title="News" items={dropdownItems.news} />
-              <a
+              </Link>
+              <DropdownMenu
+                title="Pages"
+                items={dropdownItems.pages}
+                onItemClick={() => setIsMobileMenuOpen(false)}
+              />
+              <DropdownMenu
+                title="News"
+                items={dropdownItems.news}
+                onItemClick={() => setIsMobileMenuOpen(false)}
+              />
+              <Link
                 href="/contact"
                 className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Contact
-              </a>
+              </Link>
+
+              {/* Mobile Auth Links */}
+              <div className="pt-2 border-t border-gray-700">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/profile"
+                      className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -188,7 +286,5 @@ const Navbar = () => {
     </nav>
   );
 };
-
-Navbar.propTypes = {};
 
 export default Navbar;
