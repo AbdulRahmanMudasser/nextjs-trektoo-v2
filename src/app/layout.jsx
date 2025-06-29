@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-          <Topbar cartCount={3} />
+          <Topbar cartCount={99} />
           <Navbar />
           {children}
           <Footer />

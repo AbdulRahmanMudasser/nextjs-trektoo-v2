@@ -35,17 +35,13 @@ const Navbar = () => {
     const handleScroll = () => {
       setTopOffset(window.scrollY > 10 ? 'top-0' : 'top-10');
     };
-
     window.addEventListener('scroll', handleScroll);
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Clear auth messages when dropdown closes
   useEffect(() => {
-    if (!isProfileOpen) {
-      clearMessages();
-    }
+    if (!isProfileOpen) clearMessages();
   }, [isProfileOpen, clearMessages]);
 
   const handleLogout = () => {
@@ -58,7 +54,6 @@ const Navbar = () => {
       className={`fixed ${topOffset} z-20 w-full bg-gray-900 transition-all duration-300`}
       aria-label="Main navigation"
     >
-      {/* Success/Error Messages */}
       {(authSuccess || authError) && (
         <div
           className={`absolute top-full left-0 right-0 z-30 ${authSuccess ? 'bg-green-500' : 'bg-red-500'} text-white text-center py-1`}
@@ -67,16 +62,16 @@ const Navbar = () => {
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px2 sm:px-4 lg:px-6">
+      <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
         <div className="flex h-12 items-center justify-between md:h-14 lg:h-16">
           {/* Logo */}
           <div className="flex-shrink-0 scale-100 md:scale-110 lg:scale-125">
             <Logo />
           </div>
 
-          {/* Navigation and Profile */}
+          {/* Right side */}
           <div className="flex items-center gap-1 md:gap-3">
-            {/* Desktop Navigation */}
+            {/* Desktop Menu */}
             <div className="hidden lg:flex items-center space-x-2">
               <Link
                 href="/"
@@ -95,12 +90,12 @@ const Navbar = () => {
               <span className="h-6 border-l border-gray-300 mx-2"></span>
             </div>
 
-            {/* Search Input */}
+            {/* Search */}
             <div className="hidden sm:block">
               <SearchInput />
             </div>
 
-            {/* Profile Dropdown */}
+            {/* Profile */}
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -186,9 +181,9 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* ✅ Mobile Toggle Button with z-30 fix */}
             <button
-              className="lg:hidden p-1.5 text-white hover:text-blue-400 transition-colors"
+              className="lg:hidden p-1.5 text-white hover:text-blue-400 transition-colors z-30 relative"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
@@ -210,16 +205,16 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* ✅ Mobile Menu with z-20 fix */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-gray-900 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto">
+          <div className="lg:hidden bg-gray-900 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto z-20">
             <div className="px-3 py-4 space-y-3">
               <div className="sm:hidden mb-3">
                 <SearchInput />
               </div>
               <Link
                 href="/"
-                className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
@@ -236,26 +231,25 @@ const Navbar = () => {
               />
               <Link
                 href="/contact"
-                className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Contact
               </Link>
 
-              {/* Mobile Auth Links */}
               <div className="pt-2 border-t border-gray-700">
                 {isAuthenticated ? (
                   <>
                     <Link
                       href="/profile"
-                      className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      className="block w-full text-left text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
                     >
                       Logout
                     </button>
@@ -264,14 +258,14 @@ const Navbar = () => {
                   <>
                     <Link
                       href="/login"
-                      className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       href="/signup"
-                      className="block text-white hover:text-blue-400 font-medium text-xs md:text-sm uppercase tracking-wide py-1.5 focus:outline-none"
+                      className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Sign Up
