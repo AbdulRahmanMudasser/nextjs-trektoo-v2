@@ -9,6 +9,8 @@ import {
   FaTwitter,
   FaInstagram,
   FaPinterestP,
+  FaPhone,
+  FaEnvelope,
 } from 'react-icons/fa';
 
 function Topbar({ cartCount }) {
@@ -17,56 +19,36 @@ function Topbar({ cartCount }) {
       className="bg-gray-900 text-white h-10 flex items-center w-full z-40"
       aria-label="Topbar"
     >
-      <div className="container mx-auto px-4 flex justify-between items-center text-xs md:text-sm">
-        {/* Left Side: Address and Email (hidden on small screens) */}
-        <div className="hidden sm:flex flex-row gap-4">
-          <span className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-            </svg>
-            123 Trektoo St, Adventure City
-          </span>
-          <span className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
+      <div className="container mx-auto px-2 sm:px-4 flex flex-wrap justify-between items-center text-[10px] xs:text-xs md:text-sm">
+        {/* Left Side: Phone and Email (hidden on small screens) */}
+        <div className="hidden sm:flex flex-row gap-3 md:gap-4 flex-wrap md:pt-1">
+          <a
+            href="tel:01063425677"
+            className="flex items-center whitespace-nowrap hover:text-blue-400 transition-colors"
+          >
+            <FaPhone className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1" />
+            0106 342 5677
+          </a>
+          <a
+            href="mailto:info@trektoo.com"
+            className="flex items-center whitespace-nowrap hover:text-blue-400 transition-colors"
+          >
+            <FaEnvelope className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1" />
             info@trektoo.com
-          </span>
+          </a>
         </div>
 
         {/* Right Side: Links, Cart, and Social Icons */}
-        <div className="flex items-center gap-2 sm:gap-4 ml-auto sm:ml-0">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 ml-auto sm:ml-0 flex-wrap">
           <Link
             href="/booking"
-            className="text-white hover:text-blue-400 transition-colors"
+            className="text-white hover:text-blue-400 transition-colors whitespace-nowrap"
           >
             Booking Now
           </Link>
           <Link
             href="/about"
-            className="text-white hover:text-blue-400 transition-colors"
+            className="text-white hover:text-blue-400 transition-colors whitespace-nowrap"
           >
             About
           </Link>
@@ -77,12 +59,13 @@ function Topbar({ cartCount }) {
           >
             <FaShoppingCart className="w-4 h-4" />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount}
               </span>
             )}
           </Link>
-          <div className="hidden sm:flex gap-3">
+
+          <div className="hidden sm:flex gap-2 md:gap-3">
             <a
               href="https://facebook.com"
               target="_blank"
