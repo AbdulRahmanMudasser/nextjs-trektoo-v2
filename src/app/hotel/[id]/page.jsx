@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -11,7 +11,6 @@ import ImageGallery from '@/components/feature/HotelDetails/ImageGallery';
 import HotelDetails from '@/components/feature/HotelDetails/HotelDetails';
 import RoomAvailability from '@/components/feature/HotelDetails/RoomAvailability';
 import TourInformation from '@/components/feature/HotelDetails/TourInformation';
-import TourPlan from '@/components/feature/HotelDetails/TourPlan';
 import Map from '@/components/feature/HotelDetails/Map';
 import CalendarPrice from '@/components/feature/HotelDetails/CalendarPrice';
 import ReviewScores from '@/components/feature/HotelDetails/ReviewScores';
@@ -24,11 +23,11 @@ import {
 } from '@/hooks/useHotels';
 
 const TourDetail = ({ params }) => {
-  const { id } = React.use(params);
+  const { id } = React.use(params); // Unwrap params with React.use()
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [itemsPerPage, setItemsPerPage] = React.useState(5);
   const {
     data: hotel,
     isLoading: isHotelLoading,
@@ -139,6 +138,13 @@ const TourDetail = ({ params }) => {
           loading={isRoomsLoading}
           error={roomsError?.message}
           hotelId={id}
+          hotelData={{
+            id: hotel.id,
+            title: hotel.title,
+            price: hotel.sale_price || hotel.price,
+            bookingFee: hotel.booking_fee || '0',
+            policy: hotel.policy || [],
+          }}
         />
         <TourInformation
           facilities={hotel.terms?.['6']?.child || []}
@@ -148,7 +154,6 @@ const TourDetail = ({ params }) => {
           checkInTime={hotel.check_in_time || 'Not specified'}
           checkOutTime={hotel.check_out_time || 'Not specified'}
         />
-        {/* <TourPlan relatedHotels={hotel.related || []} /> */}
         <Map
           lat={parseFloat(hotel.map_lat) || 0}
           lng={parseFloat(hotel.map_lng) || 0}
