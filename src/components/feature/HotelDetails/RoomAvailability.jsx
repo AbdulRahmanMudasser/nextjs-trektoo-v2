@@ -50,7 +50,7 @@ ImageWithFallback.propTypes = {
   alt: PropTypes.string.isRequired,
 };
 
-const RoomAvailability = ({ rooms, loading, error, hotelId }) => {
+const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
   const [currentImages, setCurrentImages] = useState({});
 
   const containerVariants = {
@@ -150,163 +150,180 @@ const RoomAvailability = ({ rooms, loading, error, hotelId }) => {
       variants={containerVariants}
     >
       <motion.h2
-        className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-8 border-l-4 border-blue-500 pl-3"
+        className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-8 border-l-4 border-blue-500 pl-3 font-montserrat"
         variants={itemVariants}
       >
         Available Rooms
       </motion.h2>
       <div className="space-y-8">
-        {rooms.map((room) => (
-          <motion.div
-            key={room.id}
-            className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-blue-50 hover:shadow-xl transition-shadow"
-            variants={itemVariants}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="relative">
-                <div className="relative h-80 sm:h-96 rounded-xl overflow-hidden">
-                  <AnimatePresence initial={false}>
-                    <motion.div
-                      key={currentImages[room.id] || 0}
-                      variants={imageVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="absolute inset-0"
-                    >
-                      <ImageWithFallback
-                        src={
-                          room.gallery?.[currentImages[room.id] || 0]?.large ||
-                          room.image
-                        }
-                        alt={`${room.title} image ${currentImages[room.id] || 0 + 1}`}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform duration-500"
-                        quality={85}
-                        loading="lazy"
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                  {room.gallery?.length > 1 && (
-                    <div className="absolute inset-x-0 bottom-0 flex justify-between p-3">
-                      <button
-                        onClick={() => handlePrevImage(room.id)}
-                        className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
-                        aria-label="Previous image"
+        {rooms.map((room) => {
+          const priceMatch = room.price_text.match(/\$(\d+\.?\d*)/);
+          const roomPrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
+          const query = new URLSearchParams({
+            roomId: room.id.toString(),
+            roomTitle: room.title,
+            roomPrice: roomPrice.toString(),
+            roomImage: room.gallery?.[0]?.large || room.image,
+            beds: room.beds_html,
+            adults: room.adults_html,
+            children: room.children_html,
+            hotelTitle: hotelData.title,
+            hotelPrice: hotelData.price.toString(),
+            bookingFee: hotelData.bookingFee,
+          }).toString();
+
+          return (
+            <motion.div
+              key={room.id}
+              className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-blue-50 hover:shadow-xl transition-shadow"
+              variants={itemVariants}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="relative">
+                  <div className="relative h-80 sm:h-96 rounded-xl overflow-hidden">
+                    <AnimatePresence initial={false}>
+                      <motion.div
+                        key={currentImages[room.id] || 0}
+                        variants={imageVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="absolute inset-0"
                       >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleNextImage(room.id)}
-                        className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
-                        aria-label="Next image"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-gray-100 pb-2">
-                  {room.gallery?.map((img, index) => (
-                    <button
-                      key={index}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                        currentImages[room.id] === index
-                          ? 'border-blue-500'
-                          : 'border-transparent'
-                      } hover:border-blue-500 transition-all min-w-0`}
-                      onClick={() => handleThumbnailClick(room.id, index)}
-                      aria-label={`View image ${index + 1}`}
-                    >
-                      <ImageWithFallback
-                        src={img.thumb}
-                        alt={`${room.title} thumbnail ${index + 1}`}
-                        width={80}
-                        height={80}
-                        className="object-cover w-full h-full"
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col justify-between">
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-4">
-                    {room.title}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-gray-600 text-sm sm:text-base mb-4">
-                    <div className="flex items-center">
-                      <Bed className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{room.beds_html}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{room.adults_html} Adults</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Baby className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{room.children_html} Children</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="font-medium">{room.size_html}</span>
-                    </div>
-                  </div>
-                  <div className="text-gray-600 text-lg sm:text-xl mb-4">
-                    <span className="font-bold text-gray-900 text-xl sm:text-2xl">
-                      {room.price_text}
-                    </span>
-                  </div>
-                  <div className="mb-6">
-                    <h4 className="text-sm sm:text-base font-medium text-gray-700 mb-3">
-                      Amenities
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {room.term_features.map((feature, index) => (
-                        <span
-                          key={index}
-                          className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium rounded-full"
+                        <ImageWithFallback
+                          src={
+                            room.gallery?.[currentImages[room.id] || 0]
+                              ?.large || room.image
+                          }
+                          alt={`${room.title} image ${currentImages[room.id] || 0 + 1}`}
+                          fill
+                          className="object-cover hover:scale-105 transition-transform duration-500"
+                          quality={85}
+                          loading="lazy"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                    {room.gallery?.length > 1 && (
+                      <div className="absolute inset-x-0 bottom-0 flex justify-between p-3">
+                        <button
+                          onClick={() => handlePrevImage(room.id)}
+                          className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
+                          aria-label="Previous image"
                         >
-                          <i
-                            className={`${feature.icon} mr-1.5 text-blue-500`}
-                          ></i>
-                          {feature.title}
-                        </span>
-                      ))}
-                    </div>
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleNextImage(room.id)}
+                          className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
+                          aria-label="Next image"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-gray-100 pb-2">
+                    {room.gallery?.map((img, index) => (
+                      <button
+                        key={index}
+                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                          currentImages[room.id] === index
+                            ? 'border-blue-500'
+                            : 'border-transparent'
+                        } hover:border-blue-500 transition-all min-w-0`}
+                        onClick={() => handleThumbnailClick(room.id, index)}
+                        aria-label={`View image ${index + 1}`}
+                      >
+                        <ImageWithFallback
+                          src={img.thumb}
+                          alt={`${room.title} thumbnail ${index + 1}`}
+                          width={80}
+                          height={80}
+                          className="object-cover w-full h-full"
+                        />
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <motion.div variants={itemVariants} className="flex-1">
-                    <Link
-                      href={`/hotel/${hotelId}/checkout?roomId=${room.id}`}
-                      className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-8 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all"
-                    >
-                      <motion.span
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-4 font-montserrat">
+                      {room.title}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-gray-600 text-sm sm:text-base mb-4">
+                      <div className="flex items-center">
+                        <Bed className="h-5 w-5 text-blue-500 mr-2" />
+                        <span>{room.beds_html}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Users className="h-5 w-5 text-blue-500 mr-2" />
+                        <span>{room.adults_html} Adults</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Baby className="h-5 w-5 text-blue-500 mr-2" />
+                        <span>{room.children_html} Children</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-medium">{room.size_html}</span>
+                      </div>
+                    </div>
+                    <div className="text-gray-600 text-lg sm:text-xl mb-4">
+                      <span className="font-bold text-gray-900 text-xl sm:text-2xl">
+                        {room.price_text}
+                      </span>
+                    </div>
+                    <div className="mb-6">
+                      <h4 className="text-sm sm:text-base font-medium text-gray-700 mb-3 font-montserrat">
+                        Amenities
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {room.term_features.map((feature, index) => (
+                          <span
+                            key={index}
+                            className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium rounded-full"
+                          >
+                            <i
+                              className={`${feature.icon} mr-1.5 text-blue-500`}
+                            ></i>
+                            {feature.title}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <motion.div variants={itemVariants} className="flex-1">
+                      <Link
+                        href={`/hotel/${hotelId}/checkout?${query}`}
+                        className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-8 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all"
                       >
-                        Book Now
-                      </motion.span>
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={itemVariants} className="flex-1">
-                    <Link
-                      href={`/hotel/${hotelId}/room/${room.id}`}
-                      className="block w-full text-center bg-gray-100 text-gray-700 font-semibold py-3 px-8 rounded-xl hover:bg-blue-100 transition-all"
-                    >
-                      <motion.span
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Book Now
+                        </motion.span>
+                      </Link>
+                    </motion.div>
+                    <motion.div variants={itemVariants} className="flex-1">
+                      <Link
+                        href={`/hotel/${hotelId}/room/${room.id}`}
+                        className="block w-full text-center bg-gray-100 text-gray-700 font-semibold py-3 px-8 rounded-xl hover:bg-blue-100 transition-all"
                       >
-                        View Details
-                      </motion.span>
-                    </Link>
-                  </motion.div>
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          View Details
+                        </motion.span>
+                      </Link>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
     </motion.div>
   );
@@ -340,6 +357,13 @@ RoomAvailability.propTypes = {
   loading: PropTypes.bool.isRequired,
   error: PropTypes.string,
   hotelId: PropTypes.string.isRequired,
+  hotelData: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    bookingFee: PropTypes.string.isRequired,
+    policy: PropTypes.arrayOf(PropTypes.object).isRequired,
+  }).isRequired,
 };
 
 export default RoomAvailability;
