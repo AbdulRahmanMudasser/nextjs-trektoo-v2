@@ -1,24 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import {
-  Loader2,
+  AlertCircle,
   ArrowLeft,
-  User,
-  Calendar,
-  CreditCard,
   CheckCircle,
-  X,
-  ChevronDown,
-  ChevronUp,
+  CreditCard,
+  Lock,
+  Loader2,
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/useAuth';
+import { useDoCheckout } from '@/hooks/useHotels';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -26,1070 +22,515 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import DateInput from '@/components/ui/Custom/DateInput';
+import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
-import confetti from 'canvas-confetti';
 
 const CheckoutPage = ({ params }) => {
-  const { id } = React.use(params); // Unwrap params with React.use()
+  const { id } = React.use(params);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { isAuthenticated, token } = useAuth();
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user?.first_name || '',
-    lastName: user?.last_name || '',
-    email: user?.email || '',
+    first_name: '',
+    last_name: '',
+    email: '',
     phone: '',
-    checkIn: new Date(),
-    checkOut: new Date(new Date().setDate(new Date().getDate() + 1)),
-    roomQuantity: 1,
-    adults: parseInt(searchParams.get('adults')) || 1,
-    children: parseInt(searchParams.get('children')) || 0,
-    paymentMethod: 'credit_card',
-    promoCode: '',
-    termsAccepted: false,
-    specialRequests: '',
+    country: '',
+    term_conditions: false,
+    payment_gateway: 'stripe',
   });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const {
+    mutate: doCheckout,
+    isPending: isCheckingOut,
+    error: checkoutError,
+  } = useDoCheckout(token);
 
-  const roomId = searchParams.get('roomId');
+  const bookingCode = searchParams.get('booking_code');
   const roomTitle = searchParams.get('roomTitle');
-  const roomPrice = parseFloat(searchParams.get('roomPrice')) || 0;
-  const roomImage = searchParams.get('roomImage') || '/placeholder-image.jpg';
-  const beds = searchParams.get('beds') || 'N/A';
+  const roomPrice = searchParams.get('roomPrice');
+  const roomImage = searchParams.get('roomImage');
+  const beds = searchParams.get('beds');
+  const adults = searchParams.get('adults');
+  const children = searchParams.get('children');
+  const number_of_rooms = searchParams.get('number_of_rooms');
+  const start_date = searchParams.get('start_date');
+  const end_date = searchParams.get('end_date');
   const hotelTitle = searchParams.get('hotelTitle');
-  const hotelPrice = parseFloat(searchParams.get('hotelPrice')) || 0;
-  const bookingFee = parseFloat(searchParams.get('bookingFee')) || 0;
+  const hotelPrice = searchParams.get('hotelPrice');
+  const bookingFee = searchParams.get('bookingFee');
 
   useEffect(() => {
-    console.log('Checkout query params:', {
-      id,
-      roomId,
+    const timer = setTimeout(() => {
+      if (!isAuthenticated || !token) {
+        console.warn('Redirecting to login: User not authenticated', {
+          isAuthenticated,
+          token,
+          localStorageToken: localStorage.getItem('authToken'),
+        });
+        router.push(
+          `/login?redirect=/hotel/${id}/checkout&${searchParams.toString()}`
+        );
+      } else {
+        console.log('Authentication successful', { isAuthenticated, token });
+      }
+      setIsAuthChecked(true);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, token, router, id, searchParams]);
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.first_name.trim())
+      errors.first_name = 'First name is required';
+    if (!formData.last_name.trim()) errors.last_name = 'Last name is required';
+    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+      errors.email = 'Valid email is required';
+    if (!formData.phone.match(/^\+?\d{10,15}$/))
+      errors.phone = 'Valid phone number is required';
+    if (!formData.country) errors.country = 'Country is required';
+    if (!formData.term_conditions)
+      errors.term_conditions = 'You must accept the terms and conditions';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleCheckout = () => {
+    if (!validateForm()) return;
+
+    const checkoutData = {
+      code: bookingCode,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      phone: formData.phone,
+      country: formData.country,
+      term_conditions: formData.term_conditions.toString(),
+      payment_gateway: formData.payment_gateway,
+    };
+
+    const query = new URLSearchParams({
+      booking_code: bookingCode,
       roomTitle,
       roomPrice,
       roomImage,
       beds,
-      adults: formData.adults,
-      children: formData.children,
+      adults,
+      children,
+      number_of_rooms,
+      start_date,
+      end_date,
       hotelTitle,
       hotelPrice,
       bookingFee,
+    }).toString();
+
+    if (formData.payment_gateway === 'Offline') {
+      console.log('Offline payment selected, redirecting to thankyou page');
+      router.push(`/thankyou?${query}`);
+      return;
+    }
+
+    doCheckout(checkoutData, {
+      onSuccess: (data) => {
+        console.log('Checkout success:', data);
+        if (formData.payment_gateway === 'stripe' && data.url) {
+          window.location.href = data.url;
+        } else {
+          router.push(`/thankyou?${query}`);
+        }
+      },
+      onError: (error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          'Checkout failed. Please try again or contact support.';
+        console.error('Checkout error:', errorMessage, error.response?.data);
+        setFormErrors({ general: errorMessage });
+      },
     });
-    if (!roomId || !roomTitle || !roomPrice || !hotelTitle || !id) {
-      setErrors({ general: 'Missing booking details. Please select a room.' });
-      router.push(`/hotel/${id || 'fallback'}`);
-    }
-  }, [roomId, roomTitle, roomPrice, hotelTitle, id, router]);
-
-  useEffect(() => {
-    if (showConfirmation) {
-      confetti({
-        particleCount: 150,
-        spread: 90,
-        origin: { y: 0.6 },
-      });
-    }
-  }, [showConfirmation]);
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = 'Invalid email format';
-    if (!formData.phone) newErrors.phone = 'Phone number is required';
-    if (formData.checkOut <= formData.checkIn)
-      newErrors.checkOut = 'Check-out must be after check-in';
-    if (formData.roomQuantity < 1)
-      newErrors.roomQuantity = 'At least one room is required';
-    if (formData.adults < 1)
-      newErrors.adults = 'At least one adult is required';
-    if (formData.children < 0)
-      newErrors.children = 'Children cannot be negative';
-    if (!formData.termsAccepted)
-      newErrors.termsAccepted = 'You must accept the terms and conditions';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  const calculatePrice = () => {
-    const nights = Math.ceil(
-      (formData.checkOut - formData.checkIn) / (1000 * 60 * 60 * 24)
+  const totalPrice = (
+    parseFloat(roomPrice || 0) * parseInt(number_of_rooms || 1) +
+    parseFloat(hotelPrice || 0) +
+    parseFloat(bookingFee || 0)
+  ).toFixed(2);
+
+  if (!isAuthChecked) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50 bg-[url('/pattern.png')] bg-cover bg-fixed"
+      >
+        <div className="max-w-md mx-auto p-8 text-center bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100">
+          <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+          <p className="text-gray-600 text-base mt-3 font-montserrat">
+            Loading checkout...
+          </p>
+        </div>
+      </motion.div>
     );
-    const roomCost = roomPrice * formData.roomQuantity * nights;
-    const tax = roomCost * 0.1; // 10% tax
-    const promoDiscount = formData.promoCode === 'SAVE10' ? roomCost * 0.1 : 0; // Mock promo
-    const total = roomCost + bookingFee + tax - promoDiscount;
-    return { roomCost, bookingFee, tax, promoDiscount, total, nights };
-  };
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    setIsSubmitting(true);
-    try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Booking submitted:', {
-        hotelId: id,
-        roomId,
-        hotelTitle,
-        roomTitle,
-        roomPrice,
-        bookingFee,
-        formData,
-      });
-      setShowConfirmation(true);
-      setIsSubmitting(false);
-    } catch (error) {
-      setErrors({ general: 'Failed to process booking. Please try again.' });
-      setIsSubmitting(false);
-    }
-  };
-
-  const priceBreakdown = calculatePrice();
-
-  const steps = [
-    { id: 1, title: 'Guest Info', icon: User },
-    { id: 2, title: 'Booking', icon: Calendar },
-    { id: 3, title: 'Payment', icon: CreditCard },
-    { id: 4, title: 'Confirm', icon: CheckCircle },
-  ];
+  if (!bookingCode) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50 bg-[url('/pattern.png')] bg-cover bg-fixed"
+      >
+        <div className="max-w-md mx-auto p-8 text-center bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+          <h3 className="text-3xl font-bold text-gray-900 mt-4 font-montserrat">
+            Invalid Booking
+          </h3>
+          <p className="text-gray-600 text-base mt-3">
+            No booking code provided. Please try booking again.
+          </p>
+          <Button
+            onClick={() => router.push(`/hotel/${id}`)}
+            className="mt-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-xl px-6 py-3 font-semibold shadow-md hover:shadow-lg"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back to Hotel
+          </Button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gray-100 font-montserrat pt-24"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-blue-50 bg-[url('/pattern.png')] bg-cover bg-fixed"
     >
-      <Dialog open={showConfirmation} onOpenChange={() => router.push('/')}>
-        <DialogContent className="rounded-3xl max-w-md sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-800 font-montserrat">
-              Booking Confirmed!
-            </DialogTitle>
-          </DialogHeader>
-          <div className="text-center space-y-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            >
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-            </motion.div>
-            <p className="text-gray-600 font-montserrat text-base">
-              Your reservation for <strong>{hotelTitle}</strong> ({roomTitle})
-              has been confirmed. Booking reference:{' '}
-              <strong>
-                {Math.random().toString(36).substring(2, 10).toUpperCase()}
-              </strong>
-              .
-            </p>
-            <p className="text-gray-600 font-montserrat text-sm">
-              Total: ${priceBreakdown.total.toFixed(2)} for{' '}
-              {priceBreakdown.nights} nights, {formData.roomQuantity} room(s).
-            </p>
-            <Button
-              onClick={() => router.push('/')}
-              className="mt-6 px-8 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 font-montserrat text-base font-semibold"
-            >
-              Back to Home
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Progress Bar */}
-        <div className="mb-8 flex justify-center gap-2 sm:gap-4">
-          {steps.map((step) => (
-            <motion.div
-              key={step.id}
-              className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full ${
-                currentStep >= step.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-600'
-              } font-montserrat font-semibold text-sm sm:text-base`}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: currentStep === step.id ? 1.1 : 1 }}
-              transition={{ type: 'spring', stiffness: 150 }}
-            >
-              {currentStep > step.id ? (
-                <CheckCircle className="h-5 w-5" />
-              ) : (
-                step.id
-              )}
-            </motion.div>
-          ))}
+      <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border mt-12 p-8">
+        {/* Hero Header */}
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 font-montserrat">
+            Secure Your Reservation
+          </h1>
+          <p className="text-gray-600 text-lg mt-2 font-montserrat">
+            Complete your booking with confidence.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          {/* Main Form */}
-          <Card className="lg:col-span-3 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-50">
-            <CardHeader className="p-6">
-              <div className="flex items-center">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => router.push(`/hotel/${id}`)}
-                  className="flex items-center text-blue-500 font-montserrat text-base font-medium"
-                  aria-label="Back to hotel"
-                >
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  Back to Hotel
-                </motion.button>
+        {/* Progress Stepper */}
+        <div className="flex justify-between mb-10">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center">
+              1
+            </div>
+            <span className="ml-3 text-base font-semibold text-gray-700 font-montserrat">
+              Booking Summary
+            </span>
+          </div>
+          <div className="flex-1 border-t-2 border-blue-200 mx-4 mt-5"></div>
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center">
+              2
+            </div>
+            <span className="ml-3 text-base font-semibold text-gray-700 font-montserrat">
+              Payment Details
+            </span>
+          </div>
+        </div>
+
+        {roomImage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="relative h-72 rounded-xl overflow-hidden mb-10"
+          >
+            <Image
+              src={
+                roomImage.includes('staging.trektoo.com')
+                  ? `/api/image/proxy?url=${encodeURIComponent(roomImage)}`
+                  : roomImage
+              }
+              alt={roomTitle || 'Room Image'}
+              fill
+              className="object-cover"
+              quality={90}
+            />
+          </motion.div>
+        )}
+
+        {/* Booking Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-xl p-8 border border-blue-100 mb-10"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 font-montserrat">
+              Booking Summary
+            </h2>
+            <CheckCircle className="h-6 w-6 text-blue-500" />
+          </div>
+          <div className="space-y-6 text-gray-700 text-lg">
+            <div className="flex justify-between">
+              <span className="font-semibold">Booking Code:</span>
+              <span>{bookingCode}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Hotel:</span>
+              <span>{hotelTitle || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Room:</span>
+              <span>{roomTitle || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Number of Rooms:</span>
+              <span>{number_of_rooms || '1'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Check-in:</span>
+              <span>{start_date || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Check-out:</span>
+              <span>{end_date || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Guests:</span>
+              <span>
+                {adults || 1} Adult{adults > 1 ? 's' : ''}, {children || 0}{' '}
+                Child
+                {children > 1 ? 'ren' : ''}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Beds:</span>
+              <span>{beds || 'N/A'}</span>
+            </div>
+            <div className="border-t border-blue-100 pt-6 mt-6">
+              <div className="flex justify-between">
+                <span className="font-semibold">
+                  Room Price ({number_of_rooms || 1} room
+                  {number_of_rooms > 1 ? 's' : ''}):
+                </span>
+                <span>
+                  $
+                  {(
+                    parseFloat(roomPrice || 0) * parseInt(number_of_rooms || 1)
+                  ).toFixed(2)}
+                </span>
               </div>
-              <CardTitle className="text-xl sm:text-2xl font-bold text-gray-800 font-montserrat mt-4">
-                Checkout
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 sm:p-8">
-              <AnimatePresence>
-                {errors.general && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    <Alert variant="destructive" className="mb-6 rounded-lg">
-                      <AlertTitle className="font-montserrat font-semibold">
-                        Error
-                      </AlertTitle>
-                      <AlertDescription className="flex justify-between items-center font-montserrat text-sm">
-                        {errors.general}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setErrors({})}
-                          aria-label="Dismiss error"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </AlertDescription>
-                    </Alert>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <form onSubmit={handleSubmit} className="space-y-8 sm:space-y-10">
-                {/* Guest Information */}
-                {currentStep === 1 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 font-montserrat">
-                      Guest Information
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <Label
-                          htmlFor="firstName"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          First Name
-                        </Label>
-                        <Input
-                          id="firstName"
-                          type="text"
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              firstName: e.target.value,
-                            })
-                          }
-                          className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          disabled={!!user?.first_name}
-                          aria-invalid={errors.firstName ? 'true' : 'false'}
-                        />
-                        <AnimatePresence>
-                          {errors.firstName && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.firstName}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="lastName"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Last Name
-                        </Label>
-                        <Input
-                          id="lastName"
-                          type="text"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              lastName: e.target.value,
-                            })
-                          }
-                          className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          disabled={!!user?.last_name}
-                          aria-invalid={errors.lastName ? 'true' : 'false'}
-                        />
-                        <AnimatePresence>
-                          {errors.lastName && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.lastName}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="email"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Email
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) =>
-                            setFormData({ ...formData, email: e.target.value })
-                          }
-                          className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          disabled={!!user?.email}
-                          aria-invalid={errors.email ? 'true' : 'false'}
-                        />
-                        <AnimatePresence>
-                          {errors.email && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.email}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="phone"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Phone
-                        </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) =>
-                            setFormData({ ...formData, phone: e.target.value })
-                          }
-                          className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          aria-invalid={errors.phone ? 'true' : 'false'}
-                        />
-                        <AnimatePresence>
-                          {errors.phone && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.phone}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                    <motion.div
-                      className="mt-8"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button
-                        onClick={() => setCurrentStep(2)}
-                        className="w-full h-14 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 font-montserrat text-base font-semibold"
-                      >
-                        Next: Booking Details
-                      </Button>
-                    </motion.div>
-                  </motion.div>
-                )}
+              <div className="flex justify-between">
+                <span className="font-semibold">Hotel Price:</span>
+                <span>${hotelPrice || '0.00'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold">Booking Fee:</span>
+                <span>${bookingFee || '0.00'}</span>
+              </div>
+              <div className="flex justify-between font-bold text-xl mt-4">
+                <span>Total Price:</span>
+                <span className="text-blue-500">${totalPrice}</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
-                {/* Booking Details */}
-                {currentStep === 2 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 font-montserrat">
-                      Booking Details
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <Label
-                          htmlFor="checkIn"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Check-In Date
-                        </Label>
-                        <DateInput
-                          selectedDate={formData.checkIn}
-                          onChange={(date) =>
-                            setFormData({ ...formData, checkIn: date })
-                          }
-                          placeholder="Select check-in date"
-                          minDate={new Date()}
-                          id="checkIn"
-                          className="mt-2 h-14"
-                        />
-                        <AnimatePresence>
-                          {errors.checkIn && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.checkIn}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="checkOut"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Check-Out Date
-                        </Label>
-                        <DateInput
-                          selectedDate={formData.checkOut}
-                          onChange={(date) =>
-                            setFormData({ ...formData, checkOut: date })
-                          }
-                          placeholder="Select check-out date"
-                          minDate={
-                            new Date(
-                              formData.checkIn.getTime() + 24 * 60 * 60 * 1000
-                            )
-                          }
-                          id="checkOut"
-                          className="mt-2 h-14"
-                        />
-                        <AnimatePresence>
-                          {errors.checkOut && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.checkOut}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="roomQuantity"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Number of Rooms
-                        </Label>
-                        <Select
-                          value={formData.roomQuantity.toString()}
-                          onValueChange={(value) =>
-                            setFormData({
-                              ...formData,
-                              roomQuantity: parseInt(value),
-                            })
-                          }
-                        >
-                          <SelectTrigger
-                            id="roomQuantity"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500"
-                          >
-                            <SelectValue placeholder="Select number of rooms" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[1, 2, 3, 4, 5].map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <AnimatePresence>
-                          {errors.roomQuantity && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.roomQuantity}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="adults"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Adults
-                        </Label>
-                        <Select
-                          value={formData.adults.toString()}
-                          onValueChange={(value) =>
-                            setFormData({
-                              ...formData,
-                              adults: parseInt(value),
-                            })
-                          }
-                        >
-                          <SelectTrigger
-                            id="adults"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500"
-                          >
-                            <SelectValue placeholder="Select number of adults" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[1, 2, 3, 4, 5].map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <AnimatePresence>
-                          {errors.adults && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.adults}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="children"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Children
-                        </Label>
-                        <Select
-                          value={formData.children.toString()}
-                          onValueChange={(value) =>
-                            setFormData({
-                              ...formData,
-                              children: parseInt(value),
-                            })
-                          }
-                        >
-                          <SelectTrigger
-                            id="children"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500"
-                          >
-                            <SelectValue placeholder="Select number of children" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[0, 1, 2, 3, 4].map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <AnimatePresence>
-                          {errors.children && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.children}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mt-8 mb-6 font-montserrat">
-                        Special Requests
-                      </h3>
-                      <textarea
-                        value={formData.specialRequests}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            specialRequests: e.target.value,
-                          })
-                        }
-                        placeholder="Any special requests (e.g., high floor, extra pillows)?"
-                        className="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-28 p-4 font-montserrat text-base transition-all"
-                        aria-label="Special requests"
-                      />
-                    </div>
-                    <div className="mt-8 flex gap-4">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          variant="outline"
-                          onClick={() => setCurrentStep(1)}
-                          className="h-14 rounded-lg font-montserrat text-base px-8 border-blue-200"
-                        >
-                          Back
-                        </Button>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={() => setCurrentStep(3)}
-                          className="h-14 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 font-montserrat text-base px-8"
-                        >
-                          Next: Payment
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Payment Method */}
-                {currentStep === 3 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 font-montserrat">
-                      Payment Method
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                      {[
-                        {
-                          value: 'credit_card',
-                          label: 'Credit Card',
-                          icon: CreditCard,
-                        },
-                        { value: 'paypal', label: 'PayPal', icon: CreditCard },
-                        {
-                          value: 'bank_transfer',
-                          label: 'Bank Transfer',
-                          icon: CreditCard,
-                        },
-                      ].map((method) => (
-                        <motion.div
-                          key={method.value}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`p-6 rounded-lg border backdrop-blur-sm bg-white/30 ${
-                            formData.paymentMethod === method.value
-                              ? 'border-blue-500 shadow-lg'
-                              : 'border-gray-200 hover:border-blue-300'
-                          } flex items-center justify-center cursor-pointer transition-all`}
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              paymentMethod: method.value,
-                            })
-                          }
-                        >
-                          <method.icon className="h-6 w-6 text-blue-500 mr-2" />
-                          <span className="font-montserrat text-base">
-                            {method.label}
-                          </span>
-                        </motion.div>
-                      ))}
-                    </div>
-                    {formData.paymentMethod === 'credit_card' && (
-                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                          <Label
-                            htmlFor="cardNumber"
-                            className="text-sm font-semibold text-gray-700 font-montserrat"
-                          >
-                            Card Number
-                          </Label>
-                          <Input
-                            id="cardNumber"
-                            type="text"
-                            placeholder="1234 5678 9012 3456"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="expiry"
-                            className="text-sm font-semibold text-gray-700 font-montserrat"
-                          >
-                            Expiry Date
-                          </Label>
-                          <Input
-                            id="expiry"
-                            type="text"
-                            placeholder="MM/YY"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="cvv"
-                            className="text-sm font-semibold text-gray-700 font-montserrat"
-                          >
-                            CVV
-                          </Label>
-                          <Input
-                            id="cvv"
-                            type="text"
-                            placeholder="123"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    <div className="mt-8 flex gap-4">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          variant="outline"
-                          onClick={() => setCurrentStep(2)}
-                          className="h-14 rounded-lg font-montserrat text-base px-8 border-blue-200"
-                        >
-                          Back
-                        </Button>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={() => setCurrentStep(4)}
-                          className="h-14 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 font-montserrat text-base px-8"
-                        >
-                          Next: Confirm
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Promo Code and Terms */}
-                {currentStep === 4 && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6 font-montserrat">
-                      Final Details
-                    </h3>
-                    <div className="space-y-8">
-                      <div>
-                        <Label
-                          htmlFor="promoCode"
-                          className="text-sm font-semibold text-gray-700 font-montserrat"
-                        >
-                          Promo Code
-                        </Label>
-                        <div className="flex gap-4">
-                          <Input
-                            id="promoCode"
-                            type="text"
-                            value={formData.promoCode}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                promoCode: e.target.value,
-                              })
-                            }
-                            placeholder="Enter promo code (e.g., SAVE10)"
-                            className="mt-2 h-14 rounded-lg font-montserrat border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all shadow-sm"
-                          />
-                          <Button
-                            type="button"
-                            onClick={() =>
-                              setFormData({
-                                ...formData,
-                                promoCode: formData.promoCode,
-                              })
-                            }
-                            className="px-8 py-3 h-14 rounded-lg bg-blue-500 hover:bg-blue-600 font-montserrat text-base"
-                          >
-                            Apply
-                          </Button>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={formData.termsAccepted}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                termsAccepted: e.target.checked,
-                              })
-                            }
-                            className="rounded border-gray-300 text-blue-500 shadow-sm focus:ring-blue-500 h-5 w-5"
-                            aria-label="Accept terms and conditions"
-                          />
-                          <span className="ml-2 text-sm text-gray-600 font-montserrat">
-                            I agree to the{' '}
-                            <a
-                              href="/terms"
-                              className="text-blue-500 hover:text-blue-600"
-                            >
-                              Terms and Conditions
-                            </a>{' '}
-                            and{' '}
-                            <a
-                              href="/cancellation"
-                              className="text-blue-500 hover:text-blue-600"
-                            >
-                              Cancellation Policy
-                            </a>
-                          </span>
-                        </label>
-                        <AnimatePresence>
-                          {errors.termsAccepted && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
-                              className="text-red-500 text-xs mt-1 font-montserrat"
-                            >
-                              {errors.termsAccepted}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
-                    <div className="mt-8 flex gap-4">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          variant="outline"
-                          onClick={() => setCurrentStep(3)}
-                          className="h-14 rounded-lg font-montserrat text-base px-8 border-blue-200"
-                        >
-                          Back
-                        </Button>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="h-14 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 font-montserrat text-base px-8"
-                        >
-                          {isSubmitting ? (
-                            <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                          ) : (
-                            'Confirm Booking'
-                          )}
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                )}
-              </form>
-              {/* Fixed Confirm Button on Mobile */}
-              {currentStep === 4 && (
-                <motion.div
-                  className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-2xl lg:hidden z-50"
-                  initial={{ y: 100 }}
-                  animate={{ y: 0 }}
-                  transition={{ type: 'spring', stiffness: 100 }}
-                >
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    onClick={handleSubmit}
-                    className="w-full h-14 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 font-montserrat text-base font-semibold"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                    ) : (
-                      `Confirm Booking - $${priceBreakdown.total.toFixed(2)}`
-                    )}
-                  </Button>
-                </motion.div>
+        {/* Payment Information */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-xl p-8 border border-blue-100"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <CreditCard className="h-7 w-7 text-blue-500 mr-2" />
+              <h2 className="text-2xl font-bold text-gray-900 font-montserrat">
+                Payment Information
+              </h2>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <Lock className="h-5 w-5 text-blue-500 mr-1" />
+              Secured by Stripe
+            </div>
+          </div>
+          {formErrors.general && (
+            <div className="p-4 bg-blue-50 text-red-600 rounded-lg text-sm mb-6 border border-blue-100">
+              {formErrors.general}
+            </div>
+          )}
+          <div className="space-y-6">
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-2">
+                First Name
+              </label>
+              <Input
+                value={formData.first_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, first_name: e.target.value })
+                }
+                placeholder="Enter first name"
+                className={`w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-base py-3 rounded-lg ${formErrors.first_name ? 'border-red-500' : ''}`}
+              />
+              {formErrors.first_name && (
+                <p className="text-red-600 text-xs mt-1">
+                  {formErrors.first_name}
+                </p>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Booking Summary */}
-          <Card className="lg:col-span-2 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-50 lg:sticky lg:top-24">
-            <CardHeader className="flex items-center justify-between p-6">
-              <CardTitle className="text-xl sm:text-2xl font-semibold text-gray-800 font-montserrat">
-                Booking Summary
-              </CardTitle>
-              <Button
-                variant="ghost"
-                className="lg:hidden font-montserrat text-base"
-                onClick={() => setIsSummaryOpen(!isSummaryOpen)}
-                aria-label={
-                  isSummaryOpen ? 'Collapse summary' : 'Expand summary'
+            </div>
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-2">
+                Last Name
+              </label>
+              <Input
+                value={formData.last_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, last_name: e.target.value })
+                }
+                placeholder="Enter last name"
+                className={`w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-base py-3 rounded-lg ${formErrors.last_name ? 'border-red-500' : ''}`}
+              />
+              {formErrors.last_name && (
+                <p className="text-red-600 text-xs mt-1">
+                  {formErrors.last_name}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-2">
+                Email
+              </label>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="Enter email"
+                className={`w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-base py-3 rounded-lg ${formErrors.email ? 'border-red-500' : ''}`}
+              />
+              {formErrors.email && (
+                <p className="text-red-600 text-xs mt-1">{formErrors.email}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-2">
+                Phone
+              </label>
+              <Input
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                placeholder="Enter phone number"
+                className={`w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-base py-3 rounded-lg ${formErrors.phone ? 'border-red-500' : ''}`}
+              />
+              {formErrors.phone && (
+                <p className="text-red-600 text-xs mt-1">{formErrors.phone}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-2">
+                Country
+              </label>
+              <Select
+                value={formData.country}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, country: value })
                 }
               >
-                {isSummaryOpen ? (
-                  <ChevronUp className="h-5 w-5" />
-                ) : (
-                  <ChevronDown className="h-5 w-5" />
-                )}
-              </Button>
-            </CardHeader>
-            <CardContent
-              className={`${isSummaryOpen ? 'block' : 'hidden'} lg:block p-6 sm:p-8`}
-            >
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
+                <SelectTrigger
+                  className={`w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-base py-3 rounded-lg ${formErrors.country ? 'border-red-500' : ''}`}
+                >
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    'Pakistan',
+                    'United States',
+                    'United Kingdom',
+                    'Canada',
+                    'Australia',
+                    'India',
+                  ].map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formErrors.country && (
+                <p className="text-red-600 text-xs mt-1">
+                  {formErrors.country}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-base font-semibold text-gray-700 mb-2">
+                Payment Method
+              </label>
+              <Select
+                value={formData.payment_gateway}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, payment_gateway: value })
+                }
               >
-                <div className="relative h-48 sm:h-56 rounded-lg overflow-hidden mb-6">
-                  <Image
-                    src={roomImage}
-                    alt={roomTitle || 'Room Image'}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-500"
-                    quality={75}
-                  />
-                </div>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-lg sm:text-xl font-semibold text-gray-700 font-montserrat">
-                      {hotelTitle || 'Selected Hotel'}
-                    </h4>
-                    <p className="text-sm text-gray-600 font-montserrat">
-                      Room: {roomTitle || 'Selected Room'}
-                    </p>
-                    <p className="text-sm text-gray-600 font-montserrat">
-                      Room ID: {roomId || 'N/A'}
-                    </p>
-                    <p className="text-sm text-gray-600 font-montserrat">
-                      Hotel ID: {id}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <User className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{formData.adults} Adults</span>
-                    </div>
-                    <div className="flex items-center">
-                      <User className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{formData.children} Children</span>
-                    </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{beds}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{formData.roomQuantity} Room(s)</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>
-                        Check-In: {formData.checkIn.toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>
-                        Check-Out: {formData.checkOut.toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>{priceBreakdown.nights} Nights</span>
-                    </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-blue-500 mr-2" />
-                      <span>Hotel Price: ${hotelPrice.toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="border-t pt-4">
-                    <p className="flex justify-between text-sm text-gray-600 font-montserrat">
-                      <span>
-                        Room Cost ({roomPrice.toFixed(2)} x{' '}
-                        {formData.roomQuantity} x {priceBreakdown.nights}{' '}
-                        nights)
-                      </span>
-                      <span>${priceBreakdown.roomCost.toFixed(2)}</span>
-                    </p>
-                    <p className="flex justify-between text-sm text-gray-600 font-montserrat">
-                      <span>Booking Fee</span>
-                      <span>${priceBreakdown.bookingFee.toFixed(2)}</span>
-                    </p>
-                    <p className="flex justify-between text-sm text-gray-600 font-montserrat">
-                      <span>Taxes (10%)</span>
-                      <span>${priceBreakdown.tax.toFixed(2)}</span>
-                    </p>
-                    {priceBreakdown.promoDiscount > 0 && (
-                      <p className="flex justify-between text-sm text-green-600 font-montserrat">
-                        <span>Promo Discount (SAVE10)</span>
-                        <span>-${priceBreakdown.promoDiscount.toFixed(2)}</span>
-                      </p>
-                    )}
-                    <p className="flex justify-between text-lg font-bold text-gray-800 font-montserrat mt-2">
-                      <span>Total</span>
-                      <span>${priceBreakdown.total.toFixed(2)}</span>
-                    </p>
-                  </div>
-                  <div className="border-t pt-4">
-                    <p className="text-sm text-gray-600 font-montserrat">
-                      Cancellation Policy: Free cancellation up to 48 hours
-                      before check-in.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </div>
+                <SelectTrigger className="w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-base py-3 rounded-lg">
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  {/* <SelectItem value="stripe">Stripe</SelectItem> */}
+                  <SelectItem value="Offline">Offline Payment</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center">
+              <Checkbox
+                id="terms"
+                checked={formData.term_conditions}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, term_conditions: checked })
+                }
+                className={
+                  formErrors.term_conditions
+                    ? 'border-red-500'
+                    : 'border-blue-200'
+                }
+              />
+              <label htmlFor="terms" className="ml-2 text-base text-gray-700">
+                I agree to the{' '}
+                <a href="/terms" className="text-blue-500 hover:underline">
+                  Terms and Conditions
+                </a>
+              </label>
+            </div>
+            {formErrors.term_conditions && (
+              <p className="text-red-600 text-xs mt-1">
+                {formErrors.term_conditions}
+              </p>
+            )}
+            <Button
+              onClick={handleCheckout}
+              disabled={isCheckingOut}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-lg py-4 text-lg transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              {isCheckingOut ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                'Confirm Payment'
+              )}
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </motion.div>
   );
