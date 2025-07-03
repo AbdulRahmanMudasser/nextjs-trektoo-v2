@@ -1,5 +1,41 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability } from '@/lib/api/hotelApi';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability, addToCart, doCheckout } from '@/lib/api/hotelApi';
+
+/**
+ * Custom hook to complete checkout with React Query
+ * @param {string} token - User access token for authentication
+ * @returns {Object} Mutation result with mutate function, loading state, and error
+ */
+export const useDoCheckout = (token) => {
+    return useMutation({
+        mutationFn: (checkoutData) => doCheckout(checkoutData, token),
+        onError: (error) => {
+            console.error('useDoCheckout error:', {
+                message: error.message,
+                status: error.response?.status,
+                stack: error.stack,
+            });
+        },
+    });
+};
+
+/**
+ * Custom hook to add a booking to the cart with React Query
+ * @param {string} token - User access token for authentication
+ * @returns {Object} Mutation result with mutate function, loading state, and error
+ */
+export const useAddToCart = (token) => {
+    return useMutation({
+        mutationFn: (bookingData) => addToCart(bookingData, token),
+        onError: (error) => {
+            console.error('useAddToCart error:', {
+                message: error.message,
+                status: error.response?.status,
+                stack: error.stack,
+            });
+        },
+    });
+};
 
 /**
  * Custom hook to fetch hotels with React Query
