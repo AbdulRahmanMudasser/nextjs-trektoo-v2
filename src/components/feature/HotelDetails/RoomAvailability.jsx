@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Loader2,
+  LoaderCircle,
   Bed,
   Users,
   Baby,
@@ -14,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import BookingDialog from './BookingDialog';
 
 const ImageWithFallback = ({ src, alt, ...props }) => {
   const [hasError, setHasError] = React.useState(false);
@@ -52,6 +55,11 @@ ImageWithFallback.propTypes = {
 
 const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
   const [currentImages, setCurrentImages] = useState({});
+  const [bookingError, setBookingError] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -100,14 +108,25 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
     setCurrentImages((prev) => ({ ...prev, [roomId]: index }));
   };
 
+  const handleBookNowClick = (room) => {
+    if (!isAuthenticated) {
+      setBookingError('Please log in to book a room.');
+      router.push('/login');
+      return;
+    }
+    setSelectedRoom(room);
+    setIsDialogOpen(true);
+    setBookingError(null);
+  };
+
   if (loading) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto p-8 text-center bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl mt-12 border border-blue-50"
+        className="max-w-7xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl mt-12 border border-blue-100"
       >
-        <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+        <LoaderCircle className="h-8 w-8 text-blue-600 animate-spin mx-auto" />
         <p className="text-gray-600 text-sm mt-2">
           Loading room availability...
         </p>
@@ -120,7 +139,7 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto p-8 text-center bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl mt-12 border border-blue-50"
+        className="max-w-7xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl mt-12 border border-blue-100"
       >
         <p className="text-gray-600 text-sm">
           {error
@@ -132,7 +151,7 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 text-sm font-medium rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
+            className="mt-4 px-4 py-2 text-sm font-medium rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -144,17 +163,26 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
 
   return (
     <motion.div
-      className="relative w-full max-w-7xl mx-auto mt-12 py-8 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl border border-blue-50"
+      className="relative w-full max-w-7xl mx-auto mt-12 py-8 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl border border-blue-100"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       <motion.h2
-        className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-8 border-l-4 border-blue-500 pl-3 font-montserrat"
+        className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-8 border-l-4 border-blue-600 pl-4 font-montserrat"
         variants={itemVariants}
       >
         Available Rooms
       </motion.h2>
+      {bookingError && !isDialogOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg text-sm"
+        >
+          <p>{bookingError}</p>
+        </motion.div>
+      )}
       <div className="space-y-8">
         {rooms.map((room) => {
           const priceMatch = room.price_text.match(/\$(\d+\.?\d*)/);
@@ -175,7 +203,7 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
           return (
             <motion.div
               key={room.id}
-              className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-blue-50 hover:shadow-xl transition-shadow"
+              className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-blue-100 hover:shadow-xl transition-shadow duration-300"
               variants={itemVariants}
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -228,9 +256,9 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
                         key={index}
                         className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
                           currentImages[room.id] === index
-                            ? 'border-blue-500'
+                            ? 'border-blue-600'
                             : 'border-transparent'
-                        } hover:border-blue-500 transition-all min-w-0`}
+                        } hover:border-blue-600 transition-all min-w-0`}
                         onClick={() => handleThumbnailClick(room.id, index)}
                         aria-label={`View image ${index + 1}`}
                       >
@@ -252,15 +280,15 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
                     </h3>
                     <div className="grid grid-cols-2 gap-4 text-gray-600 text-sm sm:text-base mb-4">
                       <div className="flex items-center">
-                        <Bed className="h-5 w-5 text-blue-500 mr-2" />
+                        <Bed className="h-5 w-5 text-blue-600 mr-2" />
                         <span>{room.beds_html}</span>
                       </div>
                       <div className="flex items-center">
-                        <Users className="h-5 w-5 text-blue-500 mr-2" />
+                        <Users className="h-5 w-5 text-blue-600 mr-2" />
                         <span>{room.adults_html} Adults</span>
                       </div>
                       <div className="flex items-center">
-                        <Baby className="h-5 w-5 text-blue-500 mr-2" />
+                        <Baby className="h-5 w-5 text-blue-600 mr-2" />
                         <span>{room.children_html} Children</span>
                       </div>
                       <div className="flex items-center">
@@ -283,7 +311,7 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
                             className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 text-xs sm:text-sm font-medium rounded-full"
                           >
                             <i
-                              className={`${feature.icon} mr-1.5 text-blue-500`}
+                              className={`${feature.icon} mr-1.5 text-blue-600`}
                             ></i>
                             {feature.title}
                           </span>
@@ -293,22 +321,25 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <motion.div variants={itemVariants} className="flex-1">
-                      <Link
-                        href={`/hotel/${hotelId}/checkout?${query}`}
-                        className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-8 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all"
+                      <button
+                        onClick={() => handleBookNowClick(room)}
+                        disabled={isDialogOpen}
+                        className={`block w-full text-center bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold py-3 px-8 rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 ${
+                          isDialogOpen ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                       >
                         <motion.span
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          whileHover={{ scale: isDialogOpen ? 1 : 1.05 }}
+                          whileTap={{ scale: isDialogOpen ? 1 : 0.95 }}
                         >
                           Book Now
                         </motion.span>
-                      </Link>
+                      </button>
                     </motion.div>
                     <motion.div variants={itemVariants} className="flex-1">
                       <Link
                         href={`/hotel/${hotelId}/room/${room.id}`}
-                        className="block w-full text-center bg-gray-100 text-gray-700 font-semibold py-3 px-8 rounded-xl hover:bg-blue-100 transition-all"
+                        className="block w-full text-center bg-gray-100 text-gray-700 font-semibold py-3 px-8 rounded-xl hover:bg-blue-100 transition-all duration-300"
                       >
                         <motion.span
                           whileHover={{ scale: 1.05 }}
@@ -325,6 +356,18 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
           );
         })}
       </div>
+
+      {selectedRoom && (
+        <BookingDialog
+          isOpen={isDialogOpen}
+          setIsOpen={setIsDialogOpen}
+          room={selectedRoom}
+          hotelId={hotelId}
+          hotelData={hotelData}
+          bookingError={bookingError}
+          setBookingError={setBookingError}
+        />
+      )}
     </motion.div>
   );
 };

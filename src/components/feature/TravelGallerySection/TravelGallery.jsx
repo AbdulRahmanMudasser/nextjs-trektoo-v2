@@ -140,7 +140,7 @@ const TravelGallerySection = () => {
   return (
     <section className="py-12 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       {/* Subtle background texture */}
-      <div className="absolute inset-0 bg-[url('/images/textures/map-pattern.png')] opacity-5 pointer-events-none" />
+      <div className="absolute inset-0 opacity-5 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div

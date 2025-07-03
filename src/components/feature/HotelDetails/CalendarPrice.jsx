@@ -72,14 +72,14 @@ const CalendarPrice = ({ price = '0', bookingFees = '0' }) => {
           </div>
         </div>
       </motion.div>
-      <motion.button
+      {/* <motion.button
         className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
         variants={itemVariants}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
         Book Now
-      </motion.button>
+      </motion.button> */}
     </motion.div>
   );
 };
