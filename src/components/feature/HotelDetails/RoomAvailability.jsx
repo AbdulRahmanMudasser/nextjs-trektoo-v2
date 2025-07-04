@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import BookingDialog from './BookingDialog';
+import { format, addDays } from 'date-fns';
 
 const ImageWithFallback = ({ src, alt, ...props }) => {
   const [hasError, setHasError] = React.useState(false);
@@ -109,11 +110,36 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
   };
 
   const handleBookNowClick = (room) => {
+    const today = new Date();
+    const staticData = {
+      start_date: format(today, 'yyyy-MM-dd'),
+      end_date: format(addDays(today, 1), 'yyyy-MM-dd'),
+      adults: '1',
+      children: '0',
+    };
+
+    const priceMatch = room.price_text.match(/\$(\d+\.?\d*)/);
+    const roomPrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
+    const query = new URLSearchParams({
+      roomId: room.id.toString(),
+      roomTitle: room.title,
+      roomPrice: roomPrice.toString(),
+      roomImage: room.gallery?.[0]?.large || room.image,
+      beds: room.beds_html,
+      adults: staticData.adults,
+      children: staticData.children,
+      start_date: staticData.start_date,
+      end_date: staticData.end_date,
+      hotelTitle: hotelData.title,
+      hotelPrice: hotelData.price.toString(),
+      bookingFee: hotelData.bookingFee,
+    }).toString();
+
     if (!isAuthenticated) {
-      setBookingError('Please log in to book a room.');
-      router.push('/login');
+      router.push(`/login?redirect=/hotel/${hotelId}/checkout&${query}`);
       return;
     }
+
     setSelectedRoom(room);
     setIsDialogOpen(true);
     setBookingError(null);
@@ -187,19 +213,6 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
         {rooms.map((room) => {
           const priceMatch = room.price_text.match(/\$(\d+\.?\d*)/);
           const roomPrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
-          const query = new URLSearchParams({
-            roomId: room.id.toString(),
-            roomTitle: room.title,
-            roomPrice: roomPrice.toString(),
-            roomImage: room.gallery?.[0]?.large || room.image,
-            beds: room.beds_html,
-            adults: room.adults_html,
-            children: room.children_html,
-            hotelTitle: hotelData.title,
-            hotelPrice: hotelData.price.toString(),
-            bookingFee: hotelData.bookingFee,
-          }).toString();
-
           return (
             <motion.div
               key={room.id}
@@ -366,6 +379,12 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
           hotelData={hotelData}
           bookingError={bookingError}
           setBookingError={setBookingError}
+          staticData={{
+            start_date: format(new Date(), 'yyyy-MM-dd'),
+            end_date: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
+            adults: '1',
+            children: '0',
+          }}
         />
       )}
     </motion.div>
