@@ -1,6 +1,7 @@
 'use client';
+
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
@@ -8,10 +9,15 @@ export default function LoginPage() {
   const { login, authError, authSuccess, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (isAuthenticated) router.push('/');
-  }, [isAuthenticated, router]);
+    if (isAuthenticated) {
+      const redirect = searchParams.get('redirect') || '/';
+      const queryString = searchParams.toString();
+      router.push(queryString ? `${redirect}?${queryString}` : redirect);
+    }
+  }, [isAuthenticated, router, searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,9 +26,10 @@ export default function LoginPage() {
       await login({
         email: e.target.email.value,
         password: e.target.password.value,
-        device_name: 'web'
+        device_name: 'web',
       });
-    } finally {
+      // Redirect handled by useEffect after isAuthenticated updates
+    } catch (error) {
       setIsLoading(false);
     }
   };

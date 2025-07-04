@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { login as loginApi, register as registerApi, logout as logoutApi } from '@/lib/api/authApi';
@@ -12,7 +13,6 @@ export const useAuth = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
 
-    // Initialize auth state
     useEffect(() => {
         const storedToken = localStorage.getItem('authToken');
         const storedUser = localStorage.getItem('authUser');

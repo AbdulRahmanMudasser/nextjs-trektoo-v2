@@ -1,6 +1,7 @@
 'use client';
+
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
@@ -8,10 +9,15 @@ export default function SignupPage() {
   const { register, authError, authSuccess, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (isAuthenticated) router.push('/');
-  }, [isAuthenticated, router]);
+    if (isAuthenticated) {
+      const redirect = searchParams.get('redirect') || '/';
+      const queryString = searchParams.toString();
+      router.push(queryString ? `${redirect}?${queryString}` : redirect);
+    }
+  }, [isAuthenticated, router, searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +30,11 @@ export default function SignupPage() {
         password: e.target.password.value,
         term: e.target.terms.checked,
       });
-    } finally {
+      // Redirect to login with the same redirect query
+      const redirect = searchParams.get('redirect') || '/';
+      const queryString = searchParams.toString();
+      router.push(queryString ? `/login?redirect=${encodeURIComponent(redirect)}&${queryString}` : '/login');
+    } catch (error) {
       setIsLoading(false);
     }
   };

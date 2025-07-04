@@ -22,8 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import DateInput from '@/components/ui/Custom/DateInput';
-import { addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 
 const BookingDialog = ({
   isOpen,
@@ -33,12 +32,9 @@ const BookingDialog = ({
   hotelData,
   bookingError,
   setBookingError,
+  staticData,
 }) => {
   const [formData, setFormData] = useState({
-    start_date: null,
-    end_date: null,
-    adults: '1',
-    children: '0',
     number_of_rooms: '1',
   });
   const [progressMessage, setProgressMessage] = useState('');
@@ -79,13 +75,8 @@ const BookingDialog = ({
   };
 
   const handleFormSubmit = () => {
-    if (
-      !formData.start_date ||
-      !formData.end_date ||
-      !formData.adults ||
-      !formData.number_of_rooms
-    ) {
-      setBookingError('Please fill in all required fields.');
+    if (!formData.number_of_rooms) {
+      setBookingError('Please select the number of rooms.');
       return;
     }
 
@@ -95,11 +86,11 @@ const BookingDialog = ({
     const bookingData = {
       service_id: parseInt(hotelId),
       service_type: 'hotel',
-      start_date: format(formData.start_date, 'yyyy-MM-dd'),
-      end_date: format(formData.end_date, 'yyyy-MM-dd'),
+      start_date: staticData.start_date,
+      end_date: staticData.end_date,
       extra_price: null,
-      adults: parseInt(formData.adults),
-      children: parseInt(formData.children),
+      adults: parseInt(staticData.adults),
+      children: parseInt(staticData.children),
       rooms: [
         {
           id: room.id,
@@ -129,11 +120,11 @@ const BookingDialog = ({
               roomPrice: roomPrice.toString(),
               roomImage: room.gallery?.[0]?.large || room.image,
               beds: room.beds_html,
-              adults: formData.adults,
-              children: formData.children,
+              adults: staticData.adults,
+              children: staticData.children,
               number_of_rooms: formData.number_of_rooms,
-              start_date: format(formData.start_date, 'yyyy-MM-dd'),
-              end_date: format(formData.end_date, 'yyyy-MM-dd'),
+              start_date: staticData.start_date,
+              end_date: staticData.end_date,
               hotelTitle: hotelData.title,
               hotelPrice: hotelData.price.toString(),
               bookingFee: hotelData.bookingFee,
@@ -171,7 +162,7 @@ const BookingDialog = ({
             Book {room?.title}
           </h2>
           <p className="text-gray-600 text-sm mt-1 font-montserrat">
-            Secure your stay with ease
+            Select the number of rooms for your stay
           </p>
         </DialogHeader>
         <motion.div
@@ -199,51 +190,6 @@ const BookingDialog = ({
                   {bookingError}
                 </motion.div>
               )}
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2 font-montserrat">
-                  Check-in Date
-                </label>
-                <motion.div
-                  variants={inputVariants}
-                  whileHover="focus"
-                  whileFocus="focus"
-                >
-                  <DateInput
-                    selectedDate={formData.start_date}
-                    onChange={(date) =>
-                      setFormData({ ...formData, start_date: date })
-                    }
-                    placeholder="Select check-in date"
-                    minDate={new Date()}
-                    className="w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg py-3 px-4 text-gray-700 text-base font-montserrat bg-white/80 shadow-sm transition-all duration-200"
-                  />
-                </motion.div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2 font-montserrat">
-                  Check-out Date
-                </label>
-                <motion.div
-                  variants={inputVariants}
-                  whileHover="focus"
-                  whileFocus="focus"
-                >
-                  <DateInput
-                    selectedDate={formData.end_date}
-                    onChange={(date) =>
-                      setFormData({ ...formData, end_date: date })
-                    }
-                    placeholder="Select check-out date"
-                    minDate={
-                      formData.start_date
-                        ? addDays(formData.start_date, 1)
-                        : new Date()
-                    }
-                    disabled={!formData.start_date}
-                    className="w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg py-3 px-4 text-gray-700 text-base font-montserrat bg-white/80 shadow-sm transition-all duration-200"
-                  />
-                </motion.div>
-              </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2 font-montserrat">
                   Number of Rooms
@@ -276,81 +222,13 @@ const BookingDialog = ({
                   </Select>
                 </motion.div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2 font-montserrat">
-                  Adults
-                </label>
-                <motion.div
-                  variants={inputVariants}
-                  whileHover="focus"
-                  whileFocus="focus"
-                >
-                  <Select
-                    value={formData.adults}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, adults: value })
-                    }
-                  >
-                    <SelectTrigger className="w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg py-3 px-4 text-gray-700 text-base font-montserrat bg-white/80 shadow-sm transition-all duration-200">
-                      <SelectValue placeholder="Select number of adults" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-blue-100 shadow-lg rounded-lg">
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <SelectItem
-                          key={num}
-                          value={num.toString()}
-                          className="text-gray-700 font-montserrat hover:bg-blue-50"
-                        >
-                          {num} Adult{num > 1 ? 's' : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2 font-montserrat">
-                  Children
-                </label>
-                <motion.div
-                  variants={inputVariants}
-                  whileHover="focus"
-                  whileFocus="focus"
-                >
-                  <Select
-                    value={formData.children}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, children: value })
-                    }
-                  >
-                    <SelectTrigger className="w-full border-blue-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg py-3 px-4 text-gray-700 text-base font-montserrat bg-white/80 shadow-sm transition-all duration-200">
-                      <SelectValue placeholder="Select number of children" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-blue-100 shadow-lg rounded-lg">
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <SelectItem
-                          key={num}
-                          value={num.toString()}
-                          className="text-gray-700 font-montserrat hover:bg-blue-50"
-                        >
-                          {num} Child{num > 1 ? 'ren' : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
-              </div>
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Button
                   onClick={handleFormSubmit}
-                  disabled={
-                    !formData.start_date ||
-                    !formData.end_date ||
-                    !formData.number_of_rooms
-                  }
+                  disabled={!formData.number_of_rooms}
                   className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-xl py-3 font-semibold text-lg font-montserrat shadow-md hover:shadow-lg transition-all duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed"
                 >
                   Confirm Booking
@@ -388,6 +266,12 @@ BookingDialog.propTypes = {
   }).isRequired,
   bookingError: PropTypes.string,
   setBookingError: PropTypes.func.isRequired,
+  staticData: PropTypes.shape({
+    start_date: PropTypes.string.isRequired,
+    end_date: PropTypes.string.isRequired,
+    adults: PropTypes.string.isRequired,
+    children: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default BookingDialog;
