@@ -526,10 +526,6 @@ const CheckoutContent = ({ id }) => {
               </div>
               <div className="space-y-4 text-gray-700 text-base">
                 <div className="flex justify-between">
-                  <span className="font-medium">Booking Code:</span>
-                  <span>{bookingCode || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="font-medium">Hotel:</span>
                   <span>{searchParams.get('hotelTitle') || 'N/A'}</span>
                 </div>
