@@ -1,10 +1,9 @@
-// app/hotel/[id]/checkout/page.jsx
 import { Suspense } from 'react';
 import CheckoutContent from './CheckoutContent';
 import { Loader2 } from 'lucide-react';
 
-export default function CheckoutPage({ params }) {
-  const { id } = params;
+export default async function CheckoutPage({ params }) {
+  const { id } = await params;
 
   return (
     <Suspense
