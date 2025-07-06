@@ -142,3 +142,22 @@ export const fetchHotelAvailability = async (id) => {
         throw error;
     }
 };
+
+/**
+ * Fetch locations based on search query
+ * @param {string} query - Search query for locations
+ * @returns {Promise<Array>} Array of location data
+ */
+export const fetchLocations = async (query) => {
+    try {
+        const response = await hotelApi.get(`/locations?q=${encodeURIComponent(query)}`);
+        return response.data.data || [];
+    } catch (error) {
+        console.error('Locations API error:', {
+            message: error.message,
+            status: error.response?.status,
+            stack: error.stack,
+        });
+        throw error;
+    }
+};
