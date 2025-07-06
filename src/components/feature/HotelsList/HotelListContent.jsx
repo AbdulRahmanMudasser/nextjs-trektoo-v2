@@ -99,6 +99,10 @@ export default function HotelListContent() {
                 hotels={hotels}
                 loading={isLoading}
                 error={error?.message}
+                checkin={checkin}
+                checkout={checkout}
+                adults={adults}
+                children={children}
               />
             </div>
           </div>

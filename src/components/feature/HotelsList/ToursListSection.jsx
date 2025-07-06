@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
 import { Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 const PaginationButton = ({ label, active, onClick }) => (
   <motion.button
@@ -156,7 +157,15 @@ ImageWithFallback.propTypes = {
   alt: PropTypes.string.isRequired,
 };
 
-const TourListSection = ({ hotels, loading, error }) => {
+const TourListSection = ({
+  hotels,
+  loading,
+  error,
+  checkin,
+  checkout,
+  adults,
+  children,
+}) => {
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(2);
@@ -294,83 +303,94 @@ const TourListSection = ({ hotels, loading, error }) => {
             />
             <div className="grid grid-cols-1 gap-8">
               <AnimatePresence>
-                {paginatedHotels.map((hotel, index) => (
-                  <motion.div
-                    key={hotel.id}
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="relative bg-white/95 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row h-auto border border-blue-50"
-                    role="article"
-                    aria-label={`Hotel: ${hotel.title}`}
-                  >
-                    <div className="relative w-full md:w-1/2 h-80">
-                      <ImageWithFallback
-                        src={hotel.image}
-                        alt={hotel.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
-                        quality={80}
-                        loading="lazy"
-                      />
-                      {hotel.discount_percent && (
-                        <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                          {hotel.discount_percent}% Off
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-6 flex flex-col justify-between w-full md:w-1/2">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-blue-500 text-lg">
-                            {'★'.repeat(
-                              Math.round(
-                                parseFloat(hotel.review_score.score_total)
-                              )
-                            ) +
-                              '☆'.repeat(
-                                5 -
-                                  Math.round(
-                                    parseFloat(hotel.review_score.score_total)
-                                  )
-                              )}
-                          </span>
-                          <span className="text-gray-600 text-xs font-medium">
-                            ({hotel.review_score.score_total})
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-semibold text-gray-900 truncate mb-2">
-                          {hotel.title}
-                        </h3>
-                        <div className="flex items-center text-gray-600 text-sm font-medium mb-2">
-                          <span className="mr-2">📍</span> {hotel.location.name}
-                        </div>
-                        <p
-                          className="text-sm text-gray-600 leading-relaxed mb-4"
-                          dangerouslySetInnerHTML={{
-                            __html: hotel.content.substring(0, 100) + '...',
-                          }}
+                {paginatedHotels.map((hotel, index) => {
+                  const queryParams = new URLSearchParams({
+                    ...(checkin && { checkin: format(checkin, 'yyyy-MM-dd') }),
+                    ...(checkout && {
+                      checkout: format(checkout, 'yyyy-MM-dd'),
+                    }),
+                    adults: String(adults),
+                    children: String(children),
+                  }).toString();
+                  return (
+                    <motion.div
+                      key={hotel.id}
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="relative bg-white/95 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row h-auto border border-blue-50"
+                      role="article"
+                      aria-label={`Hotel: ${hotel.title}`}
+                    >
+                      <div className="relative w-full md:w-1/2 h-80">
+                        <ImageWithFallback
+                          src={hotel.image}
+                          alt={hotel.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-cover transition-transform duration-700 hover:scale-105"
+                          quality={80}
+                          loading="lazy"
                         />
-                        <div className="flex items-baseline gap-2 mb-2">
-                          <span className="text-2xl font-bold text-gray-900">
-                            ${hotel.sale_price || hotel.price}
-                          </span>
-                          <span className="text-sm text-gray-600 font-medium">
-                            /night
-                          </span>
-                        </div>
+                        {hotel.discount_percent && (
+                          <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                            {hotel.discount_percent}% Off
+                          </div>
+                        )}
                       </div>
-                      <Link
-                        href={`/hotel/${hotel.id}`}
-                        className="mt-4 inline-block w-full text-center bg-blue-500 text-white font-medium py-2 sm:py-2.5 px-5 sm:px-8 rounded-xl hover:bg-blue-600 transition-colors"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="p-6 flex flex-col justify-between w-full md:w-1/2">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-blue-500 text-lg">
+                              {'★'.repeat(
+                                Math.round(
+                                  parseFloat(hotel.review_score.score_total)
+                                )
+                              ) +
+                                '☆'.repeat(
+                                  5 -
+                                    Math.round(
+                                      parseFloat(hotel.review_score.score_total)
+                                    )
+                                )}
+                            </span>
+                            <span className="text-gray-600 text-xs font-medium">
+                              ({hotel.review_score.score_total})
+                            </span>
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 truncate mb-2">
+                            {hotel.title}
+                          </h3>
+                          <div className="flex items-center text-gray-600 text-sm font-medium mb-2">
+                            <span className="mr-2">📍</span>{' '}
+                            {hotel.location.name}
+                          </div>
+                          <p
+                            className="text-sm text-gray-600 leading-relaxed mb-4"
+                            dangerouslySetInnerHTML={{
+                              __html: hotel.content.substring(0, 100) + '...',
+                            }}
+                          />
+                          <div className="flex items-baseline gap-2 mb-2">
+                            <span className="text-2xl font-bold text-gray-900">
+                              ${hotel.sale_price || hotel.price}
+                            </span>
+                            <span className="text-sm text-gray-600 font-medium">
+                              /night
+                            </span>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/hotel/${hotel.id}?${queryParams}`}
+                          className="mt-4 inline-block w-full text-center bg-blue-500 text-white font-medium py-2 sm:py-2.5 px-5 sm:px-8 rounded-xl hover:bg-blue-600 transition-colors"
+                        >
+                          View Details
+                        </Link>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
             <Pagination
@@ -391,6 +411,10 @@ TourListSection.propTypes = {
   hotels: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired,
   error: PropTypes.string,
+  checkin: PropTypes.instanceOf(Date),
+  checkout: PropTypes.instanceOf(Date),
+  adults: PropTypes.number.isRequired,
+  children: PropTypes.number.isRequired,
 };
 
 export default TourListSection;

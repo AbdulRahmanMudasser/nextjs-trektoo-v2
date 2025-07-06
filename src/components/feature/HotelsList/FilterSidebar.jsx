@@ -38,7 +38,7 @@ const GuestSelector = ({ adults, setAdults, children, setChildren }) => (
         <span className="text-sm font-medium text-gray-700">Adults</span>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setAdults((prev) => Math.encoding.max(0, prev - 1))}
+            onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
             className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
             aria-label="Decrease adults"
           >

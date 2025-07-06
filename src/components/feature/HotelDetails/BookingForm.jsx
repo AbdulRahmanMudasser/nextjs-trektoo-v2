@@ -244,7 +244,7 @@ const BookingForm = ({ id }) => {
             )}
             <motion.button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center text-base transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg flex items-center justify-center text-base transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
               disabled={!startDate || !timeSlot}
               aria-label="Book Hotel"
               whileHover={{ scale: 1.05 }}
