@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User } from 'lucide-react';
+import { Search, User, X } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
+import { useLocations } from '@/hooks/useHotels';
+import Image from 'next/image';
 
 // Utility function to add days to a date
 const addDays = (date, days) => {
@@ -17,21 +19,25 @@ function HeroContent() {
   const [guests, setGuests] = useState({ children: 0, adult: 0 });
   const [selectedDateFrom, setSelectedDateFrom] = useState(null);
   const [selectedDateTo, setSelectedDateTo] = useState(null);
-  const [selectedCity, setSelectedCity] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
 
   const dateFromPickerRef = useRef(null);
   const dateToPickerRef = useRef(null);
   const guestsDropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const searchDropdownRef = useRef(null);
 
   const router = useRouter();
   const totalGuests = guests.children + guests.adult;
 
-  const cities = [
-    'Paris',
-    'New York',
-    'California', 
-    'Los Angeles'
-  ];
+  const { data: locations = [], isLoading } = useLocations(searchQuery);
+
+  // Filter locations to only include those starting with the search query (case-insensitive)
+  const filteredLocations = locations.filter((location) =>
+    location.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -40,6 +46,8 @@ function HeroContent() {
       if (isOutside(dateFromPickerRef)) setSelectedDateFrom((prev) => prev);
       if (isOutside(dateToPickerRef)) setSelectedDateTo((prev) => prev);
       if (isOutside(guestsDropdownRef)) setIsGuestsDropdownOpen(false);
+      if (isOutside(searchDropdownRef) && isOutside(searchInputRef))
+        setIsSearchDropdownOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
@@ -74,13 +82,31 @@ function HeroContent() {
       return;
     }
     const queryParams = new URLSearchParams({
-      city: selectedCity,
+      location_id: selectedCity.id,
       checkin: formatDateToApi(selectedDateFrom),
       checkout: formatDateToApi(selectedDateTo),
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
     router.push(`/hotels-list?${queryParams}`);
+  };
+
+  const handleCitySelect = (location) => {
+    setSelectedCity(location);
+    setSearchQuery(location.title);
+    setIsSearchDropdownOpen(false);
+  };
+
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+    setSelectedCity(null);
+    setIsSearchDropdownOpen(true);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSelectedCity(null);
+    setIsSearchDropdownOpen(false);
   };
 
   const today = new Date();
@@ -131,29 +157,64 @@ function HeroContent() {
 
       <div onSubmit={(e) => e.preventDefault()} className="w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl border border-white/20">
-          <div className="lg:col-span-1">
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none cursor-pointer hover:border-gray-300"
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e\")",
-                backgroundPosition: 'right 0.5rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem',
-              }}
-            >
-              <option value="" disabled>
-                Select City
-              </option>
-              {cities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
+          <div className="lg:col-span-1 relative" ref={searchInputRef}>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleInputChange}
+                placeholder="Search for a city"
+                className="w-full h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                onFocus={() =>
+                  searchQuery.length >= 3 && setIsSearchDropdownOpen(true)
+                }
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />{' '}
+                  {/* Corrected comment: nineteen */}
+                </button>
+              )}
+            </div>
+            {isSearchDropdownOpen && searchQuery.length >= 3 && (
+              <div
+                className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 sm:mt-2 z-50 shadow-xl max-h-60 overflow-y-auto"
+                ref={searchDropdownRef}
+              >
+                {isLoading ? (
+                  <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base">
+                    Loading...
+                  </div>
+                ) : filteredLocations.length > 0 ? (
+                  filteredLocations.map((location) => (
+                    <div
+                      key={location.id}
+                      onClick={() => handleCitySelect(location)}
+                      className="p-3 sm:p-4 flex items-center gap-3 hover:bg-gray-100 cursor-pointer transition"
+                    >
+                      <Image
+                        src={location.image}
+                        alt={location.title}
+                        width={40}
+                        height={40}
+                        className="object-cover rounded"
+                      />
+                      <span className="text-gray-900 text-sm sm:text-base">
+                        {location.title}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base">
+                    No results found
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-1" ref={dateFromPickerRef}>
@@ -256,10 +317,8 @@ function HeroContent() {
         </div>
       </div>
 
-      {/* Browse Type Section with Curved Arrow */}
       <div className="transition-wrapper mt-8 sm:mt-12 md:mt-16">
         <div className="relative flex flex-col items-center">
-          {/* Curved Arrow Image */}
           <div className="curved-arrow mb-4 sm:mb-6 absolute left-68 top-14 hidden sm:block">
             <img
               src="/images/line-arrow.png"
