@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability, addToCart, doCheckout } from '@/lib/api/hotelApi';
+import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability, addToCart, doCheckout, fetchLocations } from '@/lib/api/hotelApi';
+import { useDebounce } from 'use-debounce';
 
 /**
  * Custom hook to complete checkout with React Query
@@ -112,6 +113,28 @@ export const useHotelAvailability = (id) => {
         enabled: !!id,
         onError: (error) => {
             console.error('useHotelAvailability error:', {
+                message: error.message,
+                status: error.response?.status,
+                stack: error.stack,
+            });
+        },
+    });
+};
+
+/**
+ * Custom hook to fetch locations with React Query and debouncing
+ * @param {string} query - Search query for locations
+ * @returns {Object} Query result with locations, loading state, and error
+ */
+export const useLocations = (query) => {
+    const [debouncedQuery] = useDebounce(query, 300);
+    return useQuery({
+        queryKey: ['locations', debouncedQuery],
+        queryFn: () => fetchLocations(debouncedQuery),
+        enabled: !!debouncedQuery && debouncedQuery.length >= 3,
+        keepPreviousData: true,
+        onError: (error) => {
+            console.error('useLocations error:', {
                 message: error.message,
                 status: error.response?.status,
                 stack: error.stack,
