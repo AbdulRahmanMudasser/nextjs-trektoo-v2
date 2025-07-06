@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
+import DateInput from '@/components/ui/Custom/DateInput';
 
 const FilterCheckbox = ({ label, value, checked, onChange }) => (
   <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer group">
@@ -37,7 +38,7 @@ const GuestSelector = ({ adults, setAdults, children, setChildren }) => (
         <span className="text-sm font-medium text-gray-700">Adults</span>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
+            onClick={() => setAdults((prev) => Math.encoding.max(0, prev - 1))}
             className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
             aria-label="Decrease adults"
           >
@@ -89,10 +90,16 @@ const FilterSidebar = ({
   setAdults,
   children,
   setChildren,
+  checkin,
+  setCheckin,
+  checkout,
+  setCheckout,
   onApplyFilters,
 }) => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const categories = [
     { label: 'Luxury Hotels', value: 'luxury', price: '$500+' },
@@ -113,6 +120,8 @@ const FilterSidebar = ({
     setSelectedCategories([]);
     setAdults(1);
     setChildren(0);
+    setCheckin(null);
+    setCheckout(null);
   };
 
   return (
@@ -125,6 +134,33 @@ const FilterSidebar = ({
       <h3 className="text-2xl font-extrabold text-gray-900 mb-6">
         Filter Hotels
       </h3>
+      <div className="mb-8">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Check-in
+        </label>
+        <DateInput
+          selectedDate={checkin}
+          onChange={setCheckin}
+          placeholder="Check-in"
+          minDate={today}
+          className="h-10 text-sm"
+        />
+      </div>
+      <div className="mb-8">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Check-out
+        </label>
+        <DateInput
+          selectedDate={checkout}
+          onChange={setCheckout}
+          placeholder="Check-out"
+          minDate={
+            checkin ? new Date(checkin.getTime() + 24 * 60 * 60 * 1000) : today
+          }
+          disabled={!checkin}
+          className="h-10 text-sm"
+        />
+      </div>
       <GuestSelector
         adults={adults}
         setAdults={setAdults}
@@ -183,7 +219,16 @@ const FilterSidebar = ({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => onApplyFilters({ priceRange, selectedCategories })}
+          onClick={() =>
+            onApplyFilters({
+              priceRange,
+              selectedCategories,
+              checkin,
+              checkout,
+              adults,
+              children,
+            })
+          }
           className="flex-1 px-6 py-3 bg-blue-500 text-white text-sm font-medium uppercase rounded-xl hover:bg-blue-600 transition-colors"
         >
           Apply Filters
@@ -207,6 +252,10 @@ FilterSidebar.propTypes = {
   setAdults: PropTypes.func.isRequired,
   children: PropTypes.number.isRequired,
   setChildren: PropTypes.func.isRequired,
+  checkin: PropTypes.instanceOf(Date),
+  setCheckin: PropTypes.func,
+  checkout: PropTypes.instanceOf(Date),
+  setCheckout: PropTypes.func,
   onApplyFilters: PropTypes.func.isRequired,
 };
 
