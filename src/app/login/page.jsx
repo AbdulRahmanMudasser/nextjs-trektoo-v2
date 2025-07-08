@@ -2,10 +2,10 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 
-export default function LoginPage() {
+function LoginForm() {
   const { login, authError, authSuccess, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -38,13 +38,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
-        
+
         {authError && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
             {authError}
           </div>
         )}
-        
+
         {authSuccess && (
           <div className="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm">
             {authSuccess}
@@ -86,5 +86,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

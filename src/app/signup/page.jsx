@@ -2,10 +2,10 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 
-export default function SignupPage() {
+function SignupForm() {
   const { register, authError, authSuccess, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -33,7 +33,11 @@ export default function SignupPage() {
       // Redirect to login with the same redirect query
       const redirect = searchParams.get('redirect') || '/';
       const queryString = searchParams.toString();
-      router.push(queryString ? `/login?redirect=${encodeURIComponent(redirect)}&${queryString}` : '/login');
+      router.push(
+        queryString
+          ? `/login?redirect=${encodeURIComponent(redirect)}&${queryString}`
+          : '/login'
+      );
     } catch (error) {
       setIsLoading(false);
     }
@@ -116,5 +120,19 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }
