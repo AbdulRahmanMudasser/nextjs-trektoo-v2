@@ -28,7 +28,7 @@ export async function GET(request) {
 
     try {
         const response = await axios.get(
-            `https://staging.trektoo.com/api/hotel/search?location_id=1`,
+            `https://staging.trektoo.com/api/hotel/search?location_id=5`,
             {
                 headers: {
                     'Content-Type': 'application/json',

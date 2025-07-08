@@ -363,8 +363,7 @@ const TourListSection = ({
                             {hotel.title}
                           </h3>
                           <div className="flex items-center text-gray-600 text-sm font-medium mb-2">
-                            <span className="mr-2">📍</span>{' '}
-                            {hotel.location.name}
+                            <span className="mr-2">📍</span> {hotel.address}
                           </div>
                           <p
                             className="text-sm text-gray-600 leading-relaxed mb-4"

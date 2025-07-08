@@ -32,11 +32,13 @@ function HeroContent() {
   const router = useRouter();
   const totalGuests = guests.children + guests.adult;
 
-  const { data: locations = [], isLoading } = useLocations(searchQuery);
+  const { data: locationsData, isLoading, error } = useLocations(searchQuery);
+  const locations = locationsData?.data || [];
+  const errorMessage = locationsData?.errorMessage;
 
-  // Filter locations to only include those starting with the search query (case-insensitive)
+  // Filter locations case-insensitively for additional client-side matching
   const filteredLocations = locations.filter((location) =>
-    location.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+    location.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   useEffect(() => {
@@ -149,7 +151,7 @@ function HeroContent() {
       `}</style>
 
       <h1 className="hero-title text-xl sm:text-4xl md:text-5xl lg:text-5xl text-white mb-3 sm:mb-4">
-        Where You Would Like To Go?
+        Where Would You Like To Go?
       </h1>
       <p className="hero-subtitle text-sm sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 px-2 sm:px-0">
         Checkout Beautiful Places Around The World
@@ -166,28 +168,54 @@ function HeroContent() {
                 placeholder="Search for a city"
                 className="w-full h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 onFocus={() =>
-                  searchQuery.length >= 3 && setIsSearchDropdownOpen(true)
+                  searchQuery.length >= 4 && setIsSearchDropdownOpen(true)
                 }
+                aria-label="Search for a city"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear search"
                 >
-                  <X className="h-4 w-4 sm:h-5 sm:w-5" />{' '}
-                  {/* Corrected comment: nineteen */}
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               )}
             </div>
-            {isSearchDropdownOpen && searchQuery.length >= 3 && (
+            {isSearchDropdownOpen && searchQuery.length >= 4 && (
               <div
                 className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 sm:mt-2 z-50 shadow-xl max-h-60 overflow-y-auto"
                 ref={searchDropdownRef}
+                aria-label="City search results"
               >
                 {isLoading ? (
-                  <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base">
-                    Loading...
+                  <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-5 w-5 text-blue-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Loading cities...
+                  </div>
+                ) : errorMessage ? (
+                  <div className="p-3 sm:p-4 text-red-500 text-sm sm:text-base">
+                    {errorMessage}
                   </div>
                 ) : filteredLocations.length > 0 ? (
                   filteredLocations.map((location) => (
@@ -195,6 +223,8 @@ function HeroContent() {
                       key={location.id}
                       onClick={() => handleCitySelect(location)}
                       className="p-3 sm:p-4 flex items-center gap-3 hover:bg-gray-100 cursor-pointer transition"
+                      role="option"
+                      aria-selected={selectedCity?.id === location.id}
                     >
                       <Image
                         src={location.image}
@@ -210,7 +240,7 @@ function HeroContent() {
                   ))
                 ) : (
                   <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base">
-                    No results found
+                    No cities found
                   </div>
                 )}
               </div>
@@ -224,6 +254,7 @@ function HeroContent() {
               placeholder="Check-in"
               minDate={today}
               className="h-10 sm:h-12 text-sm sm:text-base"
+              aria-label="Select check-in date"
             />
           </div>
 
@@ -235,6 +266,7 @@ function HeroContent() {
               minDate={selectedDateFrom ? addDays(selectedDateFrom, 1) : today}
               disabled={!selectedDateFrom}
               className="h-10 sm:h-12 text-sm sm:text-base"
+              aria-label="Select check-out date"
             />
           </div>
 
@@ -243,6 +275,7 @@ function HeroContent() {
               type="button"
               onClick={() => setIsGuestsDropdownOpen(!isGuestsDropdownOpen)}
               className="w-full h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-200 bg-white text-left text-gray-900 flex items-center gap-2 sm:gap-3 transition hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              aria-label="Select number of guests"
             >
               <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
               <span
@@ -283,6 +316,7 @@ function HeroContent() {
                           onClick={() => handleGuestChange(category, false)}
                           className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                           disabled={guests[category] === 0}
+                          aria-label={`Decrease number of ${category}`}
                         >
                           -
                         </button>
@@ -293,6 +327,7 @@ function HeroContent() {
                           type="button"
                           onClick={() => handleGuestChange(category, true)}
                           className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition text-sm sm:text-base"
+                          aria-label={`Increase number of ${category}`}
                         >
                           +
                         </button>
@@ -309,6 +344,7 @@ function HeroContent() {
               type="button"
               onClick={handleSearch}
               className="w-full h-10 sm:h-12 bg-blue-500 hover:bg-blue-400 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg text-sm sm:text-base"
+              aria-label="Search for hotels"
             >
               <Search className="h-4 w-4 sm:h-5 sm:w-5" />
               Search
