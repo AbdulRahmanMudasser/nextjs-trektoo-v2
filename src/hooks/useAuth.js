@@ -13,20 +13,28 @@ export const useAuth = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
 
+    // Load user and token from localStorage on mount
     useEffect(() => {
-        const storedToken = localStorage.getItem('authToken');
-        const storedUser = localStorage.getItem('authUser');
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+        try {
+            const storedToken = localStorage.getItem('authToken');
+            const storedUser = localStorage.getItem('authUser');
+            if (storedToken && storedUser) {
+                setToken(storedToken);
+                setUser(JSON.parse(storedUser));
+            }
+        } catch (error) {
+            console.error('Error loading auth data:', error);
+            setAuthError('Failed to load your session. Please log in again.');
         }
     }, []);
 
+    // Clear error/success messages
     const clearMessages = () => {
         setAuthError(null);
         setAuthSuccess(null);
     };
 
+    // Login function
     const login = async (credentials) => {
         clearMessages();
         try {
@@ -36,39 +44,40 @@ export const useAuth = () => {
                 localStorage.setItem('authUser', JSON.stringify(data.user));
                 setToken(data.access_token);
                 setUser(data.user);
-                setAuthSuccess('Login successful!');
+                setAuthSuccess('Welcome back! You’re logged in.');
                 router.push('/');
+            } else {
+                setAuthError('Login failed. Please try again.');
             }
         } catch (error) {
-            const errorData = error.response?.data;
-            setAuthError(errorData?.message || 'Login failed');
-            throw error;
+            setAuthError(error.message);
         }
     };
 
+    // Register function
     const register = async (userData) => {
         clearMessages();
         try {
             const data = await registerApi(userData);
             if (data.status === true) {
-                setAuthSuccess(data.message || 'Registration successful!');
+                setAuthSuccess(data.message || 'Registration successful! Please log in.');
                 router.push('/login');
+            } else {
+                setAuthError('Registration failed. Please try again.');
             }
         } catch (error) {
-            const errorData = error.response?.data;
-            setAuthError(
-                typeof errorData?.message === 'object'
-                    ? Object.values(errorData.message).flat().join('\n')
-                    : errorData?.message || 'Registration failed'
-            );
-            throw error;
+            setAuthError(error.message);
         }
     };
 
+    // Logout function
     const logout = async () => {
         clearMessages();
         try {
-            // await logoutApi();
+            await logoutApi();
+            setAuthSuccess('You have been logged out.');
+        } catch (error) {
+            setAuthError(error.message);
         } finally {
             localStorage.removeItem('authToken');
             localStorage.removeItem('authUser');
