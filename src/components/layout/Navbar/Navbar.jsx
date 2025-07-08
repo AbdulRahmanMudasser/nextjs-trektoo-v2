@@ -6,6 +6,7 @@ import SearchInput from '@/components/ui/Custom/SearchInput';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const dropdownItems = {
   pages: [
@@ -30,7 +31,9 @@ const Navbar = () => {
     authError,
     clearMessages,
   } = useAuth();
+  const router = useRouter();
 
+  // Handle scroll for sticky navbar
   useEffect(() => {
     const handleScroll = () => {
       setTopOffset(window.scrollY > 10 ? 'top-0' : 'top-10');
@@ -40,13 +43,31 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Clear messages when profile dropdown closes
   useEffect(() => {
     if (!isProfileOpen) clearMessages();
   }, [isProfileOpen, clearMessages]);
 
-  const handleLogout = () => {
-    logout();
-    setIsProfileOpen(false);
+  // Listen for route changes to ensure auth state updates
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // Force re-render by triggering a state update
+      setIsMobileMenuOpen(false); // Reset mobile menu to ensure UI consistency
+      setIsProfileOpen(false); // Reset profile dropdown
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed in Navbar:', error.message);
+    } finally {
+      setIsProfileOpen(false);
+    }
   };
 
   return (
@@ -181,7 +202,7 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* ✅ Mobile Toggle Button with z-30 fix */}
+            {/* Mobile Toggle Button */}
             <button
               className="lg:hidden p-1.5 text-white hover:text-blue-400 transition-colors z-30 relative"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -205,7 +226,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* ✅ Mobile Menu with z-20 fix */}
+        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-gray-900 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto z-20">
             <div className="px-3 py-4 space-y-3">
