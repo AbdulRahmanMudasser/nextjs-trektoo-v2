@@ -19,8 +19,9 @@ export const useAuth = () => {
             const storedToken = localStorage.getItem('authToken');
             const storedUser = localStorage.getItem('authUser');
             if (storedToken && storedUser) {
+                const parsedUser = JSON.parse(storedUser);
                 setToken(storedToken);
-                setUser(JSON.parse(storedUser));
+                setUser(parsedUser);
             }
         } catch (error) {
             console.error('Error loading auth data:', error);
@@ -74,9 +75,15 @@ export const useAuth = () => {
     const logout = async () => {
         clearMessages();
         try {
-            await logoutApi();
-            setAuthSuccess('You have been logged out.');
+            if (!user?.email) {
+                throw new Error('No user email found. Please log in again.');
+            }
+            const data = await logoutApi(user.email, token);
+            if (data.status === true) {
+                // setAuthSuccess(data.message || 'You have been logged out.');
+            }
         } catch (error) {
+            console.error('Logout error:', error.message);
             setAuthError(error.message);
         } finally {
             localStorage.removeItem('authToken');
