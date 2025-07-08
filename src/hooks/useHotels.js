@@ -131,14 +131,19 @@ export const useLocations = (query) => {
     return useQuery({
         queryKey: ['locations', debouncedQuery],
         queryFn: () => fetchLocations(debouncedQuery),
-        enabled: !!debouncedQuery && debouncedQuery.length >= 3,
+        enabled: !!debouncedQuery && debouncedQuery.length >= 4,
         keepPreviousData: true,
+        select: (data) => ({
+            data,
+            errorMessage: null,
+        }),
         onError: (error) => {
             console.error('useLocations error:', {
                 message: error.message,
                 status: error.response?.status,
                 stack: error.stack,
             });
+            return { data: [], errorMessage: error.message };
         },
     });
 };

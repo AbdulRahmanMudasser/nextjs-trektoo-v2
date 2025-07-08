@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
 import { useHotels } from '@/hooks/useHotels';
 import FilterSidebar from './FilterSidebar';
@@ -11,12 +11,55 @@ import TourListSection from './ToursListSection';
 
 export default function HotelListContent() {
   const searchParams = useSearchParams();
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
+  const router = useRouter();
+
+  // Parse query parameters
+  const initialAdults = parseInt(searchParams.get('adults') || '1', 10);
+  const initialChildren = parseInt(searchParams.get('children') || '0', 10);
+  const initialCheckin = searchParams.get('checkin')
+    ? new Date(searchParams.get('checkin'))
+    : null;
+  const initialCheckout = searchParams.get('checkout')
+    ? new Date(searchParams.get('checkout'))
+    : null;
+
+  const [adults, setAdults] = useState(initialAdults);
+  const [children, setChildren] = useState(initialChildren);
+  const [checkin, setCheckin] = useState(initialCheckin);
+  const [checkout, setCheckout] = useState(initialCheckout);
+
   const { data: hotels = [], isLoading, error } = useHotels(searchParams);
 
-  const handleApplyFilters = ({ priceRange, selectedCategories }) => {
-    // Implement client-side filtering or update searchParams for server-side
+  const handleApplyFilters = ({
+    priceRange,
+    selectedCategories,
+    checkin,
+    checkout,
+    adults,
+    children,
+  }) => {
+    // Create new search parameters, preserving location_id
+    const updatedParams = new URLSearchParams(searchParams);
+    updatedParams.set('adults', String(adults));
+    updatedParams.set('children', String(children));
+    if (checkin) {
+      updatedParams.set('checkin', checkin.toISOString().split('T')[0]);
+    } else {
+      updatedParams.delete('checkin');
+    }
+    if (checkout) {
+      updatedParams.set('checkout', checkout.toISOString().split('T')[0]);
+    } else {
+      updatedParams.delete('checkout');
+    }
+    updatedParams.set('minPrice', String(priceRange[0]));
+    updatedParams.set('maxPrice', String(priceRange[1]));
+    if (selectedCategories.length > 0) {
+      updatedParams.set('categories', selectedCategories.join(','));
+    } else {
+      updatedParams.delete('categories');
+    }
+    router.push(`/hotels-list?${updatedParams.toString()}`);
   };
 
   return (
@@ -44,6 +87,10 @@ export default function HotelListContent() {
                 setAdults={setAdults}
                 children={children}
                 setChildren={setChildren}
+                checkin={checkin}
+                setCheckin={setCheckin}
+                checkout={checkout}
+                setCheckout={setCheckout}
                 onApplyFilters={handleApplyFilters}
               />
             </div>
@@ -52,6 +99,10 @@ export default function HotelListContent() {
                 hotels={hotels}
                 loading={isLoading}
                 error={error?.message}
+                checkin={checkin}
+                checkout={checkout}
+                adults={adults}
+                children={children}
               />
             </div>
           </div>

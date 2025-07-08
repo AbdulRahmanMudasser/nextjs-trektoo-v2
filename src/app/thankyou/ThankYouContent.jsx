@@ -235,12 +235,12 @@ const ThankYouContent = () => {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Home
           </Button>
-          <Button
+          {/* <Button
             onClick={() => router.push('/bookings')}
             className="bg-white text-blue-500 border border-blue-500 hover:bg-blue-50 rounded-lg px-6 py-4 text-lg shadow-md hover:shadow-lg"
           >
             View Booking
-          </Button>
+          </Button> */}
         </motion.div>
       </div>
     </motion.div>

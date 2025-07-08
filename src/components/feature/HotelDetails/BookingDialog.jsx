@@ -229,7 +229,7 @@ const BookingDialog = ({
                 <Button
                   onClick={handleFormSubmit}
                   disabled={!formData.number_of_rooms}
-                  className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-xl py-3 font-semibold text-lg font-montserrat shadow-md hover:shadow-lg transition-all duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-lg py-3 text-lg font-montserrat shadow-md hover:shadow-lg transition-all duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed"
                 >
                   Confirm Booking
                 </Button>

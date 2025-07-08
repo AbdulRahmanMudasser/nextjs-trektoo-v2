@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LoaderCircle,
@@ -61,6 +61,17 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+
+  // Parse query parameters
+  const checkin = searchParams.get('checkin')
+    ? new Date(searchParams.get('checkin'))
+    : new Date();
+  const checkout = searchParams.get('checkout')
+    ? new Date(searchParams.get('checkout'))
+    : addDays(new Date(), 1);
+  const adults = parseInt(searchParams.get('adults') || '1', 10);
+  const children = parseInt(searchParams.get('children') || '0', 10);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -110,14 +121,6 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
   };
 
   const handleBookNowClick = (room) => {
-    const today = new Date();
-    const staticData = {
-      start_date: format(today, 'yyyy-MM-dd'),
-      end_date: format(addDays(today, 1), 'yyyy-MM-dd'),
-      adults: '1',
-      children: '0',
-    };
-
     const priceMatch = room.price_text.match(/\$(\d+\.?\d*)/);
     const roomPrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
     const query = new URLSearchParams({
@@ -126,10 +129,10 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
       roomPrice: roomPrice.toString(),
       roomImage: room.gallery?.[0]?.large || room.image,
       beds: room.beds_html,
-      adults: staticData.adults,
-      children: staticData.children,
-      start_date: staticData.start_date,
-      end_date: staticData.end_date,
+      adults: String(adults),
+      children: String(children),
+      start_date: format(checkin, 'yyyy-MM-dd'),
+      end_date: format(checkout, 'yyyy-MM-dd'),
       hotelTitle: hotelData.title,
       hotelPrice: hotelData.price.toString(),
       bookingFee: hotelData.bookingFee,
@@ -337,7 +340,7 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
                       <button
                         onClick={() => handleBookNowClick(room)}
                         disabled={isDialogOpen}
-                        className={`block w-full text-center bg-gradient-to-r from-blue-600 to-blue-800 text-white font-semibold py-3 px-8 rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 ${
+                        className={`block w-full text-center bg-blue-500 text-white py-3 px-8 rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all duration-300 ${
                           isDialogOpen ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                       >
@@ -380,10 +383,10 @@ const RoomAvailability = ({ rooms, loading, error, hotelId, hotelData }) => {
           bookingError={bookingError}
           setBookingError={setBookingError}
           staticData={{
-            start_date: format(new Date(), 'yyyy-MM-dd'),
-            end_date: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
-            adults: '1',
-            children: '0',
+            start_date: format(checkin, 'yyyy-MM-dd'),
+            end_date: format(checkout, 'yyyy-MM-dd'),
+            adults: String(adults),
+            children: String(children),
           }}
         />
       )}

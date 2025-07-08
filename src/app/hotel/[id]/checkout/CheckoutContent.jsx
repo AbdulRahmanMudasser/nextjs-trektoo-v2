@@ -496,7 +496,7 @@ const CheckoutContent = ({ id }) => {
                 <Button
                   onClick={handleCheckout}
                   disabled={isCheckingOut || isAddingToCart}
-                  className="w-full bg-blue-600 text-white hover:bg-blue-700 rounded-lg py-4 text-lg font-semibold transition-colors duration-200"
+                  className="w-full bg-blue-500 text-white hover:bg-blue-700 rounded-lg py-4 text-lg  transition-colors duration-200"
                 >
                   {isCheckingOut || isAddingToCart ? (
                     <>
