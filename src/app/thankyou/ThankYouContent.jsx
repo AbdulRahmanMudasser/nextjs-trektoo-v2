@@ -1,4 +1,3 @@
-// app/thankyou/ThankYouContent.jsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,6 +7,7 @@ import { AlertCircle, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { useBookingDetails } from '@/hooks/useHotels';
 
 const ThankYouContent = () => {
   const searchParams = useSearchParams();
@@ -17,7 +17,6 @@ const ThankYouContent = () => {
 
   const bookingCode = searchParams.get('booking_code');
   const roomTitle = searchParams.get('roomTitle');
-  const roomPrice = searchParams.get('roomPrice');
   const roomImage = searchParams.get('roomImage');
   const beds = searchParams.get('beds');
   const adults = searchParams.get('adults');
@@ -26,14 +25,12 @@ const ThankYouContent = () => {
   const start_date = searchParams.get('start_date');
   const end_date = searchParams.get('end_date');
   const hotelTitle = searchParams.get('hotelTitle');
-  const hotelPrice = searchParams.get('hotelPrice');
-  const bookingFee = searchParams.get('bookingFee');
 
-  const totalPrice = (
-    parseFloat(roomPrice || 0) * parseInt(number_of_rooms || 1) +
-    parseFloat(hotelPrice || 0) +
-    parseFloat(bookingFee || 0)
-  ).toFixed(2);
+  const {
+    data: bookingData,
+    isLoading: isBookingLoading,
+    error: bookingError,
+  } = useBookingDetails(bookingCode, token);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,7 +50,7 @@ const ThankYouContent = () => {
     return () => clearTimeout(timer);
   }, [isAuthenticated, token, router, searchParams]);
 
-  if (!isAuthChecked) {
+  if (!isAuthChecked || isBookingLoading) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -70,7 +67,7 @@ const ThankYouContent = () => {
     );
   }
 
-  if (!bookingCode) {
+  if (!bookingCode || bookingError || !bookingData?.status) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -83,7 +80,9 @@ const ThankYouContent = () => {
             Invalid Booking
           </h3>
           <p className="text-gray-600 text-base mt-3">
-            No booking code provided. Please try booking again.
+            {bookingError
+              ? bookingError.message
+              : 'No booking code provided. Please try booking again.'}
           </p>
           <Button
             onClick={() => router.push('/')}
@@ -96,6 +95,12 @@ const ThankYouContent = () => {
       </motion.div>
     );
   }
+
+  // Hardcoded values as per request
+  const roomPrice = '0.00';
+  const hotelPrice = '900.00';
+  const bookingFee = '1090';
+  const totalPrice = '1090';
 
   return (
     <motion.div
@@ -194,30 +199,20 @@ const ThankYouContent = () => {
             </div>
             <div className="border-t border-blue-100 pt-6 mt-6">
               <div className="flex justify-between">
-                <span className="font-semibold">
-                  Room Price ({number_of_rooms || 1} room
-                  {number_of_rooms > 1 ? 's' : ''}):
-                </span>
-                <span>
-                  $
-                  {(
-                    parseFloat(roomPrice || 0) * parseInt(number_of_rooms || 1)
-                  ).toFixed(2)}
-                </span>
+                <span className="font-semibold">Room Price (4 rooms):</span>
+                <span>${roomPrice}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-semibold">Hotel Price:</span>
-                <span>${hotelPrice || '0.00'}</span>
+                <span>${hotelPrice}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-semibold">Booking Fee:</span>
-                {/* <span>${bookingFee || '0.00'}</span> */}
-                <span>$1090</span>
+                <span>${bookingFee}</span>
               </div>
               <div className="flex justify-between font-bold text-xl mt-4">
                 <span>Total Price:</span>
-                {/* <span className="text-blue-500">${totalPrice}</span> */}
-                <span className="text-blue-500">$1090</span>
+                <span className="text-blue-500">${totalPrice}</span>
               </div>
             </div>
           </div>
@@ -237,12 +232,6 @@ const ThankYouContent = () => {
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Home
           </Button>
-          {/* <Button
-            onClick={() => router.push('/bookings')}
-            className="bg-white text-blue-500 border border-blue-500 hover:bg-blue-50 rounded-lg px-6 py-4 text-lg shadow-md hover:shadow-lg"
-          >
-            View Booking
-          </Button> */}
         </motion.div>
       </div>
     </motion.div>
