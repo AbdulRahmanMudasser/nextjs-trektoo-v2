@@ -27,17 +27,18 @@ import Image from 'next/image';
 import { format, addDays } from 'date-fns';
 
 const CheckoutContent = ({ id }) => {
+  const [isMounted, setIsMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isAuthenticated, token } = useAuth();
   const [formData, setFormData] = useState({
-    first_name: searchParams.get('first_name') || '',
-    last_name: searchParams.get('last_name') || '',
-    email: searchParams.get('email') || '',
-    phone: searchParams.get('phone') || '',
-    country: searchParams.get('country') || '',
-    term_conditions: searchParams.get('term_conditions') === 'true',
-    payment_gateway: searchParams.get('payment_gateway') || 'stripe',
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    country: '',
+    term_conditions: false,
+    payment_gateway: 'stripe',
   });
   const [formErrors, setFormErrors] = useState({});
   const {
@@ -47,10 +48,25 @@ const CheckoutContent = ({ id }) => {
   } = useDoCheckout(token);
   const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart(token);
 
-  let bookingCode =
-    searchParams.get('booking_code') || localStorage.getItem('booking_code');
+  useEffect(() => {
+    setIsMounted(true);
+    setFormData({
+      first_name: searchParams.get('first_name') || '',
+      last_name: searchParams.get('last_name') || '',
+      email: searchParams.get('email') || '',
+      phone: searchParams.get('phone') || '',
+      country: searchParams.get('country') || '',
+      term_conditions: searchParams.get('term_conditions') === 'true',
+      payment_gateway: searchParams.get('payment_gateway') || 'stripe',
+    });
+  }, [searchParams]);
+
+  let bookingCode = isMounted
+    ? searchParams.get('booking_code') || localStorage.getItem('booking_code')
+    : null;
 
   useEffect(() => {
+    if (!isMounted) return;
     const pendingBooking = localStorage.getItem('pending_booking');
     if (!bookingCode && pendingBooking && isAuthenticated) {
       const { hotelId, room, staticData, hotelData } =
@@ -116,7 +132,15 @@ const CheckoutContent = ({ id }) => {
         },
       });
     }
-  }, [isAuthenticated, bookingCode, addToCart, router, searchParams, formData]);
+  }, [
+    isMounted,
+    isAuthenticated,
+    bookingCode,
+    addToCart,
+    router,
+    formData,
+    searchParams.get('number_of_rooms'),
+  ]);
 
   const validateForm = () => {
     const errors = {};
@@ -169,6 +193,13 @@ const CheckoutContent = ({ id }) => {
     if (!bookingCode) {
       setFormErrors({
         general: 'No booking code available. Please try booking again.',
+      });
+      return;
+    }
+
+    if (!token) {
+      setFormErrors({
+        general: 'Authentication token is missing. Please log in again.',
       });
       return;
     }
@@ -226,11 +257,15 @@ const CheckoutContent = ({ id }) => {
   };
 
   const totalPrice = (
-    parseFloat(searchParams.get('roomPrice') || 0) *
-      parseInt(searchParams.get('number_of_rooms') || 1) +
-    parseFloat(searchParams.get('hotelPrice') || 0) +
-    parseFloat(searchParams.get('bookingFee') || 0)
+    (parseFloat(searchParams.get('roomPrice') || '0') || 0) *
+      (parseInt(searchParams.get('number_of_rooms') || '1') || 1) +
+    (parseFloat(searchParams.get('hotelPrice') || '0') || 0) +
+    (parseFloat(searchParams.get('bookingFee') || '0') || 0)
   ).toFixed(2);
+
+  if (!isMounted) {
+    return null; // or a loading placeholder
+  }
 
   if (!bookingCode && !localStorage.getItem('pending_booking')) {
     return (
@@ -496,7 +531,7 @@ const CheckoutContent = ({ id }) => {
                 <Button
                   onClick={handleCheckout}
                   disabled={isCheckingOut || isAddingToCart}
-                  className="w-full bg-blue-500 text-white hover:bg-blue-700 rounded-lg py-4 text-lg  transition-colors duration-200"
+                  className="w-full bg-blue-500 text-white hover:bg-blue-700 rounded-lg py-4 text-lg transition-colors duration-200"
                 >
                   {isCheckingOut || isAddingToCart ? (
                     <>
@@ -568,8 +603,10 @@ const CheckoutContent = ({ id }) => {
                     <span>
                       $
                       {(
-                        parseFloat(searchParams.get('roomPrice') || 0) *
-                        parseInt(searchParams.get('number_of_rooms') || 1)
+                        (parseFloat(searchParams.get('roomPrice') || '0') ||
+                          0) *
+                        (parseInt(searchParams.get('number_of_rooms') || '1') ||
+                          1)
                       ).toFixed(2)}
                     </span>
                   </div>
@@ -579,11 +616,13 @@ const CheckoutContent = ({ id }) => {
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium">Booking Fee:</span>
-                    <span>${searchParams.get('bookingFee') || '0.00'}</span>
+                    {/* <span>${searchParams.get('bookingFee') || '0.00'}</span> */}
+                    <span>$1090</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg mt-4">
                     <span>Total Price:</span>
-                    <span className="text-blue-600">${totalPrice}</span>
+                    {/* <span className="text-blue-600">${totalPrice}</span> */}
+                    <span className="text-blue-600">$1090</span>
                   </div>
                 </div>
               </div>

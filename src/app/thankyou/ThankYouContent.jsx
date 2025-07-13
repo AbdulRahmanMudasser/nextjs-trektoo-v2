@@ -104,7 +104,7 @@ const ThankYouContent = () => {
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-blue-50 bg-[url('/pattern.png')] bg-cover bg-fixed"
     >
-      <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border mt-12 p-8">
+      <div className="max-w-5xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border mt-12 p-8">
         {/* Hero Header */}
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold text-gray-900 font-montserrat">
@@ -211,11 +211,13 @@ const ThankYouContent = () => {
               </div>
               <div className="flex justify-between">
                 <span className="font-semibold">Booking Fee:</span>
-                <span>${bookingFee || '0.00'}</span>
+                {/* <span>${bookingFee || '0.00'}</span> */}
+                <span>$1090</span>
               </div>
               <div className="flex justify-between font-bold text-xl mt-4">
                 <span>Total Price:</span>
-                <span className="text-blue-500">${totalPrice}</span>
+                {/* <span className="text-blue-500">${totalPrice}</span> */}
+                <span className="text-blue-500">$1090</span>
               </div>
             </div>
           </div>
