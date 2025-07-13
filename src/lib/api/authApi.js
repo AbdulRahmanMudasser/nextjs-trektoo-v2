@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const authApi = axios.create({
-    baseURL: '/api/auth', // Use local proxy routes
+    baseURL: '/api', // Use local proxy routes
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const getUserFriendlyError = (error) => {
 // Login API call
 export const login = async (credentials) => {
     try {
-        const response = await authApi.post('/login', credentials);
+        const response = await authApi.post('/auth/login', credentials);
         if (!response.data) {
             throw new Error('No response received from server');
         }
@@ -63,7 +63,7 @@ export const login = async (credentials) => {
 // Register API call
 export const register = async (userData) => {
     try {
-        const response = await authApi.post('/register', userData);
+        const response = await authApi.post('/auth/register', userData);
         if (!response.data) {
             throw new Error('No response received from server');
         }
@@ -77,7 +77,7 @@ export const register = async (userData) => {
 // Logout API call
 export const logout = async (email, token) => {
     try {
-        const response = await authApi.post('/logout', { email }, {
+        const response = await authApi.post('/auth/logout', { email }, {
             headers: {
                 Authorization: token ? `Bearer ${token}` : undefined,
             },
@@ -95,7 +95,7 @@ export const logout = async (email, token) => {
 // Get user profile API call
 export const getUserProfile = async (token) => {
     try {
-        const response = await authApi.get('/me', {
+        const response = await authApi.get('/auth/me', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -113,7 +113,7 @@ export const getUserProfile = async (token) => {
 // Update user profile API call
 export const updateUserProfile = async (userData, token) => {
     try {
-        const response = await authApi.post('/me', userData, {
+        const response = await authApi.post('/auth/me', userData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -124,6 +124,24 @@ export const updateUserProfile = async (userData, token) => {
         return response.data;
     } catch (error) {
         console.error('Update user profile API error:', formatError(error));
+        throw new Error(getUserFriendlyError(error));
+    }
+};
+
+// Get booking history API call
+export const getBookingHistory = async (token, page = 1) => {
+    try {
+        const response = await authApi.get(`/user/booking-history?page=${page}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!response.data) {
+            throw new Error('No response received from server');
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Booking history API error:', formatError(error));
         throw new Error(getUserFriendlyError(error));
     }
 };
