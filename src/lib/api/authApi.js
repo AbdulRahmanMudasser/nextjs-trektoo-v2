@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 const authApi = axios.create({
-    baseURL: 'https://staging.trektoo.com/api/auth', // Updated to external API
+    baseURL: '/api/auth', // Use local proxy routes
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     },
-    timeout: 10000, // 10-second timeout to avoid hanging
+    timeout: 10000,
 });
 
 // Helper function to format errors for logging
@@ -26,7 +26,7 @@ const getUserFriendlyError = (error) => {
     const data = error.response?.data;
 
     if (status === 400) {
-        return data?.message || 'Invalid request. Please try again.';
+        return data?.message ? Object.values(data.message).flat().join(', ') : 'Invalid request. Please try again.';
     }
     if (status === 401) {
         return 'Authentication failed. Please log in again.';
@@ -35,7 +35,7 @@ const getUserFriendlyError = (error) => {
         return 'You are not allowed to perform this action. Contact support.';
     }
     if (status === 404) {
-        return 'Logout service unavailable. Please try again later.';
+        return 'Service unavailable. Please try again later.';
     }
     if (status === 429) {
         return 'Too many attempts. Please wait a few minutes and try again.';
@@ -88,6 +88,42 @@ export const logout = async (email, token) => {
         return response.data;
     } catch (error) {
         console.error('Logout API error:', formatError(error));
+        throw new Error(getUserFriendlyError(error));
+    }
+};
+
+// Get user profile API call
+export const getUserProfile = async (token) => {
+    try {
+        const response = await authApi.get('/me', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!response.data) {
+            throw new Error('No response received from server');
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Get user profile API error:', formatError(error));
+        throw new Error(getUserFriendlyError(error));
+    }
+};
+
+// Update user profile API call
+export const updateUserProfile = async (userData, token) => {
+    try {
+        const response = await authApi.post('/me', userData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!response.data) {
+            throw new Error('No response received from server');
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Update user profile API error:', formatError(error));
         throw new Error(getUserFriendlyError(error));
     }
 };
