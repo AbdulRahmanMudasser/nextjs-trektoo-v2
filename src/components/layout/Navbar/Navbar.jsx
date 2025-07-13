@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import Logo from '@/components/ui/Custom/Logo';
 import DropdownMenu from './DropdownMenu';
@@ -72,7 +73,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed ${topOffset} z-20 w-full bg-gray-900 transition-all duration-300`}
+      className={`fixed ${topOffset} z-20 w-full bg-gradient-to-r from-white via-[url('/patterns/wave.svg')] via-30% to-blue-500 bg-blend-multiply bg-opacity-90 transition-all duration-300 font-montserrat shadow-2xl`}
       aria-label="Main navigation"
     >
       {(authSuccess || authError) && (
@@ -228,7 +229,7 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-gray-900 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto z-20">
+          <div className="lg:hidden bg-blue-500 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto z-20">
             <div className="px-3 py-4 space-y-3">
               <div className="sm:hidden mb-3">
                 <SearchInput />
@@ -258,7 +259,7 @@ const Navbar = () => {
                 Contact
               </Link>
 
-              <div className="pt-2 border-t border-gray-700">
+              <div className="pt-2 border-t border-blue-700">
                 {isAuthenticated ? (
                   <>
                     <Link
