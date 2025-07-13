@@ -4,7 +4,7 @@ import axios from 'axios';
  * Centralized API client for hotel-related requests
  */
 const hotelApi = axios.create({
-    baseURL: 'https://staging.trektoo.com/api',
+    baseURL: '/api', // Use relative path for proxy routes
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -48,6 +48,27 @@ const getUserFriendlyError = (error) => {
         return 'Something went wrong on our server. Please try again later.';
     }
     return data?.message || 'An unexpected error occurred. Please try again.';
+};
+
+/**
+ * Fetch booking details by booking code
+ * @param {string} code - Booking code
+ * @param {string} token - User access token for authentication
+ * @returns {Promise<Object>} Booking details
+ */
+export const fetchBookingDetails = async (code, token) => {
+    try {
+        const response = await hotelApi.get(`/hotel/booking/${code}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log('fetchBookingDetails response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Booking Details API error:', formatError(error));
+        throw new Error(getUserFriendlyError(error));
+    }
 };
 
 /**
@@ -102,6 +123,7 @@ export const fetchHotels = async (searchParams) => {
     const query = searchParams.toString();
     try {
         const response = await hotelApi.get(`/hotel/search?${query}`);
+        console.log(response);
         return response.data.data || [];
     } catch (error) {
         console.error('Hotel API error:', formatError(error));

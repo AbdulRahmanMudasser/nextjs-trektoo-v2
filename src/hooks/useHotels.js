@@ -1,6 +1,27 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability, addToCart, doCheckout, fetchLocations } from '@/lib/api/hotelApi';
+import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability, addToCart, doCheckout, fetchLocations, fetchBookingDetails } from '@/lib/api/hotelApi';
 import { useDebounce } from 'use-debounce';
+
+/**
+ * Custom hook to fetch booking details by code with React Query
+ * @param {string} code - Booking code
+ * @param {string} token - User access token for authentication
+ * @returns {Object} Query result with booking details, loading state, and error
+ */
+export const useBookingDetails = (code, token) => {
+    return useQuery({
+        queryKey: ['booking', code],
+        queryFn: () => fetchBookingDetails(code, token),
+        enabled: !!code && !!token,
+        onError: (error) => {
+            console.error('useBookingDetails error:', {
+                message: error.message,
+                status: error.response?.status,
+                stack: error.stack,
+            });
+        },
+    });
+};
 
 /**
  * Custom hook to complete checkout with React Query
