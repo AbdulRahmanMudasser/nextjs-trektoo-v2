@@ -4,12 +4,13 @@ import axios from 'axios';
  * Centralized API client for hotel-related requests
  */
 const hotelApi = axios.create({
-    baseURL: '/api', // Use relative path for proxy routes
+    baseURL: 'https://staging.trektoo.com/api',
+
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     },
-    timeout: 10000, // 10-second timeout
+    timeout: 30000, // 10-second timeout
 });
 
 /**
