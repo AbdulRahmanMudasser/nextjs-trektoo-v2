@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const authApi = axios.create({
-    baseURL: '/api', // Use local proxy routes
+    baseURL: 'https://staging.trektoo.com/api',
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
