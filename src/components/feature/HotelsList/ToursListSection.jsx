@@ -323,7 +323,7 @@ const TourListSection = ({
                       role="article"
                       aria-label={`Hotel: ${hotel.title}`}
                     >
-                      <div className="relative w-full md:w-1/2 h-80">
+                      <div className="relative w-full md:w-1/2 h-85">
                         <ImageWithFallback
                           src={hotel.image}
                           alt={hotel.title}
