@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['staging.trektoo.com', 'images.unsplash.com'],
+        domains: ['staging.trektoo.com', 'images.unsplash.com', 'cdn.worldota.net'],
         formats: ['image/avif', 'image/webp'],
-        minimumCacheTTL: 604800, // Cache images for 7 days
+        minimumCacheTTL: 604800,
     },
     async headers() {
         return [
@@ -24,4 +24,4 @@ const nextConfig = {
     },
 };
 
-export default nextConfig;  
+export default nextConfig;
