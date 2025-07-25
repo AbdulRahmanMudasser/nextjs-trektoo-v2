@@ -2,22 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Logo from '@/components/ui/Custom/Logo';
-import DropdownMenu from './DropdownMenu';
 import SearchInput from '@/components/ui/Custom/SearchInput';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import DropdownMenu from './DropdownMenu';
 
 const dropdownItems = {
-  pages: [
-    { href: '/about', label: 'About Us' },
-    { href: '/faq', label: 'FAQ' },
-  ],
-  news: [
-    { href: '/news/latest', label: 'Latest News' },
-    { href: '/news/archive', label: 'News Archive' },
-  ],
   exploreTrektoo: {
     'Things to do': [
       { href: '/tours-experiences', label: 'Tours & experiences' },
@@ -126,12 +118,17 @@ const Navbar = () => {
               >
                 Home
               </Link>
-              <DropdownMenu title="Pages" items={dropdownItems.pages} />
-              <DropdownMenu title="News" items={dropdownItems.news} />
+
               <DropdownMenu
                 title="Explore Trektoo"
                 items={dropdownItems.exploreTrektoo}
               />
+              <Link
+                href="/about"
+                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+              >
+                About Us
+              </Link>
               <Link
                 href="/contact"
                 className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
@@ -271,20 +268,18 @@ const Navbar = () => {
                 Home
               </Link>
               <DropdownMenu
-                title="Pages"
-                items={dropdownItems.pages}
-                onItemClick={() => setIsMobileMenuOpen(false)}
-              />
-              <DropdownMenu
-                title="News"
-                items={dropdownItems.news}
-                onItemClick={() => setIsMobileMenuOpen(false)}
-              />
-              <DropdownMenu
                 title="Explore Trektoo"
                 items={dropdownItems.exploreTrektoo}
                 onItemClick={() => setIsMobileMenuOpen(false)}
               />
+              <Link
+                href="/about"
+                className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                About Us
+              </Link>
+
               <Link
                 href="/contact"
                 className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
