@@ -12,7 +12,7 @@ import DropdownMenu from './DropdownMenu';
 const dropdownItems = {
   exploreTrektoo: {
     'Things to do': [
-      { href: '/tours-experiences', label: 'Tours & experiences' },
+      { href: '/activities', label: 'Tours & experiences' },
       { href: '/day-trips', label: 'Day trips' },
       { href: '/massages-spa', label: 'Massages & spa' },
       { href: '/outdoor-activities', label: 'Outdoor activities' },

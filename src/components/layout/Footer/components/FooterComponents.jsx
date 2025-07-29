@@ -60,10 +60,9 @@ const CompanyInfo = () => {
         15766570
       </p>
       <div className="flex flex-wrap gap-2">
-        <SocialIcon type="twitter" />
         <SocialIcon type="facebook" />
         <SocialIcon type="instagram" />
-        <SocialIcon type="linkedin" />
+        <SocialIcon type="tiktok" />
       </div>
     </div>
   );
@@ -71,11 +70,10 @@ const CompanyInfo = () => {
 
 const PagesLinks = () => {
   const links = [
-    { label: 'About us', href: '/about-us' },
-    { label: 'Community Blog', href: '/blog' },
-    { label: 'Work with Us', href: '/careers' },
-    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'About us', href: '/about' },
     { label: 'Contact us', href: '/contact' },
+    { label: 'Terms & Conditions', href: '/terms-and-conditions' },
+    { label: 'Privacy Policy', href: '/privacy-policy' },
   ];
 
   return (
@@ -86,7 +84,7 @@ const PagesLinks = () => {
           <li key={index} className="mb-2">
             <a
               href={link.href}
-              className="text-sm text-gray-300 no-underline hover:text-indigo-200"
+              className="text-sm text-gray-300 no-underline hover:text-indigo-200 transition-colors duration-200"
             >
               {link.label}
             </a>
@@ -122,7 +120,7 @@ const NewsletterForm = () => {
         />
         <button
           type="submit"
-          className="bg-blue-500 text-gray-900 p-2 rounded-lg border-none cursor-pointer h-9 flex items-center justify-center"
+          className="bg-blue-500 text-gray-900 p-2 rounded-lg border-none cursor-pointer h-9 flex items-center justify-center hover:bg-blue-600 transition-colors duration-200"
           aria-label="Subscribe"
         >
           <svg
@@ -145,8 +143,13 @@ const NewsletterForm = () => {
         htmlFor="newsletter-email"
         className="flex items-start gap-2 text-xs text-gray-300"
       >
-        <input type="checkbox" className="mt-1" /> I agree to all terms and
-        policies
+        <input type="checkbox" className="mt-1" /> I agree to all{' '}
+        <a
+          href="/terms"
+          className="text-blue-400 hover:text-blue-300 underline"
+        >
+          terms and policies
+        </a>
       </label>
     </div>
   );
@@ -175,7 +178,7 @@ const ContactInfo = () => {
           {contact.href ? (
             <a
               href={contact.href}
-              className="text-sm text-gray-300 ml-2 hover:text-indigo-200 break-words"
+              className="text-sm text-gray-300 ml-2 hover:text-indigo-200 break-words transition-colors duration-200"
             >
               {contact.value}
             </a>
