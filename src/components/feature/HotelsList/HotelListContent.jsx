@@ -1,6 +1,5 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -28,7 +27,40 @@ export default function HotelListContent() {
   const [checkin, setCheckin] = useState(initialCheckin);
   const [checkout, setCheckout] = useState(initialCheckout);
 
-  const { data: hotels = [], isLoading, error } = useHotels(searchParams);
+  // Create search params with page and per_page defaults
+  const createSearchParamsWithDefaults = () => {
+    const params = new URLSearchParams(searchParams);
+    if (!params.has('page')) {
+      params.set('page', '1');
+    }
+    if (!params.has('per_page')) {
+      params.set('per_page', '15');
+    }
+    return params;
+  };
+
+  const {
+    data: hotelResponse,
+    isLoading,
+    error,
+  } = useHotels(createSearchParamsWithDefaults());
+
+  // Extract data from the response
+  const hotels = hotelResponse?.data || [];
+  const totalHotels = hotelResponse?.total || 0;
+  const totalPages = hotelResponse?.totalPages || 1;
+
+  // Update state when URL params change
+  useEffect(() => {
+    setAdults(parseInt(searchParams.get('adults') || '1', 10));
+    setChildren(parseInt(searchParams.get('children') || '0', 10));
+
+    const checkinParam = searchParams.get('checkin');
+    setCheckin(checkinParam ? new Date(checkinParam) : null);
+
+    const checkoutParam = searchParams.get('checkout');
+    setCheckout(checkoutParam ? new Date(checkoutParam) : null);
+  }, [searchParams]);
 
   const handleApplyFilters = ({
     priceRange,
@@ -38,27 +70,33 @@ export default function HotelListContent() {
     adults,
     children,
   }) => {
-    // Create new search parameters, preserving location_id
+    // Create new search parameters, preserving location_id but resetting page to 1
     const updatedParams = new URLSearchParams(searchParams);
     updatedParams.set('adults', String(adults));
     updatedParams.set('children', String(children));
+    updatedParams.set('page', '1'); // Reset to first page when filters change
+
     if (checkin) {
       updatedParams.set('checkin', checkin.toISOString().split('T')[0]);
     } else {
       updatedParams.delete('checkin');
     }
+
     if (checkout) {
       updatedParams.set('checkout', checkout.toISOString().split('T')[0]);
     } else {
       updatedParams.delete('checkout');
     }
+
     updatedParams.set('minPrice', String(priceRange[0]));
     updatedParams.set('maxPrice', String(priceRange[1]));
+
     if (selectedCategories.length > 0) {
       updatedParams.set('categories', selectedCategories.join(','));
     } else {
       updatedParams.delete('categories');
     }
+
     router.push(`/hotels-list?${updatedParams.toString()}`);
   };
 
@@ -103,6 +141,8 @@ export default function HotelListContent() {
                 checkout={checkout}
                 adults={adults}
                 children={children}
+                totalHotels={totalHotels}
+                totalPages={totalPages}
               />
             </div>
           </div>
