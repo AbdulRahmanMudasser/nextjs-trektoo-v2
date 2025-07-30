@@ -60,15 +60,31 @@ export const useAddToCart = (token) => {
 };
 
 /**
- * Custom hook to fetch hotels with React Query
- * @param {URLSearchParams} searchParams - Search parameters
- * @returns {Object} Query result with hotels, loading state, and error
+ * Custom hook to fetch hotels with React Query and server-side pagination
+ * @param {URLSearchParams} searchParams - Search parameters including page and per_page
+ * @returns {Object} Query result with hotels data, pagination info, loading state, and error
  */
 export const useHotels = (searchParams) => {
+    // Ensure page and per_page are set with defaults
+    const params = new URLSearchParams(searchParams);
+    if (!params.has('page')) {
+        params.set('page', '1');
+    }
+    if (!params.has('per_page')) {
+        params.set('per_page', '15');
+    }
+
     return useQuery({
-        queryKey: ['hotels', searchParams.toString()],
-        queryFn: () => fetchHotels(searchParams),
+        queryKey: ['hotels', params.toString()],
+        queryFn: () => fetchHotels(params),
         keepPreviousData: true,
+        select: (response) => ({
+            data: response.data || [],
+            total: response.total || 0,
+            totalPages: response.total_pages || 1,
+            currentPage: response.current_page || 1,
+            perPage: response.per_page || 15,
+        }),
         onError: (error) => {
             console.error('useHotels error:', {
                 message: error.message,
