@@ -10,7 +10,7 @@ const hotelApi = axios.create({
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     },
-    timeout: 30000, // 10-second timeout
+    timeout: 30000, // 30-second timeout
 });
 
 /**
@@ -118,14 +118,22 @@ export const addToCart = async (bookingData, token) => {
 /**
  * Fetch hotels based on search parameters
  * @param {URLSearchParams} searchParams - Search parameters
- * @returns {Promise<Array>} Array of hotel data
+ * @returns {Promise<Object>} Response object with hotels data, total count, and pagination info
  */
 export const fetchHotels = async (searchParams) => {
     const query = searchParams.toString();
     try {
         const response = await hotelApi.get(`/hotel/search?${query}`);
-        console.log(response);
-        return response.data.data || [];
+        console.log('Hotels API response:', response.data);
+
+        // Return the complete response object with pagination info
+        return {
+            data: response.data.data || [],
+            total: response.data.total || 0,
+            total_pages: response.data.total_pages || 1,
+            current_page: response.data.current_page || 1,
+            per_page: response.data.per_page || 15,
+        };
     } catch (error) {
         console.error('Hotel API error:', formatError(error));
         throw new Error(getUserFriendlyError(error));
