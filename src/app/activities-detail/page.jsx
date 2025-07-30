@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users } from 'lucide-react';
 
 // Import the separated components
-import FilterDropdown from './components/FilterDropdown';
-import ActivityCard from './components/ActivityCard';
-import ActivityDetailsView from './components/ActivityDetailsView';
-import { mockActivities } from './data/mockData';
+import FilterDropdown from '@/components/feature/ActivitiesDetail/FilterDropdown';
+import ActivityCard from '@/components/feature/ActivitiesDetail/ActivityCard';
+import ActivityDetailsView from '@/components/feature/ActivitiesDetail/ActivityDetailView';
+import { mockActivities } from '@/components/feature/ActivitiesDetail/mockActivities'; // Fixed typo: mockActivites -> mockActivities
 
 const ActivitiesPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -50,17 +50,23 @@ const ActivitiesPage = () => {
     setIsFilterOpen(false);
   };
 
-  const filteredActivities = mockActivities.filter((activity) => {
+  // Ensure mockActivities is an array before filtering
+  const activitiesArray = Array.isArray(mockActivities) ? mockActivities : [];
+
+  const filteredActivities = activitiesArray.filter((activity) => {
     // Category filter
-    if (selectedCategories.length > 0 && !selectedCategories.includes(activity.category)) {
+    if (
+      selectedCategories.length > 0 &&
+      !selectedCategories.includes(activity.category)
+    ) {
       return false;
     }
-    
+
     // Price range filter
     if (activity.price < priceRange[0] || activity.price > priceRange[1]) {
       return false;
     }
-    
+
     // Date filter (if checkin is provided, check if activity is available on that date)
     if (checkin) {
       const checkinDate = new Date(checkin);
@@ -72,13 +78,13 @@ const ActivitiesPage = () => {
       });
       if (!isAvailable) return false;
     }
-    
+
     // Guest filter (assuming activities have a max capacity of 15 for consistency)
     const totalGuests = adults + children;
     if (totalGuests > 15) {
       return false;
     }
-    
+
     return true;
   });
 
@@ -92,8 +98,8 @@ const ActivitiesPage = () => {
   // If an activity is selected, show the details view
   if (selectedActivity) {
     return (
-      <ActivityDetailsView 
-        activity={selectedActivity} 
+      <ActivityDetailsView
+        activity={selectedActivity}
         onBack={handleBackToList}
         isFavorite={favorites.has(selectedActivity.id)}
         onFavoriteToggle={handleFavoriteToggle}
@@ -111,12 +117,12 @@ const ActivitiesPage = () => {
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 1, ease: 'easeOut' }}
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
               Discover Amazing
@@ -125,7 +131,8 @@ const ActivitiesPage = () => {
               </span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
-              Book unforgettable experiences and create lasting memories with our curated selection of premium tours and activities
+              Book unforgettable experiences and create lasting memories with
+              our curated selection of premium tours and activities
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -147,7 +154,9 @@ const ActivitiesPage = () => {
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 {sortedActivities.length} Premium Activities
               </h2>
-              <p className="text-gray-600">Handpicked experiences just for you</p>
+              <p className="text-gray-600">
+                Handpicked experiences just for you
+              </p>
             </div>
             <FilterDropdown
               isOpen={isFilterOpen}
@@ -167,7 +176,9 @@ const ActivitiesPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-gray-600">Sort by:</span>
+            <span className="text-sm font-semibold text-gray-600">
+              Sort by:
+            </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -217,7 +228,8 @@ const ActivitiesPage = () => {
               No activities found
             </h3>
             <p className="text-gray-600 mb-10 max-w-md mx-auto text-lg">
-              We couldn't find any activities matching your current filters. Try adjusting your search criteria.
+              We couldn't find any activities matching your current filters. Try
+              adjusting your search criteria.
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
