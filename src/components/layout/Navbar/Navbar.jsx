@@ -119,10 +119,10 @@ const Navbar = () => {
                 Home
               </Link>
 
-              <DropdownMenu
+              {/* <DropdownMenu
                 title="Explore Trektoo"
                 items={dropdownItems.exploreTrektoo}
-              />
+              /> */}
               <Link
                 href="/about"
                 className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
