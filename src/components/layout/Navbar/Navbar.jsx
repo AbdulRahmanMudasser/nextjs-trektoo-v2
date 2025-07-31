@@ -153,7 +153,6 @@ const Navbar = () => {
                 {user?.avatar_url ? (
                   <Image
                     src={user.avatar_url}
-                    alt={user.display_name || 'User'}
                     width={24}
                     height={24}
                     className="rounded-full"
