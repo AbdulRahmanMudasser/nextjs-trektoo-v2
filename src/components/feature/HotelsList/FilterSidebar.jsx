@@ -96,28 +96,10 @@ const FilterSidebar = ({
   setCheckout,
   onApplyFilters,
 }) => {
-  const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const categories = [
-    { label: 'Luxury Hotels', value: 'luxury', price: '$500+' },
-    { label: 'Budget Hotels', value: 'budget', price: '$100-$300' },
-    { label: 'Mid-range Hotels', value: 'midrange', price: '$300-$500' },
-  ];
-
-  const handleCategoryChange = (value) => {
-    setSelectedCategories((prev) =>
-      prev.includes(value)
-        ? prev.filter((cat) => cat !== value)
-        : [...prev, value]
-    );
-  };
-
   const clearFilters = () => {
-    setPriceRange([0, 5000]);
-    setSelectedCategories([]);
     setAdults(1);
     setChildren(0);
     setCheckin(null);
@@ -167,62 +149,12 @@ const FilterSidebar = ({
         children={children}
         setChildren={setChildren}
       />
-      <div className="mb-8">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Price Range
-        </label>
-        <div className="space-y-3">
-          <input
-            type="range"
-            min="0"
-            max="5000"
-            value={priceRange[0]}
-            onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
-            className="w-full h-1 bg-gray-200 rounded-full cursor-pointer accent-blue-500"
-          />
-          <input
-            type="range"
-            min="0"
-            max="5000"
-            value={priceRange[1]}
-            onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
-            className="w-full h-1 bg-gray-200 rounded-full cursor-pointer accent-blue-500"
-          />
-          <div className="flex justify-between text-sm text-gray-600 font-medium">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
-          </div>
-        </div>
-      </div>
-      <h3 className="text-xl font-extrabold text-gray-900 mb-4">
-        Hotel Categories
-      </h3>
-      <div className="space-y-4">
-        {categories.map((category) => (
-          <div
-            key={category.value}
-            className="flex justify-between items-center"
-          >
-            <FilterCheckbox
-              label={category.label}
-              value={category.value}
-              checked={selectedCategories.includes(category.value)}
-              onChange={handleCategoryChange}
-            />
-            <span className="text-sm text-gray-600 font-medium">
-              {category.price}
-            </span>
-          </div>
-        ))}
-      </div>
       <div className="flex gap-4 mt-8">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() =>
             onApplyFilters({
-              priceRange,
-              selectedCategories,
               checkin,
               checkout,
               adults,
