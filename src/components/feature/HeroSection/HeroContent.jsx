@@ -2,7 +2,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, X } from 'lucide-react';
+import {
+  Search,
+  User,
+  X,
+  Hotel,
+  MapPin,
+  Ticket,
+  Car,
+  Compass,
+} from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
 import { useLocations } from '@/hooks/useHotels';
 import Image from 'next/image';
@@ -14,7 +23,43 @@ const addDays = (date, days) => {
   return result;
 };
 
+// Service options configuration
+const serviceOptions = [
+  {
+    id: 'hotels',
+    label: 'Hotels',
+    icon: Hotel,
+    available: true,
+  },
+  {
+    id: 'tours',
+    label: 'Tours & Experiences',
+    icon: Compass,
+    available: false,
+  },
+  {
+    id: 'attractions',
+    label: 'Attraction Tickets',
+    icon: Ticket,
+    available: false,
+  },
+  {
+    id: 'transport',
+    label: 'Transport',
+    icon: MapPin,
+    available: false,
+  },
+  {
+    id: 'cars',
+    label: 'Car Rentals',
+    icon: Car,
+    available: false,
+  },
+];
+
 function HeroContent() {
+  const [selectedService, setSelectedService] = useState('hotels');
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
   const [guests, setGuests] = useState({ children: 0, adult: 0 });
   const [selectedDateFrom, setSelectedDateFrom] = useState(null);
@@ -58,6 +103,17 @@ function HeroContent() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
+
+  // Handle service selection
+  const handleServiceSelect = (serviceId) => {
+    const service = serviceOptions.find((s) => s.id === serviceId);
+    if (!service.available) {
+      setShowComingSoon(true);
+      setTimeout(() => setShowComingSoon(false), 2000);
+      return;
+    }
+    setSelectedService(serviceId);
+  };
 
   const handleGuestChange = (category, increment) => {
     setGuests((prev) => ({
@@ -148,6 +204,19 @@ function HeroContent() {
             transform: translateY(-10px);
           }
         }
+        .coming-soon-toast {
+          animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
       `}</style>
 
       <h1 className="hero-title text-xl sm:text-4xl md:text-5xl lg:text-5xl text-white mb-3 sm:mb-4">
@@ -156,6 +225,54 @@ function HeroContent() {
       <p className="hero-subtitle text-sm sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 px-2 sm:px-0">
         Checkout Beautiful Places Around The World
       </p>
+
+      {/* Service Selection Tabs */}
+      <div className="mb-4 sm:mb-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-xl border border-white/20 inline-block">
+          <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
+            {serviceOptions.map((service) => {
+              const IconComponent = service.icon;
+              const isSelected = selectedService === service.id;
+              const isAvailable = service.available;
+
+              return (
+                <button
+                  key={service.id}
+                  onClick={() => handleServiceSelect(service.id)}
+                  className={`
+                    flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200
+                    ${
+                      isSelected && isAvailable
+                        ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }
+                    ${!isAvailable ? 'cursor-pointer' : 'cursor-pointer'}
+                    active:scale-95
+                  `}
+                  aria-label={`Select ${service.label}`}
+                >
+                  <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="hidden xs:inline sm:inline whitespace-nowrap">
+                    {service.label}
+                  </span>
+                  <span className="xs:hidden sm:hidden">
+                    {service.label.split(' ')[0]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Coming Soon Toast */}
+      {showComingSoon && (
+        <div className="fixed top-40 left-1/2 transform -translate-x-1/2 z-50 coming-soon-toast">
+          <div className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            <p className="text-sm font-medium">Coming Soon! 🚀</p>
+          </div>
+        </div>
+      )}
 
       <div onSubmit={(e) => e.preventDefault()} className="w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl border border-white/20">

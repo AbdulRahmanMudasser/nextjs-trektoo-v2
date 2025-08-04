@@ -65,23 +65,24 @@ const BrowseTypes = () => {
 
   return (
     <div
-      className="relative text-center py-6 z-10 bg-transparent"
+      className="relative text-center py-6 z-10 bg-gradient-to-b from-gray-900/95 to-gray-800/95 backdrop-blur-lg"
       aria-label="Browse Types Section"
     >
-      {/* Text */}
-      <div className="text-white text-center -mt-48 mb-10">
-        <p className="text-sm sm:text-base md:text-lg lg:text-2xl font-medium tracking-wide">
-          Or Browse Selected Types
-        </p>
+      {/* Premium Header */}
+      <div className="text-white text-center -mt-48 mb-10 animate-fade-in">
+        <h2 className="text-2xl sm:text-3xl   md:text-4xl lg:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-white">
+          Browse Types
+        </h2>
+        <div className="w-20 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
       </div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer z-20 shadow-lg hover:bg-blue-100/80 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-20 shadow-xl hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300"
           aria-label="Scroll left"
         >
           <svg
-            className="w-6 h-6 text-gray-800"
+            className="w-6 h-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -100,7 +101,10 @@ const BrowseTypes = () => {
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {types.map((type, index) => (
-            <div key={index} className="flex-shrink-0 snap-center">
+            <div
+              key={index}
+              className="flex-shrink-0 snap-center transform transition-transform duration-300 hover:scale-105"
+            >
               <TypeCard
                 title={type.title}
                 type={type.type}
@@ -111,11 +115,11 @@ const BrowseTypes = () => {
         </div>
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer z-20 shadow-lg hover:bg-blue-100/80 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-20 shadow-xl hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300"
           aria-label="Scroll right"
         >
           <svg
-            className="w-6 h-6 text-gray-800"
+            className="w-6 h-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -132,6 +136,19 @@ const BrowseTypes = () => {
       <style jsx>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
+        }
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-out forwards;
         }
         @media (min-width: 640px) {
           .hide-scrollbar {
