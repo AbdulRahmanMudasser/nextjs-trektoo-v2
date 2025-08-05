@@ -65,13 +65,13 @@ const BrowseTypes = () => {
 
   return (
     <div
-      className="relative text-center py-6 z-10 bg-gradient-to-b from-gray-900/95 to-gray-800/95 backdrop-blur-lg"
+      className="relative text-center py-6 z-10"
       aria-label="Browse Types Section"
     >
       {/* Premium Header */}
-      <div className="text-white text-center -mt-48 mb-10 animate-fade-in">
-        <h2 className="text-2xl sm:text-3xl   md:text-4xl lg:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-white">
-          Browse Types
+      <div className="text-white text-center -mt-56 mb-10 animate-fade-in">
+        <h2 className="text-xl sm:text-2xl  md:text-3xl lg:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-white">
+          Browse By Categories
         </h2>
         <div className="w-20 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
       </div>
