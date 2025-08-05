@@ -1,50 +1,65 @@
+'use client';
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, ChevronDown, X, Calendar, Sparkles } from 'lucide-react';
+import { 
+  Filter, ChevronDown, X, Sparkles
+} from 'lucide-react';
 
-const categories = [
-  {
-    id: 'luxury',
-    label: 'Luxury',
-    color:
-      'bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-purple-200',
-  },
-  {
-    id: 'midrange',
-    label: 'Mid-range',
-    color:
-      'bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-emerald-200',
-  },
-  {
-    id: 'budget',
-    label: 'Budget',
-    color:
-      'bg-gradient-to-r from-orange-50 to-yellow-50 text-orange-700 border-orange-200',
-  },
-];
-
-const FilterDropdown = ({
-  isOpen,
-  onToggle,
-  selectedCategories,
+const FilterDropdown = ({ 
+  isOpen, 
+  onToggle, 
+  selectedCategories, 
   setSelectedCategories,
-  priceRange,
-  setPriceRange,
-  adults,
-  setAdults,
-  children,
-  setChildren,
-  checkin,
-  setCheckin,
-  onClearFilters,
+  selectedCountries,
+  setSelectedCountries,
+  selectedCities,
+  setSelectedCities,
+  categories,
+  onClearFilters 
 }) => {
   const handleCategoryToggle = (categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
+    setSelectedCategories(prev => 
+      prev.includes(categoryId) 
+        ? prev.filter(id => id !== categoryId)
         : [...prev, categoryId]
     );
   };
+
+  const handleCountryToggle = (countryId) => {
+    setSelectedCountries(prev => 
+      prev.includes(countryId) 
+        ? prev.filter(id => id !== countryId)
+        : [...prev, countryId]
+    );
+  };
+
+  const handleCityToggle = (cityId) => {
+    setSelectedCities(prev => 
+      prev.includes(cityId) 
+        ? prev.filter(id => id !== cityId)
+        : [...prev, cityId]
+    );
+  };
+
+  // Get main categories for filtering
+  const mainCategories = categories?.slice(0, 10) || []; // Show first 10 categories
+
+  // Sample countries and cities (you would typically get these from an API)
+  const sampleCountries = [
+    { id: 1004, name: 'Thailand' },
+    { id: 1012, name: 'Japan' },
+    { id: 1014, name: 'Malaysia' },
+    { id: 1022, name: 'Hong Kong' },
+  ];
+
+  const sampleCities = [
+    { id: 2, name: 'Hong Kong' },
+    { id: 4, name: 'Bangkok' },
+    { id: 5, name: 'Chiang Mai' },
+    { id: 17, name: 'Pattaya' },
+    { id: 28, name: 'Tokyo' },
+  ];
 
   return (
     <div className="relative">
@@ -55,12 +70,8 @@ const FilterDropdown = ({
         className="flex items-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-2xl hover:border-blue-200 hover:shadow-lg transition-all duration-300 group"
       >
         <Filter className="h-5 w-5 text-gray-600 group-hover:text-blue-500 transition-colors" />
-        <span className="font-semibold text-gray-800 group-hover:text-blue-500 transition-colors">
-          Filters
-        </span>
-        <ChevronDown
-          className={`h-5 w-5 text-gray-500 transition-all duration-300 ${isOpen ? 'rotate-180 text-blue-500' : 'group-hover:text-blue-500'}`}
-        />
+        <span className="font-semibold text-gray-800 group-hover:text-blue-500 transition-colors">Filters</span>
+        <ChevronDown className={`h-5 w-5 text-gray-500 transition-all duration-300 ${isOpen ? 'rotate-180 text-blue-500' : 'group-hover:text-blue-500'}`} />
       </motion.button>
 
       <AnimatePresence>
@@ -69,7 +80,7 @@ const FilterDropdown = ({
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="absolute top-full left-0 mt-3 w-96 bg-white rounded-3xl shadow-2xl border border-gray-100 z-50 overflow-hidden backdrop-blur-lg"
           >
             <div className="p-8">
@@ -88,117 +99,61 @@ const FilterDropdown = ({
 
               {/* Categories */}
               <div className="mb-8">
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                  Categories
-                </h4>
-                <div className="grid grid-cols-1 gap-3">
-                  {categories.map((category) => (
+                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">Categories</h4>
+                <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+                  {mainCategories.map(category => (
                     <button
                       key={category.id}
                       onClick={() => handleCategoryToggle(category.id)}
                       className={`px-5 py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-300 text-left ${
                         selectedCategories.includes(category.id)
                           ? 'bg-blue-500 text-white border-blue-500 shadow-lg transform scale-[1.02]'
-                          : category.color +
-                            ' hover:shadow-md hover:scale-[1.01]'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:shadow-md hover:scale-[1.01] hover:border-blue-200'
                       }`}
                     >
-                      {category.label}
+                      {category.name}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Price Range */}
+              {/* Countries */}
               <div className="mb-8">
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                  Price Range
-                </h4>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={priceRange[1]}
-                      onChange={(e) =>
-                        setPriceRange([priceRange[0], parseInt(e.target.value)])
-                      }
-                      className="w-full h-3 bg-gradient-to-r from-gray-200 to-blue-200 rounded-full appearance-none cursor-pointer slider"
-                      style={{
-                        background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${priceRange[1]}%, #3b82f6 ${priceRange[1]}%, #3b82f6 100%)`,
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">
-                      ${priceRange[0]}
-                    </span>
-                    <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
-                      ${priceRange[1]}
-                    </span>
-                  </div>
+                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">Countries</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {sampleCountries.map(country => (
+                    <button
+                      key={country.id}
+                      onClick={() => handleCountryToggle(country.id)}
+                      className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all duration-300 text-center ${
+                        selectedCountries.includes(country.id)
+                          ? 'bg-blue-500 text-white border-blue-500 shadow-lg'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:shadow-md hover:border-blue-200'
+                      }`}
+                    >
+                      {country.name}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Guests */}
+              {/* Cities */}
               <div className="mb-8">
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                  Guests
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-600 mb-2 block uppercase tracking-wide">
-                      Adults
-                    </label>
-                    <select
-                      value={adults}
-                      onChange={(e) => setAdults(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold"
+                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">Cities</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {sampleCities.map(city => (
+                    <button
+                      key={city.id}
+                      onClick={() => handleCityToggle(city.id)}
+                      className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all duration-300 text-center ${
+                        selectedCities.includes(city.id)
+                          ? 'bg-blue-500 text-white border-blue-500 shadow-lg'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:shadow-md hover:border-blue-200'
+                      }`}
                     >
-                      {[1, 2, 3, 4, 5, 6].map((num) => (
-                        <option key={num} value={num}>
-                          {num}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-600 mb-2 block uppercase tracking-wide">
-                      Children
-                    </label>
-                    <select
-                      value={children}
-                      onChange={(e) => setChildren(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold"
-                    >
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <option key={num} value={num}>
-                          {num}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Date */}
-              <div className="mb-8">
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
-                  Date
-                </h4>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={checkin ? checkin.toISOString().split('T')[0] : ''}
-                    onChange={(e) =>
-                      setCheckin(
-                        e.target.value ? new Date(e.target.value) : null
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold"
-                  />
-                  <Calendar className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      {city.name}
+                    </button>
+                  ))}
                 </div>
               </div>
 
