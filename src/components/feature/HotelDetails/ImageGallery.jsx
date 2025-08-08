@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCw, Download, Share2, Maximize2, Grid3X3 } from 'lucide-react';
 
-const ImageWithFallback = ({ src, alt, ...props }) => {
-  const [hasError, setHasError] = React.useState(false);
+const ImageWithFallback = ({ src, alt, onLoad, priority = false, ...props }) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const proxiedSrc = src.includes('staging.trektoo.com')
     ? `/api/image/proxy?url=${encodeURIComponent(src)}`
     : src;
@@ -15,21 +17,35 @@ const ImageWithFallback = ({ src, alt, ...props }) => {
   return (
     <div className="relative w-full h-full">
       {hasError ? (
-        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">
-          <span className="text-gray-600 text-sm font-medium">
-            Image Unavailable
-          </span>
+        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+          <div className="text-gray-400 mb-2">
+            <Grid3X3 className="h-12 w-12" />
+          </div>
+          <span className="text-gray-500 text-sm font-medium">Image Unavailable</span>
         </div>
       ) : (
-        <Image
-          src={proxiedSrc}
-          alt={alt}
-          onError={(e) => {
-            console.error('Image load error:', { src, error: e.message });
-            setHasError(true);
-          }}
-          {...props}
-        />
+        <>
+          {isLoading && (
+            <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+          <Image
+            src={proxiedSrc}
+            alt={alt}
+            onLoad={() => {
+              setIsLoading(false);
+              onLoad?.();
+            }}
+            onError={(e) => {
+              console.error('Image load error:', { src, error: e.message });
+              setHasError(true);
+              setIsLoading(false);
+            }}
+            priority={priority}
+            {...props}
+          />
+        </>
       )}
     </div>
   );
@@ -38,39 +54,443 @@ const ImageWithFallback = ({ src, alt, ...props }) => {
 ImageWithFallback.propTypes = {
   src: PropTypes.string.isRequired,
   alt: PropTypes.string.isRequired,
+  onLoad: PropTypes.func,
+  priority: PropTypes.bool,
 };
 
-const ImageGallery = ({ images = [] }) => {
-  const galleryRef = useRef(null);
+const ImageModal = ({ isOpen, onClose, images, currentIndex, setCurrentIndex }) => {
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [imageLoadStates, setImageLoadStates] = useState({});
+  
+  const dragX = useMotionValue(0);
+  const dragOpacity = useTransform(dragX, [-300, 0, 300], [0.3, 1, 0.3]);
+  
+  const controlsTimeout = useRef(null);
 
-  const scrollLeft = () => {
-    if (galleryRef.current) {
-      galleryRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+  const resetImageState = useCallback(() => {
+    setZoom(1);
+    setRotation(0);
+    setPanOffset({ x: 0, y: 0 });
+    dragX.set(0);
+  }, [dragX]);
+
+  const nextImage = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+    resetImageState();
+  }, [images.length, setCurrentIndex, resetImageState]);
+
+  const prevImage = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    resetImageState();
+  }, [images.length, setCurrentIndex, resetImageState]);
+
+  const handleImageLoad = useCallback((index) => {
+    setImageLoadStates(prev => ({ ...prev, [index]: true }));
+  }, []);
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd || zoom > 1) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      prevImage();
     }
   };
 
-  const scrollRight = () => {
-    if (galleryRef.current) {
-      galleryRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+  const handleZoomIn = () => setZoom(prev => Math.min(prev * 1.5, 4));
+  const handleZoomOut = () => setZoom(prev => Math.max(prev / 1.5, 1));
+  const handleRotate = () => setRotation(prev => prev + 90);
+  
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(images[currentIndex]);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `image-${currentIndex + 1}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
     }
   };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Gallery Image ${currentIndex + 1}`,
+          url: images[currentIndex],
+        });
+      } catch (error) {
+        console.error('Share failed:', error);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(images[currentIndex]);
+        // You could show a toast notification here
+      } catch (error) {
+        console.error('Copy failed:', error);
+      }
+    }
+  };
+
+  const showControlsTemporarily = () => {
+    setShowControls(true);
+    if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    controlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
+  };
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'ArrowLeft') {
+      prevImage();
+    } else if (e.key === 'ArrowRight') {
+      nextImage();
+    } else if (e.key === 'Escape') {
+      onClose();
+    } else if (e.key === '+' || e.key === '=') {
+      handleZoomIn();
+    } else if (e.key === '-') {
+      handleZoomOut();
+    } else if (e.key === 'r' || e.key === 'R') {
+      handleRotate();
+    }
+    showControlsTemporarily();
+  }, [nextImage, prevImage, onClose]);
 
   useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+      showControlsTemporarily();
+    } else {
+      document.body.style.overflow = 'unset';
+      resetImageState();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+      if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
+    };
+  }, [isOpen, handleKeyDown, resetImageState]);
+
+  const handleDragEnd = (event, info) => {
+    const threshold = 100;
+    if (Math.abs(info.offset.x) > threshold) {
+      if (info.offset.x > 0) {
+        prevImage();
+      } else {
+        nextImage();
+      }
+    } else {
+      dragX.set(0);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        onMouseMove={showControlsTemporarily}
+      >
+        {/* Top Controls */}
+        <motion.div
+          className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/50 to-transparent p-4 z-20"
+          initial={{ y: -100 }}
+          animate={{ y: showControls ? 0 : -100 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <span className="text-white text-lg font-semibold">
+                {currentIndex + 1} / {images.length}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <motion.button
+                onClick={handleZoomOut}
+                disabled={zoom <= 1}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </motion.button>
+              <motion.button
+                onClick={handleZoomIn}
+                disabled={zoom >= 4}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </motion.button>
+              <motion.button
+                onClick={handleRotate}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <RotateCw className="h-5 w-5" />
+              </motion.button>
+              <motion.button
+                onClick={handleShare}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Share2 className="h-5 w-5" />
+              </motion.button>
+              <motion.button
+                onClick={handleDownload}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Download className="h-5 w-5" />
+              </motion.button>
+              <motion.button
+                onClick={onClose}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <X className="h-6 w-6" />
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Image Container */}
+        <motion.div
+          className="relative max-w-[95vw] max-h-[95vh] w-full mx-4"
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ opacity: dragOpacity }}
+        >
+          <motion.div
+            key={currentIndex}
+            className="relative w-full h-[80vh] rounded-lg overflow-hidden cursor-grab active:cursor-grabbing"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            drag={zoom === 1 ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            style={{ x: dragX }}
+          >
+            <motion.div
+              className="w-full h-full"
+              animate={{
+                scale: zoom,
+                rotate: rotation,
+                x: panOffset.x,
+                y: panOffset.y,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <ImageWithFallback
+                src={images[currentIndex]}
+                alt={`Gallery Image ${currentIndex + 1}`}
+                fill
+                className="object-contain select-none"
+                quality={95}
+                priority
+                onLoad={() => handleImageLoad(currentIndex)}
+              />
+            </motion.div>
+          </motion.div>
+
+          {/* Navigation Arrows */}
+          {images.length > 1 && (
+            <motion.div
+              className="absolute inset-y-0 left-0 right-0 flex justify-between items-center pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: showControls ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.button
+                onClick={prevImage}
+                className="ml-4 p-3 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all pointer-events-auto"
+                whileHover={{ scale: 1.1, x: -5 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ChevronLeft className="h-8 w-8" />
+              </motion.button>
+
+              <motion.button
+                onClick={nextImage}
+                className="mr-4 p-3 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all pointer-events-auto"
+                whileHover={{ scale: 1.1, x: 5 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ChevronRight className="h-8 w-8" />
+              </motion.button>
+            </motion.div>
+          )}
+        </motion.div>
+
+        {/* Bottom Controls & Indicators */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4 z-20"
+          initial={{ y: 100 }}
+          animate={{ y: showControls ? 0 : 100 }}
+          transition={{ duration: 0.3 }}
+        >
+          {images.length > 1 && (
+            <div className="flex justify-center space-x-2 mb-4">
+              {images.map((_, index) => (
+                <motion.button
+                  key={index}
+                  onClick={() => {
+                    setCurrentIndex(index);
+                    resetImageState();
+                  }}
+                  className={`relative overflow-hidden rounded transition-all duration-300 ${
+                    index === currentIndex ? 'ring-2 ring-white' : ''
+                  }`}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <div className="w-12 h-8 relative">
+                    <ImageWithFallback
+                      src={images[index]}
+                      alt={`Thumbnail ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      quality={30}
+                    />
+                    {!imageLoadStates[index] && (
+                      <div className="absolute inset-0 bg-gray-600 animate-pulse" />
+                    )}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          )}
+          
+          <div className="text-center">
+            <p className="text-white/80 text-sm">
+              Use arrow keys or swipe to navigate • Press ESC to close • Scroll to zoom
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+ImageModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  images: PropTypes.arrayOf(PropTypes.string).isRequired,
+  currentIndex: PropTypes.number.isRequired,
+  setCurrentIndex: PropTypes.func.isRequired,
+};
+
+const ImageGallery = ({ images = [], autoPlay = true, autoPlayInterval = 3000 }) => {
+  const galleryRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentModalIndex, setCurrentModalIndex] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
+  const [loadedImages, setLoadedImages] = useState(new Set());
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  const scrollAmount = 300;
+
+  const updateScrollButtons = useCallback(() => {
+    if (galleryRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  }, []);
+
+  const scrollLeft = useCallback(() => {
+    if (galleryRef.current) {
+      galleryRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      setTimeout(updateScrollButtons, 300);
+    }
+  }, [updateScrollButtons]);
+
+  const scrollRight = useCallback(() => {
+    if (galleryRef.current) {
+      galleryRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(updateScrollButtons, 300);
+    }
+  }, [updateScrollButtons]);
+
+  const openModal = useCallback((index) => {
+    setCurrentModalIndex(index);
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const handleImageLoad = useCallback((index) => {
+    setLoadedImages(prev => new Set([...prev, index]));
+  }, []);
+
+  // Enhanced auto-scroll with smooth transitions
+  useEffect(() => {
+    if (!isAutoPlaying || isModalOpen) return;
+
     const gallery = galleryRef.current;
     let scrollInterval;
 
     const startAutoScroll = () => {
       scrollInterval = setInterval(() => {
         if (gallery) {
-          const isAtEnd =
-            gallery.scrollLeft >= gallery.scrollWidth - gallery.clientWidth - 1;
+          const { scrollLeft, scrollWidth, clientWidth } = gallery;
+          const isAtEnd = scrollLeft >= scrollWidth - clientWidth - 5;
+          
           if (isAtEnd) {
-            gallery.scrollLeft = 0;
+            gallery.scrollTo({ left: 0, behavior: 'smooth' });
           } else {
-            gallery.scrollLeft += 1;
+            gallery.scrollBy({ left: 2, behavior: 'auto' });
           }
+          updateScrollButtons();
         }
-      }, 30);
+      }, autoPlayInterval / 100);
     };
 
     const stopAutoScroll = () => {
@@ -79,35 +499,52 @@ const ImageGallery = ({ images = [] }) => {
 
     gallery?.addEventListener('mouseenter', stopAutoScroll);
     gallery?.addEventListener('mouseleave', startAutoScroll);
-    startAutoScroll();
+    
+    if (isAutoPlaying) startAutoScroll();
 
     return () => {
       stopAutoScroll();
       gallery?.removeEventListener('mouseenter', stopAutoScroll);
       gallery?.removeEventListener('mouseleave', startAutoScroll);
     };
-  }, []);
+  }, [isAutoPlaying, isModalOpen, autoPlayInterval, updateScrollButtons]);
 
-  const handleKeyDown = (e) => {
+  // Initialize scroll buttons
+  useEffect(() => {
+    updateScrollButtons();
+    const gallery = galleryRef.current;
+    gallery?.addEventListener('scroll', updateScrollButtons);
+    
+    return () => {
+      gallery?.removeEventListener('scroll', updateScrollButtons);
+    };
+  }, [images, updateScrollButtons]);
+
+  const handleKeyDown = useCallback((e) => {
+    if (isModalOpen) return;
+    
     if (e.key === 'ArrowLeft') {
       scrollLeft();
     } else if (e.key === 'ArrowRight') {
       scrollRight();
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      setIsAutoPlaying(prev => !prev);
     }
-  };
+  }, [isModalOpen, scrollLeft, scrollRight]);
 
-  const containerVariants = {
+  const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
       },
     },
-  };
+  }), []);
 
-  const itemVariants = {
+  const itemVariants = useMemo(() => ({
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
@@ -118,7 +555,7 @@ const ImageGallery = ({ images = [] }) => {
         damping: 20,
       },
     },
-  };
+  }), []);
 
   if (!images.length) {
     return (
@@ -128,83 +565,175 @@ const ImageGallery = ({ images = [] }) => {
         animate="visible"
         variants={containerVariants}
       >
-        <motion.p
-          className="text-center text-gray-600 text-lg"
+        <motion.div
+          className="text-center py-16"
           variants={itemVariants}
         >
-          No images available for this hotel.
-        </motion.p>
+          <Grid3X3 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500 text-lg">No images available for this gallery.</p>
+        </motion.div>
       </motion.div>
     );
   }
 
   return (
-    <motion.div
-      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-    >
-      <motion.div className="relative" variants={itemVariants}>
-        <motion.button
-          onClick={scrollLeft}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 -ml-6 sm:-ml-12 z-10 bg-blue-50 text-blue-500 p-3 rounded-full shadow-sm hover:bg-blue-500 hover:text-white transition-all duration-300"
-          aria-label="Scroll left"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+    <>
+      <motion.div
+        className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+      >
+        {/* Gallery Header */}
+        <motion.div 
+          className="flex justify-between items-center mb-6"
+          variants={itemVariants}
         >
-          <ChevronLeft className="h-6 w-6" />
-        </motion.button>
-        <div
-          ref={galleryRef}
-          className="w-full overflow-x-hidden whitespace-nowrap flex items-center gap-4 sm:gap-6 py-4"
-        >
-          {images.map((src, index) => (
-            <motion.div
-              key={index}
-              className="relative w-full sm:w-1/2 md:w-1/3 lg:w-1/4 h-64 sm:h-72 lg:h-80 flex-shrink-0 rounded-2xl overflow-hidden group"
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, x: 5 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            >
-              <ImageWithFallback
-                src={src}
-                alt={`Gallery Image ${index + 1}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                quality={80}
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Image Gallery</h2>
+            <p className="text-gray-600">{images.length} {images.length === 1 ? 'image' : 'images'}</p>
+          </div>
+          <motion.button
+            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              isAutoPlaying
+                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {isAutoPlaying ? 'Pause' : 'Play'} Auto-scroll
+          </motion.button>
+        </motion.div>
+
+        <motion.div className="relative" variants={itemVariants}>
+          {/* Left Arrow */}
+          <motion.button
+            onClick={scrollLeft}
+            disabled={!canScrollLeft}
+            className={`absolute left-0 top-1/2 transform -translate-y-1/2 -ml-6 sm:-ml-12 z-10 p-3 rounded-full shadow-lg transition-all duration-300 ${
+              canScrollLeft
+                ? 'bg-white text-blue-500 hover:bg-blue-500 hover:text-white cursor-pointer shadow-blue-200/50'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+            }`}
+            aria-label="Scroll left"
+            whileHover={canScrollLeft ? { scale: 1.1, x: -2 } : {}}
+            whileTap={canScrollLeft ? { scale: 0.9 } : {}}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </motion.button>
+          
+          {/* Images Container */}
+          <div
+            ref={galleryRef}
+            className="w-full overflow-x-hidden whitespace-nowrap flex items-center gap-4 sm:gap-6 py-4 scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {images.map((src, index) => (
               <motion.div
-                className="absolute bottom-4 left-4 bg-blue-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100"
-                initial={{ y: 10 }}
-                animate={{ y: 0 }}
-                transition={{ delay: 0.1 }}
+                key={index}
+                className="relative w-full sm:w-1/2 md:w-1/3 lg:w-1/4 h-64 sm:h-72 lg:h-80 flex-shrink-0 rounded-2xl overflow-hidden group cursor-pointer"
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, y: -5 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={() => openModal(index)}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                View Details
+                <ImageWithFallback
+                  src={src}
+                  alt={`Gallery Image ${index + 1}`}
+                  fill
+                  className="object-cover transition-all duration-700 group-hover:scale-110"
+                  quality={85}
+                  loading={index < 4 ? "eager" : "lazy"}
+                  priority={index < 2}
+                  onLoad={() => handleImageLoad(index)}
+                />
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                
+                {/* Loading State */}
+                {!loadedImages.has(index) && (
+                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+                
+                {/* Hover Effects */}
+                <AnimatePresence>
+                  {hoveredIndex === index && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <motion.div
+                        className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        <Maximize2 className="h-6 w-6 text-gray-800" />
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {/* Image Counter */}
+                <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {index + 1} / {images.length}
+                </div>
               </motion.div>
-            </motion.div>
-          ))}
-        </div>
-        <motion.button
-          onClick={scrollRight}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 -mr-6 sm:-mr-12 z-10 bg-blue-50 text-blue-500 p-3 rounded-full shadow-sm hover:bg-blue-500 hover:text-white transition-all duration-300"
-          aria-label="Scroll right"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+            ))}
+          </div>
+          
+          {/* Right Arrow */}
+          <motion.button
+            onClick={scrollRight}
+            disabled={!canScrollRight}
+            className={`absolute right-0 top-1/2 transform -translate-y-1/2 -mr-6 sm:-mr-12 z-10 p-3 rounded-full shadow-lg transition-all duration-300 ${
+              canScrollRight
+                ? 'bg-white text-blue-500 hover:bg-blue-500 hover:text-white cursor-pointer shadow-blue-200/50'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+            }`}
+            aria-label="Scroll right"
+            whileHover={canScrollRight ? { scale: 1.1, x: 2 } : {}}
+            whileTap={canScrollRight ? { scale: 0.9 } : {}}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </motion.button>
+        </motion.div>
+
+        {/* Keyboard Shortcuts Info */}
+        <motion.div 
+          className="mt-6 text-center text-sm text-gray-500"
+          variants={itemVariants}
         >
-          <ChevronRight className="h-6 w-6" />
-        </motion.button>
+          Use arrow keys to navigate • Space to pause/play • Click any image to view fullscreen
+        </motion.div>
       </motion.div>
-    </motion.div>
+
+      {/* Enhanced Modal */}
+      <ImageModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        images={images}
+        currentIndex={currentModalIndex}
+        setCurrentIndex={setCurrentModalIndex}
+      />
+    </>
   );
 };
 
 ImageGallery.propTypes = {
   images: PropTypes.arrayOf(PropTypes.string),
+  autoPlay: PropTypes.bool,
+  autoPlayInterval: PropTypes.number,
 };
 
 export default ImageGallery;

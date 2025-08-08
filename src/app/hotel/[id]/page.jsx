@@ -159,10 +159,10 @@ const TourDetail = ({ params }) => {
           lng={parseFloat(hotel.map_lng) || 0}
           zoom={parseInt(hotel.map_zoom) || 10}
         />
-        <CalendarPrice
+        {/* <CalendarPrice
           price={hotel.sale_price || hotel.price}
           bookingFees={hotel.booking_fee || '0'}
-        />
+        /> */}
         <ReviewScores
           scoreTotal={hotel.review_score?.score_total || 0}
           scoreText={hotel.review_score?.score_text || 'No rating'}
