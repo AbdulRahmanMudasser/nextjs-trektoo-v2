@@ -80,7 +80,7 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
 
   return (
     <motion.section
-      className="w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8"
+      className="w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -97,7 +97,6 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Experience Excellence
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full" />
         </motion.div>
 
         {/* Main Content */}
