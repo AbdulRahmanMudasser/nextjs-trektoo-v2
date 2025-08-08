@@ -55,11 +55,6 @@ const TourInformation = ({
     },
   };
 
-  const accordionVariants = {
-    hidden: { height: 0, opacity: 0 },
-    visible: { height: 'auto', opacity: 1, transition: { duration: 0.3 } },
-  };
-
   const iconMap = {
     'Wake-up call': Clock,
     'Car hire': Car,
@@ -90,7 +85,7 @@ const TourInformation = ({
       <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 border-l-4 border-blue-500 pl-3">
         {title}
       </h3>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <ul className="space-y-3">
         {items.map((item, index) => {
           const Icon = getIconForItem(item);
           return (
@@ -113,7 +108,68 @@ const TourInformation = ({
     </motion.div>
   );
 
-  // Enhanced policy rendering function for TourInformation.jsx
+  const renderCheckInOut = () => (
+    <motion.div
+      variants={itemVariants}
+      className="bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50"
+    >
+      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 border-l-4 border-blue-500 pl-3">
+        Check-In & Check-Out
+      </h3>
+      <ul className="space-y-3">
+        <motion.li
+          className="flex items-center gap-3 text-gray-600"
+          variants={itemVariants}
+          whileHover={{ x: 5 }}
+        >
+          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+            <Clock className="h-5 w-5 text-blue-500" />
+          </div>
+          <span className="text-base sm:text-lg">Check-In: {checkInTime}</span>
+        </motion.li>
+        <motion.li
+          className="flex items-center gap-3 text-gray-600"
+          variants={itemVariants}
+          whileHover={{ x: 5 }}
+        >
+          <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+            <Clock className="h-5 w-5 text-blue-500" />
+          </div>
+          <span className="text-base sm:text-lg">
+            Check-Out: {checkOutTime}
+          </span>
+        </motion.li>
+      </ul>
+    </motion.div>
+  );
+
+  const renderExtraPrices = () => (
+    <motion.div
+      variants={itemVariants}
+      className="bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50"
+    >
+      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 border-l-4 border-blue-500 pl-3">
+        Extra Prices
+      </h3>
+      <ul className="space-y-3">
+        {extraPrices.map((price, index) => (
+          <motion.li
+            key={index}
+            className="flex items-center gap-3 text-gray-600"
+            variants={itemVariants}
+            whileHover={{ x: 5 }}
+          >
+            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+              <CreditCard className="h-5 w-5 text-blue-500" />
+            </div>
+            <span className="text-base sm:text-lg">
+              {price.name}: ${parseFloat(price.price).toFixed(2)} ({price.type})
+            </span>
+          </motion.li>
+        ))}
+      </ul>
+    </motion.div>
+  );
 
   const renderPolicies = () => (
     <motion.div
@@ -124,27 +180,26 @@ const TourInformation = ({
         Hotel Policies
       </h3>
       {policies && policies.length > 0 ? (
-        <div className="space-y-4">
+        <ul className="space-y-3">
           {policies.map((policy, index) => {
             const isExpanded = expandedPolicy === index;
 
-            // Enhanced content parsing
             const parseContent = (content) => {
               if (!content || typeof content !== 'string') {
                 return ['No policy details available'];
               }
 
               return content
-                .split(/\r\n|\n|\r/) // Handle different line break types
-                .filter((line) => line.trim() && line.trim() !== '-') // Remove empty lines and standalone dashes
-                .map((line) => line.replace(/^-\s*/, '').trim()) // Remove leading dashes and whitespace
-                .filter((line) => line.length > 0); // Remove any remaining empty lines
+                .split(/\r\n|\n|\r/)
+                .filter((line) => line.trim() && line.trim() !== '-')
+                .map((line) => line.replace(/^-\s*/, '').trim())
+                .filter((line) => line.length > 0);
             };
 
             const contentLines = parseContent(policy.content);
 
             return (
-              <motion.div
+              <motion.li
                 key={index}
                 className="border border-blue-100 rounded-xl overflow-hidden bg-white/70"
                 variants={itemVariants}
@@ -156,10 +211,10 @@ const TourInformation = ({
                   onClick={() => setExpandedPolicy(isExpanded ? null : index)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Shield className="h-6 w-6 text-blue-600" />
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-blue-500" />
                     </div>
-                    <h4 className="font-semibold text-gray-900 text-lg">
+                    <h4 className="text-base sm:text-lg text-gray-600">
                       {policy.title}
                     </h4>
                   </div>
@@ -167,7 +222,7 @@ const TourInformation = ({
                     animate={{ rotate: isExpanded ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <ChevronDown className="h-5 w-5 text-blue-500" />
+                    <ChevronDown className="h-4 w-4 text-blue-500" />
                   </motion.div>
                 </div>
 
@@ -180,15 +235,15 @@ const TourInformation = ({
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="border-t border-blue-100"
                     >
-                      <div className="p-4 pt-0">
-                        <ul className="space-y-2 mt-3">
+                      <div className="p-4">
+                        <ul className="space-y-2">
                           {contentLines.map((line, lineIndex) => (
                             <motion.li
                               key={lineIndex}
                               initial={{ x: -10, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
                               transition={{ delay: lineIndex * 0.1 }}
-                              className="flex items-start gap-2 text-gray-700"
+                              className="flex items-start gap-2 text-gray-600"
                             >
                               <div className="w-2 h-2 rounded-full bg-blue-400 mt-2 flex-shrink-0"></div>
                               <span className="text-sm leading-relaxed">
@@ -201,10 +256,10 @@ const TourInformation = ({
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </motion.li>
             );
           })}
-        </div>
+        </ul>
       ) : (
         <div className="text-center py-8">
           <Shield className="h-12 w-12 text-gray-300 mx-auto mb-3" />
@@ -216,57 +271,15 @@ const TourInformation = ({
     </motion.div>
   );
 
-  // Alternative: If you want to display policies in a simpler list format
-  const renderPoliciesSimple = () => (
-    <motion.div
-      variants={itemVariants}
-      className="bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50"
-    >
-      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 border-l-4 border-blue-500 pl-3">
-        Hotel Policies
-      </h3>
-      {policies && policies.length > 0 ? (
-        <div className="space-y-6">
-          {policies.map((policy, index) => {
-            const contentLines = policy.content
-              ? policy.content
-                  .split(/\r\n|\n|\r/)
-                  .filter((line) => line.trim() && line.trim() !== '-')
-                  .map((line) => line.replace(/^-\s*/, '').trim())
-                  .filter((line) => line.length > 0)
-              : ['No details available'];
-
-            return (
-              <motion.div
-                key={index}
-                className="border-l-4 border-blue-400 pl-4 py-2"
-                variants={itemVariants}
-              >
-                <h4 className="font-semibold text-gray-900 text-lg mb-2 flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-blue-500" />
-                  {policy.title}
-                </h4>
-                <ul className="space-y-1">
-                  {contentLines.map((line, lineIndex) => (
-                    <li
-                      key={lineIndex}
-                      className="text-gray-600 text-sm leading-relaxed"
-                    >
-                      • {line}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            );
-          })}
-        </div>
-      ) : (
-        <p className="text-gray-500 text-center py-4">
-          No hotel policies available.
-        </p>
-      )}
-    </motion.div>
-  );
+  // Don't render if no data is available
+  if (
+    facilities.length === 0 &&
+    services.length === 0 &&
+    extraPrices.length === 0 &&
+    policies.length === 0
+  ) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -281,82 +294,16 @@ const TourInformation = ({
       >
         Hotel Amenities & Policies
       </motion.h2>
+
       <div className="flex flex-col md:flex-row gap-8">
         <motion.div className="flex-1 space-y-6" variants={itemVariants}>
-          {facilities.length > 0 ? (
-            renderList(facilities, 'Facilities')
-          ) : (
-            <p className="text-gray-600 text-base sm:text-lg bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50">
-              No facilities available.
-            </p>
-          )}
-          {services.length > 0 ? (
-            renderList(services, 'Services')
-          ) : (
-            <p className="text-gray-600 text-base sm:text-lg bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50">
-              No services available.
-            </p>
-          )}
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50"
-          >
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 border-l-4 border-blue-500 pl-3">
-              Check-In & Check-Out
-            </h3>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                </div>
-                <span className="text-gray-600 text-base sm:text-lg">
-                  Check-In: {checkInTime}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                </div>
-                <span className="text-gray-600 text-base sm:text-lg">
-                  Check-Out: {checkOutTime}
-                </span>
-              </div>
-            </div>
-          </motion.div>
+          {facilities.length > 0 && renderList(facilities, 'Facilities')}
+          {services.length > 0 && renderList(services, 'Services')}
+          {renderCheckInOut()}
         </motion.div>
+
         <motion.div className="flex-1 space-y-6" variants={itemVariants}>
-          {extraPrices.length > 0 ? (
-            <motion.div
-              variants={itemVariants}
-              className="bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50"
-            >
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 border-l-4 border-blue-500 pl-3">
-                Extra Prices
-              </h3>
-              <ul className="space-y-3">
-                {extraPrices.map((price, index) => (
-                  <motion.li
-                    key={index}
-                    className="flex items-center gap-3 text-gray-600"
-                    variants={itemVariants}
-                    whileHover={{ x: 5 }}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                      <CreditCard className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <span className="text-base sm:text-lg">
-                      {price.name}: ${parseFloat(price.price).toFixed(2)} (
-                      {price.type})
-                    </span>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
-          ) : (
-            <p className="text-gray-600 text-base sm:text-lg bg-white/50 p-6 rounded-2xl shadow-sm border border-blue-50">
-              No extra prices available.
-            </p>
-          )}
+          {extraPrices.length > 0 && renderExtraPrices()}
           {renderPolicies()}
         </motion.div>
       </div>
