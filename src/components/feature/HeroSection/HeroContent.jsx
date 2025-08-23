@@ -30,30 +30,35 @@ const serviceOptions = [
     label: 'Hotels',
     icon: Hotel,
     available: true,
+    route: '/hotels-list',
   },
   {
     id: 'tours',
     label: 'Tours & Experiences',
     icon: Compass,
-    available: false,
+    available: true,
+    route: '/tours',
   },
   {
     id: 'attractions',
     label: 'Attraction Tickets',
     icon: Ticket,
-    available: false,
+    available: true,
+    route: '/attractions',
   },
   {
     id: 'transport',
     label: 'Transport',
     icon: MapPin,
-    available: false,
+    available: true,
+    route: '/transport',
   },
   {
     id: 'cars',
     label: 'Car Rentals',
     icon: Car,
-    available: false,
+    available: true,
+    route: '/car-rentals',
   },
 ];
 
@@ -112,6 +117,19 @@ function HeroContent() {
       setTimeout(() => setShowComingSoon(false), 2000);
       return;
     }
+    
+    // If it's hotels, use the existing hotel search functionality
+    if (serviceId === 'hotels') {
+      setSelectedService(serviceId);
+      return;
+    }
+    
+    // For other services, navigate to their dedicated pages
+    if (service.route) {
+      router.push(service.route);
+      return;
+    }
+    
     setSelectedService(serviceId);
   };
 
