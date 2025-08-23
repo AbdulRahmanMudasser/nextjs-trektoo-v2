@@ -11,15 +11,32 @@ import TravelGallerySection from '@/components/feature/TravelGallerySection/Trav
 
 export default function HomePage() {
   return (
-    <main>
+    <main className="relative">
       <HeroSection />
       <BrowseTypes />
       <AdventureTours />
       <GoWildSection />
       <WhoWeAreSection />
+      
+      {/* Connecting Visual Element */}
+      <div className="relative">
+        <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent"></div>
+      </div>
+      
       <QA />
-      <Tour />
+      
+      {/* Connecting Visual Element */}
+      <div className="relative">
+        <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent"></div>
+      </div>
+      
       <WhyChooseUs />
+      
+      {/* Connecting Visual Element */}
+      <div className="relative">
+        <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent"></div>
+      </div>
+      
       <TravelGallerySection />
     </main>
   );
