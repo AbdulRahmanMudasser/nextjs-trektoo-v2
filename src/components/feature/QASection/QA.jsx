@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { FaPlay } from 'react-icons/fa';
@@ -70,44 +70,53 @@ const ExpandableItem = ({ question, answer, isExpandedByDefault = false }) => {
 
   return (
     <motion.div
-      className="border border-blue-50 rounded-xl p-4 mb-4 bg-white/95 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow"
+      className="border border-gray-200 rounded-2xl p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:border-blue-300"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
+      whileHover={{ y: -2 }}
     >
       <div
         className="flex justify-between items-center cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h4 className="text-lg font-semibold text-gray-900 tracking-tight m-0">
+        <h4 className="text-lg font-bold text-gray-900 tracking-tight m-0 pr-4">
           {question}
         </h4>
-        <motion.svg
-          className="w-5 h-5 text-blue-500"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
+        <motion.div
+          className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white flex-shrink-0"
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.2 }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </motion.svg>
+          <motion.svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={3}
+              d="M19 9l-7 7-7-7"
+            />
+          </motion.svg>
+        </motion.div>
       </div>
       {isExpanded && (
-        <motion.p
-          className="text-sm text-gray-600 mt-3 leading-relaxed"
+        <motion.div
+          className="mt-4 pt-4 border-t border-gray-100"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {answer}
-        </motion.p>
+          <p className="text-gray-600 leading-relaxed text-base">
+            {answer}
+          </p>
+        </motion.div>
       )}
     </motion.div>
   );
@@ -120,17 +129,7 @@ ExpandableItem.propTypes = {
 };
 
 const QASection = () => {
-  const [isMobile, setIsMobile] = useState(false);
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const sectionVariants = {
     hidden: { opacity: 0 },
@@ -143,49 +142,52 @@ const QASection = () => {
   return (
     <motion.section
       ref={ref}
-      className="relative w-full py-12 sm:py-16 bg-blue-50/50 px-0 "
+      className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden"
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
       aria-labelledby="qa-section-heading"
     >
-      <div className="w-full">
+      {/* Subtle background texture */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)`
+        }}></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
-          className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
-          variants={sectionVariants}
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <motion.div
-            className={`flex ${isMobile ? 'flex-col' : 'flex-row'} items-start gap-8`}
-            variants={sectionVariants}
-          >
-            {/* Video Section */}
-            <motion.div
-              className={isMobile ? 'w-full' : 'flex-1 max-w-[60%]'}
-              variants={sectionVariants}
-            >
-              <VideoSection />
-            </motion.div>
 
-            {/* Q&A Sidebar */}
-            <motion.div
-              className={isMobile ? 'w-full' : 'flex-1 max-w-[40%]'}
-              variants={sectionVariants}
-            >
-              <motion.p
-                className="text-lg text-white font-semibold bg-blue-500 inline-block px-4 py-2 rounded-md shadow-sm"
-                whileHover={{ scale: 1.05 }}
-              >
-                Availability
-              </motion.p>
+          
 
-              <motion.h2
-                className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-6 mt-6"
-                variants={sectionVariants}
-              >
-                Enjoy Real Adventure
-              </motion.h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
+            Enjoy Real Adventure
+          </h2>
+          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            Discover authentic experiences and get answers to your travel questions. 
+            Let us guide you through every step of your adventure.
+          </p>
+        </motion.div>
 
-              {/* Expandable Items */}
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Video Section */}
+          <motion.div variants={sectionVariants}>
+            <VideoSection />
+          </motion.div>
+
+          {/* Q&A Section */}
+          <motion.div variants={sectionVariants}>
+            <div className="space-y-6">
               <ExpandableItem
                 question="How Much Price About Tour & Travels?"
                 answer="Our tours are priced competitively, offering premium experiences starting from $129. From kayaking in Phuket to luxurious villas in the Maldives, we tailor adventures to your budget."
@@ -197,9 +199,9 @@ const QASection = () => {
               />
               <ExpandableItem
                 question="Why Choose Our Travel Agency?"
-                answer="With years of expertise, we curate personalized adventures to the world’s most stunning destinations, delivering exceptional service and memorable experiences."
+                answer="With years of expertise, we curate personalized adventures to the world's most stunning destinations, delivering exceptional service and memorable experiences."
               />
-            </motion.div>
+            </div>
           </motion.div>
         </motion.div>
       </div>

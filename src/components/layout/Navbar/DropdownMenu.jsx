@@ -74,7 +74,7 @@ const DropdownMenu = ({ title, items, onItemClick }) => {
                 </h3>
                 {subItems.map((item) => (
                   <Link
-                    key={item.href}
+                    key={item.key || item.href}
                     href={item.href}
                     className="block px-4 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900 transition-colors"
                     role="menuitem"
@@ -101,7 +101,7 @@ const DropdownMenu = ({ title, items, onItemClick }) => {
         ) : (
           items.map((item) => (
             <Link
-              key={item.href}
+              key={item.key || item.href}
               href={item.href}
               className="block px-4 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900 transition-colors"
               role="menuitem"
@@ -135,6 +135,7 @@ DropdownMenu.propTypes = {
       PropTypes.shape({
         href: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired,
+        key: PropTypes.string,
       })
     ),
     PropTypes.objectOf(
@@ -142,6 +143,7 @@ DropdownMenu.propTypes = {
         PropTypes.shape({
           href: PropTypes.string.isRequired,
           label: PropTypes.string.isRequired,
+          key: PropTypes.string,
         })
       )
     ),

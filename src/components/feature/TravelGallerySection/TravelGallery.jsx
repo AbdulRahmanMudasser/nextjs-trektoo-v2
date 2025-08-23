@@ -31,7 +31,7 @@ const GalleryCard = ({ image, title, subtitle, index }) => {
 
   return (
     <motion.div
-      className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-500 group"
+      className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 group border border-gray-100"
       variants={cardVariants}
       initial="hidden"
       animate="visible"
@@ -55,16 +55,16 @@ const GalleryCard = ({ image, title, subtitle, index }) => {
         >
           <div className="text-center space-y-3">
             <motion.div
-              className="bg-blue-500 rounded-full w-12 h-12 flex items-center justify-center mx-auto"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full w-12 h-12 flex items-center justify-center mx-auto shadow-lg"
               whileHover={{ scale: 1.2, rotate: 90 }}
               transition={{ duration: 0.3 }}
             >
               <FaPlus className="text-white text-xl" />
             </motion.div>
-            <h3 className="text-xl font-semibold text-white capitalize tracking-tight">
+            <h3 className="text-xl font-bold text-white capitalize tracking-tight">
               {title}
             </h3>
-            <p className="text-sm text-blue-200 uppercase tracking-widest font-light">
+            <p className="text-sm text-blue-200 uppercase tracking-widest font-medium">
               {subtitle}
             </p>
           </div>
@@ -138,17 +138,23 @@ const TravelGallerySection = () => {
   };
 
   return (
-    <section className="py-12 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+    <section className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
       {/* Subtle background texture */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none" />
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)`
+        }}></div>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
+
+          
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
             Explore Your Next Adventure
           </h2>

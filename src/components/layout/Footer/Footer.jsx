@@ -11,17 +11,37 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* <SupportBanner /> */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <CompanyInfo />
-          <PagesLinks />
-          <NewsletterForm />
-          <ContactInfo />
+    <footer className="bg-gray-900 text-white">
+      {/* Support Banner - Full Width */}
+      <div className="w-full bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm border-b border-blue-500/30">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <SupportBanner />
         </div>
-        <div className="border-t border-gray-600 pt-4 text-center text-xs text-gray-300">
-          © 2025 Copyright by Trektoo. All Rights Reserved.
+      </div>
+      
+      {/* Main Footer Content - Full Width */}
+      <div className="w-full">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          {/* Top Row - Company Info and Newsletter */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <CompanyInfo />
+            <NewsletterForm />
+          </div>
+          
+          {/* Bottom Row - Quick Links and Contact */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <PagesLinks />
+            <ContactInfo />
+          </div>
+        </div>
+      </div>
+      
+      {/* Copyright - Full Width */}
+      <div className="w-full border-t border-white/10 bg-black/20">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="text-center text-sm text-gray-300">
+            © 2025 Copyright by Trektoo. All Rights Reserved.
+          </div>
         </div>
       </div>
     </footer>
