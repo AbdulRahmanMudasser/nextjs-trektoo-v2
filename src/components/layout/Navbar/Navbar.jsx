@@ -10,31 +10,13 @@ import { useRouter } from 'next/navigation';
 import DropdownMenu from './DropdownMenu';
 
 const dropdownItems = {
-  exploreTrektoo: {
-    'Things to do': [
-      { href: '/activities', label: 'Tours & experiences' },
-      { href: '/day-trips', label: 'Day trips' },
-      { href: '/massages-spa', label: 'Massages & spa' },
-      { href: '/outdoor-activities', label: 'Outdoor activities' },
-      { href: '/cultural-experiences', label: 'Cultural experiences' },
-      { href: '/water-sports', label: 'Water sports' },
-      { href: '/cruises', label: 'Cruises' },
-      { href: '/attraction-tickets', label: 'Attraction tickets' },
-    ],
-    Accommodation: [{ href: '/hotels', label: 'Hotels' }],
-    'Transport options': [
-      { href: '/airport-transfers', label: 'Airport transfers' },
-      { href: '/car-rentals', label: 'Car rentals' },
-      { href: '/europe-train-tickets', label: 'Europe train tickets' },
-      { href: '/japan-train-tickets', label: 'Japan train tickets' },
-      { href: '/japan-train-tickets/shinkansen', label: 'Shinkansen tickets' },
-      { href: '/korea-bus', label: 'Korea bus' },
-    ],
-    'Travel essentials': [
-      { href: '/insurance', label: 'Insurance' },
-      { href: '/wifi-sim-cards', label: 'WiFi & SIM cards' },
-    ],
-  },
+  exploreTrektoo: [
+    { href: '/hotels-list', label: 'Hotels', key: 'hotels-main' },
+    { href: '/tours', label: 'Tours & Experiences', key: 'tours-main' },
+    { href: '/attractions', label: 'Attraction Tickets', key: 'attractions-main' },
+    { href: '/transport', label: 'Transport', key: 'transport-main' },
+    { href: '/car-rentals', label: 'Car Rentals', key: 'cars-main' },
+  ],
 };
 
 const Navbar = () => {
@@ -119,10 +101,10 @@ const Navbar = () => {
                 Home
               </Link>
 
-              {/* <DropdownMenu
-                title="Explore Trektoo"
+              <DropdownMenu
+                title="Explore TrekToo"
                 items={dropdownItems.exploreTrektoo}
-              /> */}
+              />
               <Link
                 href="/about"
                 className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
@@ -267,7 +249,7 @@ const Navbar = () => {
                 Home
               </Link>
               <DropdownMenu
-                title="Explore Trektoo"
+                title="Explore TrekToo"
                 items={dropdownItems.exploreTrektoo}
                 onItemClick={() => setIsMobileMenuOpen(false)}
               />
