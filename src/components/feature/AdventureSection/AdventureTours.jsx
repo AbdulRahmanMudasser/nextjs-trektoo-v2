@@ -182,7 +182,7 @@ const AdventureTours = () => {
             className="bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl p-6 sm:p-8 border border-blue-50 max-w-7xl mx-auto"
             variants={sectionVariants}
           >
-            <motion.h2
+            {/* <motion.h2
               id="adventure-tours-heading"
               className="text-3xl sm:text-4xl font-extrabold text-center text-gray-900 mb-8 tracking-tight"
               initial={{ opacity: 0, y: 20 }}
@@ -190,7 +190,7 @@ const AdventureTours = () => {
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
               Explore Real Adventure
-            </motion.h2>
+            </motion.h2> */}
             <div className="relative">
               {!isMobile && (
                 <motion.button

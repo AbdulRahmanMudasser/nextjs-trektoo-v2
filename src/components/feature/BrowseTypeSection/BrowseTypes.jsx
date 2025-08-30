@@ -68,13 +68,13 @@ const BrowseTypes = () => {
       className="relative text-center py-6 z-10"
       aria-label="Browse Types Section"
     >
-      {/* Premium Header */}
-      <div className="text-white text-center -mt-56 mb-10 animate-fade-in">
+      {/* Premium Header - Hidden */}
+      {/* <div className="text-white text-center -mt-56 mb-10 animate-fade-in">
         <h2 className="text-xl sm:text-2xl  md:text-3xl lg:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-white">
           Browse By Categories
         </h2>
         <div className="w-20 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
-      </div>
+      </div> */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={scrollLeft}

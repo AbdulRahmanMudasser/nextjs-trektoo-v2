@@ -210,9 +210,9 @@ function HeroContent() {
             box-shadow 0.3s,
             transform 0.4s;
         }
-        .curved-arrow {
+        /* .curved-arrow {
           animation: float 3s ease-in-out infinite;
-        }
+        } */
         @keyframes float {
           0%,
           100% {
@@ -490,13 +490,13 @@ function HeroContent() {
 
       <div className="transition-wrapper mt-8 sm:mt-12 md:mt-16">
         <div className="relative flex flex-col items-center">
-          <div className="curved-arrow mb-4 sm:mb-6 absolute left-68 top-14 hidden sm:block">
+          {/* <div className="curved-arrow mb-4 sm:mb-6 absolute left-68 top-14 hidden sm:block">
             <img
               src="/images/line-arrow.png"
               alt="Arrow pointing down"
               className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-20 object-contain opacity-80"
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -147,7 +147,7 @@ const TravelGallerySection = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
+        {/* <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -162,7 +162,7 @@ const TravelGallerySection = () => {
             Discover breathtaking destinations that ignite your wanderlust and
             create unforgettable memories.
           </p>
-        </motion.div>
+        </motion.div> */}
 
         <motion.div
           className={`grid gap-6 ${

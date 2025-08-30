@@ -65,70 +65,9 @@ const VideoSection = () => {
 
 VideoSection.propTypes = {};
 
-const ExpandableItem = ({ question, answer, isExpandedByDefault = false }) => {
-  const [isExpanded, setIsExpanded] = useState(isExpandedByDefault);
 
-  return (
-    <motion.div
-      className="border border-gray-200 rounded-2xl p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:border-blue-300"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      whileHover={{ y: -2 }}
-    >
-      <div
-        className="flex justify-between items-center cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <h4 className="text-lg font-bold text-gray-900 tracking-tight m-0 pr-4">
-          {question}
-        </h4>
-        <motion.div
-          className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white flex-shrink-0"
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.2 }}
-        >
-          <motion.svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={3}
-              d="M19 9l-7 7-7-7"
-            />
-          </motion.svg>
-        </motion.div>
-      </div>
-      {isExpanded && (
-        <motion.div
-          className="mt-4 pt-4 border-t border-gray-100"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <p className="text-gray-600 leading-relaxed text-base">
-            {answer}
-          </p>
-        </motion.div>
-      )}
-    </motion.div>
-  );
-};
 
-ExpandableItem.propTypes = {
-  question: PropTypes.string.isRequired,
-  answer: PropTypes.string.isRequired,
-  isExpandedByDefault: PropTypes.bool,
-};
-
-const QASection = () => {
+const AdventureVideoSection = () => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   const sectionVariants = {
@@ -175,7 +114,7 @@ const QASection = () => {
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+          className="max-w-4xl mx-auto"
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
@@ -184,31 +123,12 @@ const QASection = () => {
           <motion.div variants={sectionVariants}>
             <VideoSection />
           </motion.div>
-
-          {/* Q&A Section */}
-          <motion.div variants={sectionVariants}>
-            <div className="space-y-6">
-              <ExpandableItem
-                question="How Much Price About Tour & Travels?"
-                answer="Our tours are priced competitively, offering premium experiences starting from $129. From kayaking in Phuket to luxurious villas in the Maldives, we tailor adventures to your budget."
-                isExpandedByDefault={true}
-              />
-              <ExpandableItem
-                question="What Services Do You Provide?"
-                answer="We offer comprehensive travel planning, including guided tours, accommodations, transportation, and 24/7 support to ensure a seamless and unforgettable journey."
-              />
-              <ExpandableItem
-                question="Why Choose Our Travel Agency?"
-                answer="With years of expertise, we curate personalized adventures to the world's most stunning destinations, delivering exceptional service and memorable experiences."
-              />
-            </div>
-          </motion.div>
         </motion.div>
       </div>
     </motion.section>
   );
 };
 
-QASection.propTypes = {};
+AdventureVideoSection.propTypes = {};
 
-export default QASection;
+export default AdventureVideoSection;
