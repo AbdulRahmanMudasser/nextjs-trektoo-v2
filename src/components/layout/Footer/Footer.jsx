@@ -13,7 +13,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       {/* Support Banner - Full Width */}
-      <div className="w-full bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm border-b border-blue-500/30">
+      <div className="w-full bg-blue-500/20 backdrop-blur-sm border-b border-blue-500/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <SupportBanner />
         </div>

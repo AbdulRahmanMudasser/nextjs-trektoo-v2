@@ -9,7 +9,7 @@ const SupportBanner = () => {
     <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center">
-          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-lg mr-3">
+          <div className="bg-blue-500 p-2 rounded-lg mr-3">
             <svg
               className="w-5 h-5 text-white"
               fill="none"
@@ -38,7 +38,7 @@ const SupportBanner = () => {
           <span className="text-sm text-white mr-3 font-medium">
             Ready to Start Your Adventure?
           </span>
-          <button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
+          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
             Get Started
           </button>
         </div>
@@ -51,7 +51,7 @@ const CompanyInfo = () => {
   return (
     <div className="flex-1">
       <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-lg mr-3">
+        <div className="bg-blue-500 p-2 rounded-lg mr-3">
           <svg
             className="w-6 h-6 text-white"
             fill="none"
@@ -74,26 +74,26 @@ const CompanyInfo = () => {
       </p>
       <div className="space-y-3 mb-4">
         <div className="flex items-center text-sm text-gray-300">
-          <svg className="w-4 h-4 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
           Trusted by 10K+ travelers
         </div>
         <div className="flex items-center text-sm text-gray-300">
-          <svg className="w-4 h-4 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
           50+ destinations covered
         </div>
         <div className="flex items-center text-sm text-gray-300">
-          <svg className="w-4 h-4 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
           24/7 customer support
         </div>
       </div>
       <div className="pt-4 border-t border-white/10">
-        <p className="text-xs text-blue-400 mb-3 font-medium">Follow us on social media</p>
+        <p className="text-xs text-blue-500 mb-3 font-medium">Follow us on social media</p>
         <div className="flex gap-3">
           <SocialIcon type="facebook" />
           <SocialIcon type="instagram" />
@@ -141,7 +141,7 @@ const PagesLinks = () => {
   return (
     <div className="flex-1">
       <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-lg mr-3">
+        <div className="bg-blue-500 p-2 rounded-lg mr-3">
           <svg
             className="w-5 h-5 text-white"
             fill="none"
@@ -163,9 +163,9 @@ const PagesLinks = () => {
           <li key={index}>
             <a
               href={link.href}
-              className="flex items-center text-sm text-gray-300 no-underline hover:text-blue-400 transition-all duration-300 hover:translate-x-1 group"
+              className="flex items-center text-sm text-gray-300 no-underline hover:text-blue-500 transition-all duration-300 hover:translate-x-1 group"
             >
-              <span className="text-blue-400 mr-3 group-hover:scale-110 transition-transform duration-200">
+              <span className="text-blue-500 mr-3 group-hover:scale-110 transition-transform duration-200">
                 {getIcon(link.icon)}
               </span>
               {link.label}
@@ -187,7 +187,7 @@ const NewsletterForm = () => {
   return (
     <div className="flex-1">
       <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-lg mr-3">
+        <div className="bg-blue-500 p-2 rounded-lg mr-3">
           <svg
             className="w-5 h-5 text-white"
             fill="none"
@@ -242,7 +242,7 @@ const NewsletterForm = () => {
         
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
           aria-label="Subscribe to newsletter"
         >
           <svg
@@ -266,7 +266,7 @@ const NewsletterForm = () => {
         <input 
           type="checkbox" 
           id="newsletter-terms"
-          className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 flex-shrink-0"
+          className="w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 flex-shrink-0"
           required
         />
         <label
@@ -276,14 +276,14 @@ const NewsletterForm = () => {
           I agree to receive marketing emails and accept the{' '}
           <a
             href="/terms"
-            className="text-blue-400 hover:text-blue-300 underline font-medium"
+            className="text-blue-500 hover:text-blue-400 underline font-medium"
           >
             Terms of Service
           </a>
           {' '}and{' '}
           <a
             href="/privacy"
-            className="text-blue-400 hover:text-blue-300 underline font-medium"
+            className="text-blue-500 hover:text-blue-400 underline font-medium"
           >
             Privacy Policy
           </a>
@@ -349,7 +349,7 @@ const ContactInfo = () => {
   return (
     <div className="flex-1">
       <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-lg mr-3">
+        <div className="bg-blue-500 p-2 rounded-lg mr-3">
           <svg
             className="w-5 h-5 text-white"
             fill="none"
@@ -377,9 +377,9 @@ const ContactInfo = () => {
           <li key={index}>
             <a
               href={contact.href}
-              className="flex items-center text-sm text-gray-300 no-underline hover:text-blue-400 transition-all duration-300 hover:translate-x-1 group"
+              className="flex items-center text-sm text-gray-300 no-underline hover:text-blue-500 transition-all duration-300 hover:translate-x-1 group"
             >
-              <span className="text-blue-400 mr-3 group-hover:scale-110 transition-transform duration-200">
+              <span className="text-blue-500 mr-3 group-hover:scale-110 transition-transform duration-200">
                 {getIcon(contact.icon)}
               </span>
               {contact.value}
