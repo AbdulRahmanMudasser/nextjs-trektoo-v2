@@ -3,7 +3,7 @@ import HeroSection from '@/components/feature/HeroSection/HeroSection';
 // import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
 // import AdventureTours from '@/components/feature/AdventureSection/AdventureTours';
 import GoWildSection from '@/components/feature/GoWildSection/GoWildSection';
-import WhoWeAreSection from '@/components/feature/WhoWeAreSection/WhoWeAre';
+// import WhoWeAreSection from '@/components/feature/WhoWeAreSection/WhoWeAre';
 import AdventureVideoSection from '@/components/feature/QASection/QA';
 import FAQ from '@/components/feature/FAQSection/FAQ';
 import Tour from '@/components/feature/TourSection/Tour';
@@ -17,7 +17,7 @@ export default function HomePage() {
       {/* <BrowseTypes /> */}
       {/* <AdventureTours /> */}
       <GoWildSection />
-      <WhoWeAreSection />
+      {/* <WhoWeAreSection /> */}
       
       {/* Connecting Visual Element */}
       <div className="relative">
