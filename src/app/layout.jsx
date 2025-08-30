@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer/Footer';
 import Navbar from '@/components/layout/Navbar/Navbar';
 import Topbar from '@/components/layout/Topbar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css';
 
 const queryClient = new QueryClient({
@@ -28,10 +29,12 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-          <Topbar cartCount={99} />
-          <Navbar />
-          {children}
-          <Footer />
+          <AuthProvider>
+            <Topbar cartCount={99} />
+            <Navbar />
+            {children}
+            <Footer />
+          </AuthProvider>
         </QueryClientProvider>
       </body>
     </html>

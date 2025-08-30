@@ -48,17 +48,7 @@ const Navbar = () => {
     if (!isProfileOpen) clearMessages();
   }, [isProfileOpen, clearMessages]);
 
-  // Listen for route changes to ensure auth state updates
-  useEffect(() => {
-    const handleStorageChange = () => {
-      // Force re-render by triggering a state update
-      setIsMobileMenuOpen(false); // Reset mobile menu to ensure UI consistency
-      setIsProfileOpen(false); // Reset profile dropdown
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  // No need for storage event listener anymore - context handles state updates automatically
 
   const handleLogout = async () => {
     try {
