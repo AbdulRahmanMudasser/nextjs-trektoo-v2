@@ -37,7 +37,7 @@ body {
     transform: scale(1.05);
     /* Less zoom on mobile for better performance */
   }
-  
+
 }
 
 /* Ensure your topbar/navbar has proper z-index */
@@ -219,7 +219,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-gray-200;
   }
 
   body {
