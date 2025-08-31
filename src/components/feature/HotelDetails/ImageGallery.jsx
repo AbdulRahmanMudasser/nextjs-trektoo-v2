@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import Image from 'next/image';
+
 import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCw, Download, Share2, Maximize2, Grid3X3 } from 'lucide-react';
 
@@ -10,13 +10,63 @@ const ImageWithFallback = ({ src, alt, onLoad, priority = false, ...props }) => 
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
-  const proxiedSrc = src.includes('staging.trektoo.com')
-    ? `/api/image/proxy?url=${encodeURIComponent(src)}`
-    : src;
+  // Clean and validate image URL
+  const cleanImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    // Remove trailing quotes and whitespace
+    let cleanedUrl = url
+      .trim()
+      .replace(/["']+$/, '')
+      .replace(/^["']+/, '');
+    // Check for common invalid patterns
+    if (
+      cleanedUrl === '' ||
+      cleanedUrl === 'null' ||
+      cleanedUrl === 'undefined'
+    )
+      return null;
+    return cleanedUrl;
+  };
+
+  const isValidImageUrl = (url) => {
+    if (!url) return false;
+    // Check if it's a valid URL format
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      // If it's not a valid absolute URL, check if it's a valid relative path
+      return (
+        url.startsWith('/') || url.startsWith('./') || url.startsWith('../')
+      );
+    }
+  };
+
+  const cleanedSrc = cleanImageUrl(src);
+  const validSrc = cleanedSrc && isValidImageUrl(cleanedSrc);
+
+  // Enhanced error handling with better logging
+  const handleImageError = (e) => {
+    console.error('Image load error:', {
+      originalSrc: src,
+      cleanedSrc,
+      error: e.message,
+      timestamp: new Date().toISOString(),
+    });
+    setHasError(true);
+    setIsLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+    onLoad?.();
+    // Reset error state if image loads successfully
+    if (hasError) setHasError(false);
+  };
 
   return (
     <div className="relative w-full h-full">
-      {hasError ? (
+      {hasError || !validSrc ? (
         <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
           <div className="text-gray-400 mb-2">
             <Grid3X3 className="h-12 w-12" />
@@ -30,21 +80,13 @@ const ImageWithFallback = ({ src, alt, onLoad, priority = false, ...props }) => 
               <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
             </div>
           )}
-          <Image
-            src={proxiedSrc}
-            alt={alt}
-            onLoad={() => {
-              setIsLoading(false);
-              onLoad?.();
-            }}
-            onError={(e) => {
-              console.error('Image load error:', { src, error: e.message });
-              setHasError(true);
-              setIsLoading(false);
-            }}
-            priority={priority}
-            {...props}
-          />
+                     <img
+             src={cleanedSrc}
+             alt={alt}
+             onLoad={handleImageLoad}
+             onError={handleImageError}
+             className="w-full h-full object-cover"
+           />
         </>
       )}
     </div>
@@ -324,15 +366,12 @@ const ImageModal = ({ isOpen, onClose, images, currentIndex, setCurrentIndex }) 
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <ImageWithFallback
-                src={images[currentIndex]}
-                alt={`Gallery Image ${currentIndex + 1}`}
-                fill
-                className="object-contain select-none"
-                quality={95}
-                priority
-                onLoad={() => handleImageLoad(currentIndex)}
-              />
+                             <ImageWithFallback
+                 src={images[currentIndex]}
+                 alt={`Gallery Image ${currentIndex + 1}`}
+                 className="w-full h-full object-contain select-none"
+                 onLoad={() => handleImageLoad(currentIndex)}
+               />
             </motion.div>
           </motion.div>
 
@@ -388,13 +427,11 @@ const ImageModal = ({ isOpen, onClose, images, currentIndex, setCurrentIndex }) 
                   whileTap={{ scale: 0.9 }}
                 >
                   <div className="w-12 h-8 relative">
-                    <ImageWithFallback
-                      src={images[index]}
-                      alt={`Thumbnail ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      quality={30}
-                    />
+                                         <ImageWithFallback
+                       src={images[index]}
+                       alt={`Thumbnail ${index + 1}`}
+                       className="w-full h-full object-cover"
+                     />
                     {!imageLoadStates[index] && (
                       <div className="absolute inset-0 bg-gray-600 animate-pulse" />
                     )}
@@ -560,7 +597,7 @@ const ImageGallery = ({ images = [], autoPlay = true, autoPlayInterval = 3000 })
   if (!images.length) {
     return (
       <motion.div
-        className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+        className="relative w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -579,7 +616,7 @@ const ImageGallery = ({ images = [], autoPlay = true, autoPlayInterval = 3000 })
   return (
     <>
       <motion.div
-        className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+        className="relative w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -643,16 +680,12 @@ const ImageGallery = ({ images = [], autoPlay = true, autoPlayInterval = 3000 })
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                <ImageWithFallback
-                  src={src}
-                  alt={`Gallery Image ${index + 1}`}
-                  fill
-                  className="object-cover transition-all duration-700 group-hover:scale-110"
-                  quality={85}
-                  loading={index < 4 ? "eager" : "lazy"}
-                  priority={index < 2}
-                  onLoad={() => handleImageLoad(index)}
-                />
+                                 <ImageWithFallback
+                   src={src}
+                   alt={`Gallery Image ${index + 1}`}
+                   className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                   onLoad={() => handleImageLoad(index)}
+                 />
                 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />

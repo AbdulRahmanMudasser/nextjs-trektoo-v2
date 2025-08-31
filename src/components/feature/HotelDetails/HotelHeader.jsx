@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Image from 'next/image';
+
 import {
   MapPin,
   ThumbsUp,
@@ -15,28 +15,88 @@ import { motion } from 'framer-motion';
 
 const ImageWithFallback = ({ src, alt, ...props }) => {
   const [hasError, setHasError] = React.useState(false);
-  const proxiedSrc = src.includes('staging.trektoo.com')
-    ? `/api/image/proxy?url=${encodeURIComponent(src)}`
-    : src;
+
+  // Clean and validate image URL
+  const cleanImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    // Remove trailing quotes and whitespace
+    let cleanedUrl = url
+      .trim()
+      .replace(/["']+$/, '')
+      .replace(/^["']+/, '');
+    // Check for common invalid patterns
+    if (
+      cleanedUrl === '' ||
+      cleanedUrl === 'null' ||
+      cleanedUrl === 'undefined'
+    )
+      return null;
+    return cleanedUrl;
+  };
+
+  const isValidImageUrl = (url) => {
+    if (!url) return false;
+    // Check if it's a valid URL format
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      // If it's not a valid absolute URL, check if it's a valid relative path
+      return (
+        url.startsWith('/') || url.startsWith('./') || url.startsWith('../')
+      );
+    }
+  };
+
+  const cleanedSrc = cleanImageUrl(src);
+  const validSrc = cleanedSrc && isValidImageUrl(cleanedSrc);
+
+  // Enhanced error handling with better logging
+  const handleImageError = (e) => {
+    console.error('Image load error:', {
+      originalSrc: src,
+      cleanedSrc,
+      error: e.message,
+      timestamp: new Date().toISOString(),
+    });
+    setHasError(true);
+  };
 
   return (
     <div className="relative w-full h-full">
-      {hasError ? (
-        <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">
-          <span className="text-gray-600 text-sm font-medium">
+      {hasError || !validSrc ? (
+        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+          <div className="h-12 w-12 text-blue-500 flex items-center justify-center mb-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-8 h-8"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-4.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 1 1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+              />
+            </svg>
+          </div>
+          <span className="text-gray-600 text-sm font-medium text-center px-2">
             Image Unavailable
           </span>
         </div>
       ) : (
-        <Image
-          src={proxiedSrc}
-          alt={alt}
-          onError={(e) => {
-            console.error('Image load error:', { src, error: e.message });
-            setHasError(true);
-          }}
-          {...props}
-        />
+                 <img
+           src={cleanedSrc}
+           alt={alt}
+           onError={handleImageError}
+           onLoad={() => {
+             // Reset error state if image loads successfully
+             if (hasError) setHasError(false);
+           }}
+           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+         />
       )}
     </div>
   );
@@ -96,24 +156,20 @@ const HotelHeader = ({
     >
       {/* Hero Image Section */}
       <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden">
-        <ImageWithFallback
-          src={image}
-          alt={title}
-          fill
-          className="object-cover transform transition-transform duration-1000 hover:scale-105"
-          priority
-          sizes="100vw"
-          quality={80}
-        />
+                 <ImageWithFallback
+           src={image}
+           alt={title}
+           className="w-full h-full object-cover transform transition-transform duration-1000 hover:scale-105"
+         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50" />
       </div>
 
       {/* Main Content Section */}
       <motion.div
-        className="relative bg-white/95 backdrop-blur-sm py-8 sm:py-12 px-4 sm:px-6 lg:px-8 shadow-xl -mt-16 mx-4 sm:mx-6 lg:mx-12 rounded-3xl"
+        className="relative bg-white/95 backdrop-blur-sm py-8 sm:py-12 px-4 sm:px-6 lg:px-8 -mt-16 mx-4 sm:mx-6 lg:mx-12 rounded-3xl"
         variants={itemVariants}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
             <motion.div className="space-y-4" variants={itemVariants}>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
@@ -131,7 +187,6 @@ const HotelHeader = ({
               variants={containerVariants}
             >
               {[
-                { icon: ThumbsUp, label: 'From', value: `$${parseFloat(price).toFixed(2)}` },
                 { icon: Clock, label: 'Duration', value: duration },
                 { icon: Leaf, label: 'Hotel Type', value: 'Luxury' },
                 ...(discount
@@ -165,7 +220,7 @@ const HotelHeader = ({
         className="bg-white border-t border-gray-100 py-6 px-4 sm:px-6 lg:px-8"
         variants={itemVariants}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
             <motion.div className="flex items-center" variants={itemVariants}>
               <div className="flex">

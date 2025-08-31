@@ -283,7 +283,7 @@ const TourInformation = ({
 
   return (
     <motion.div
-      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm shadow-xl rounded-3xl"
+      className="relative w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
       initial="hidden"
       animate="visible"
       variants={containerVariants}

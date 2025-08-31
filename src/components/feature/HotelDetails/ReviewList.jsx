@@ -131,7 +131,7 @@ const ReviewList = ({
 
   return (
     <motion.div
-      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-10 px-6 sm:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white rounded-3xl shadow-lg mb-16"
+      className="relative w-full py-10 px-6 sm:px-8 lg:px-12 mb-16"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -153,7 +153,7 @@ const ReviewList = ({
             return (
               <motion.div
                 key={review.id}
-                className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6 hover:shadow-xl transition-shadow duration-300"
+                className="p-6 rounded-xl border border-gray-100 mb-6 transition-shadow duration-300"
                 variants={itemVariants}
                 data-testid={`review-${review.id}`}
               >

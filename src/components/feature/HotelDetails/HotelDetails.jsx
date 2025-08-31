@@ -85,7 +85,7 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
       animate="visible"
       variants={containerVariants}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header Section */}
         <motion.div className="text-center mb-12" variants={itemVariants}>
           <motion.div
@@ -103,7 +103,7 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
         <div className="w-full">
           {/* Description Section */}
           <motion.div className="w-full space-y-6" variants={itemVariants}>
-            <div className="bg-gradient-to-br from-gray-50 to-white p-8 sm:p-10 rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="p-8 sm:p-10 rounded-3xl border border-gray-100">
               <motion.h3
                 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center"
                 variants={itemVariants}
@@ -120,7 +120,7 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
 
               {/* Location */}
               <motion.div
-                className="mt-8 p-6 bg-blue-50 rounded-2xl border border-blue-100"
+                className="mt-8 p-6 rounded-2xl border border-blue-100"
                 variants={itemVariants}
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -145,7 +145,7 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
             {/* Rating Card */}
             {rating && (
               <motion.div
-                className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 sm:p-8 rounded-3xl border border-yellow-200 shadow-lg"
+                className="p-6 sm:p-8 rounded-3xl border border-yellow-200"
                 variants={itemVariants}
                 whileHover={{ y: -5 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -168,7 +168,7 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
             {/* Amenities Card */}
             {amenities && amenities.length > 0 && (
               <motion.div
-                className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 sm:p-8 rounded-3xl border border-green-200 shadow-lg"
+                className="p-6 sm:p-8 rounded-3xl border border-green-200"
                 variants={itemVariants}
                 whileHover={{ y: -5 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
