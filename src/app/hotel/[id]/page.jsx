@@ -15,7 +15,7 @@ import Map from '@/components/feature/HotelDetails/Map';
 import CalendarPrice from '@/components/feature/HotelDetails/CalendarPrice';
 import ReviewScores from '@/components/feature/HotelDetails/ReviewScores';
 import ReviewList from '@/components/feature/HotelDetails/ReviewList';
-import { ErrorBoundary } from '@/components/feature/Error/ErrorBoundary';
+import ErrorBoundary from '@/components/security/ErrorBoundary';
 import {
   useHotelDetails,
   useHotelReviews,
