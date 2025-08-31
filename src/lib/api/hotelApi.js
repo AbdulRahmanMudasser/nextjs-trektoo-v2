@@ -1,17 +1,4 @@
-import axios from 'axios';
-
-/**
- * Centralized API client for hotel-related requests
- */
-const hotelApi = axios.create({
-    baseURL: 'https://staging.trektoo.com/api',
-
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-    },
-    timeout: 30000, // 30-second timeout
-});
+import secureApiClient from './secureApiClient';
 
 /**
  * Helper function to format errors for logging
@@ -59,7 +46,7 @@ const getUserFriendlyError = (error) => {
  */
 export const fetchBookingDetails = async (code, token) => {
     try {
-        const response = await hotelApi.get(`/hotel/booking/${code}`, {
+        const response = await secureApiClient.get(`/hotel/booking/${code}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -82,7 +69,7 @@ export const doCheckout = async (checkoutData, token) => {
     try {
         const query = new URLSearchParams(checkoutData).toString();
         console.log('doCheckout request:', { url: `/booking/doCheckout?${query}`, checkoutData, token });
-        const response = await hotelApi.post(`/booking/doCheckout?${query}`, {}, {
+        const response = await secureApiClient.post(`/booking/doCheckout?${query}`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -103,7 +90,7 @@ export const doCheckout = async (checkoutData, token) => {
  */
 export const addToCart = async (bookingData, token) => {
     try {
-        const response = await hotelApi.post('/booking/addToCart', bookingData, {
+        const response = await secureApiClient.post('/booking/addToCart', bookingData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -123,7 +110,7 @@ export const addToCart = async (bookingData, token) => {
 export const fetchHotels = async (searchParams) => {
     const query = searchParams.toString();
     try {
-        const response = await hotelApi.get(`/hotel/search?${query}`);
+        const response = await secureApiClient.get(`/hotel/search?${query}`);
         console.log('Hotels API response:', response.data);
 
         // Return the complete response object with pagination info
@@ -147,7 +134,7 @@ export const fetchHotels = async (searchParams) => {
  */
 export const fetchHotelDetails = async (id) => {
     try {
-        const response = await hotelApi.get(`/hotel/detail/${id}`);
+        const response = await secureApiClient.get(`/hotel/detail/${id}`);
         return response.data.data || {};
     } catch (error) {
         console.error('Hotel Details API error:', formatError(error));
@@ -164,7 +151,7 @@ export const fetchHotelDetails = async (id) => {
  */
 export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
     try {
-        const response = await hotelApi.get(`/hotel/detail/${id}?page=${page}&per_page=${perPage}`);
+        const response = await secureApiClient.get(`/hotel/detail/${id}?page=${page}&per_page=${perPage}`);
         return response.data.data?.review_lists || { data: [], current_page: 1, total_pages: 1, total: 0 };
     } catch (error) {
         console.error('Hotel Reviews API error:', formatError(error));
@@ -179,7 +166,7 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
  */
 export const fetchHotelAvailability = async (id) => {
     try {
-        const response = await hotelApi.get(`/hotel/availability/${id}`);
+        const response = await secureApiClient.get(`/hotel/availability/${id}`);
         return response.data.rooms || [];
     } catch (error) {
         console.error('Hotel Availability API error:', formatError(error));
@@ -194,7 +181,7 @@ export const fetchHotelAvailability = async (id) => {
  */
 export const fetchLocations = async (query) => {
     try {
-        const response = await hotelApi.get(`/locations?service_name=${encodeURIComponent(query)}`);
+        const response = await secureApiClient.get(`/locations?service_name=${encodeURIComponent(query)}`);
         console.log('Locations API response:', { total: response.data.total, data: response.data.data });
         return response.data.data || [];
     } catch (error) {

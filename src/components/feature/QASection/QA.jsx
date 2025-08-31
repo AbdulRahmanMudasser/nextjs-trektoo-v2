@@ -1,214 +1,240 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { FaPlay } from 'react-icons/fa';
 import { useInView } from 'react-intersection-observer';
 
-const PlayButton = ({ onClick, isPlaying }) => {
-  if (isPlaying) return null;
-
-  return (
-    <motion.div
-      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors"
-      onClick={onClick}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <FaPlay className="w-6 h-6 text-white ml-1" />
-    </motion.div>
-  );
-};
-
-PlayButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  isPlaying: PropTypes.bool.isRequired,
-};
-
 const VideoSection = () => {
-  const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   return (
     <motion.div
-      className="relative w-full pt-[56.25%] rounded-2xl overflow-hidden shadow-lg"
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className="relative w-full pt-[56.25%] rounded-3xl overflow-hidden shadow-2xl"
+      initial={{ opacity: 0, y: 50, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)",
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
+      style={{ willChange: 'transform, opacity' }}
     >
-      <video
-        ref={videoRef}
-        className="absolute top-0 left-0 w-full h-full object-cover"
-        src="https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-paradise-beach-42347-large.mp4"
-        loop
-        muted
-        playsInline
-        loading="lazy"
+      {/* YouTube Video Embed */}
+      <iframe
+        className="absolute top-0 left-0 w-full h-full rounded-3xl"
+        src="https://www.youtube.com/embed/278IRQ6HSi4?si=-ITT0DEL4dU3Sx11&autoplay=0&rel=0&modestbranding=1"
+        title="Trektoo Adventure Video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-      <PlayButton onClick={handlePlayPause} isPlaying={isPlaying} />
+      
+      {/* Enhanced overlay with gradient */}
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5 }}
+      />
+      
+      {/* Enhanced decorative elements */}
+      <motion.div 
+        className="absolute top-4 right-4 w-3 h-3 bg-blue-500 rounded-full"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        style={{ willChange: 'transform, opacity' }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [1, 0.7, 1],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div 
+        className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 1.0 }}
+        style={{ willChange: 'transform, opacity' }}
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.7, 1, 0.7],
+        }}
+        transition={{
+          duration: 2.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.5
+        }}
+      />
     </motion.div>
   );
 };
 
 VideoSection.propTypes = {};
 
-const ExpandableItem = ({ question, answer, isExpandedByDefault = false }) => {
-  const [isExpanded, setIsExpanded] = useState(isExpandedByDefault);
 
-  return (
-    <motion.div
-      className="border border-gray-200 rounded-2xl p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:border-blue-300"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      whileHover={{ y: -2 }}
-    >
-      <div
-        className="flex justify-between items-center cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <h4 className="text-lg font-bold text-gray-900 tracking-tight m-0 pr-4">
-          {question}
-        </h4>
-        <motion.div
-          className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white flex-shrink-0"
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.2 }}
-        >
-          <motion.svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={3}
-              d="M19 9l-7 7-7-7"
-            />
-          </motion.svg>
-        </motion.div>
-      </div>
-      {isExpanded && (
-        <motion.div
-          className="mt-4 pt-4 border-t border-gray-100"
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <p className="text-gray-600 leading-relaxed text-base">
-            {answer}
-          </p>
-        </motion.div>
-      )}
-    </motion.div>
-  );
-};
 
-ExpandableItem.propTypes = {
-  question: PropTypes.string.isRequired,
-  answer: PropTypes.string.isRequired,
-  isExpandedByDefault: PropTypes.bool,
-};
-
-const QASection = () => {
+const AdventureVideoSection = () => {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   const sectionVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.8, ease: 'easeOut', staggerChildren: 0.2 },
+      transition: { duration: 1, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.3 },
+    },
+  };
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -30, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        duration: 0.8, 
+        ease: [0.25, 0.46, 0.45, 0.94],
+        type: "spring",
+        stiffness: 100
+      }
+    },
+  };
+
+  const descriptionVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.98 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        duration: 0.8, 
+        delay: 0.2,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }
     },
   };
 
   return (
     <motion.section
       ref={ref}
-      className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden"
+      className="py-20 bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden"
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
       aria-labelledby="qa-section-heading"
     >
-      {/* Subtle background texture */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)`
+      {/* Enhanced background with animated elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Animated gradient circles */}
+        <motion.div
+          className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.6, 0.3, 0.6],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+        
+        {/* Floating particles */}
+        <motion.div
+          className="absolute top-1/4 right-1/4 w-2 h-2 bg-blue-400 rounded-full"
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.5, 1, 0.5],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-indigo-400 rounded-full"
+          animate={{
+            y: [0, 15, 0],
+            opacity: [0.3, 0.8, 0.3],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+        
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
         }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                 {/* Enhanced Header Section */}
+         <motion.div
+           className="text-center mb-16"
+           variants={headerVariants}
+         >
+           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-6">
+             Enjoy{' '}
+             <span className="text-blue-500">
+               Real Adventure
+             </span>
+           </h2>
+           
+           <motion.p 
+             className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed"
+             variants={descriptionVariants}
+           >
+             Discover authentic experiences and get answers to your travel questions. 
+             Let us guide you through every step of your adventure.
+           </motion.p>
+         </motion.div>
+
+        {/* Enhanced Video Container */}
         <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-
-          
-
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
-            Enjoy Real Adventure
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover authentic experiences and get answers to your travel questions. 
-            Let us guide you through every step of your adventure.
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+          className="max-w-5xl mx-auto"
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Video Section */}
-          <motion.div variants={sectionVariants}>
-            <VideoSection />
-          </motion.div>
+                     {/* Video Section with enhanced wrapper */}
+           <motion.div 
+             variants={sectionVariants}
+             className="relative"
+           >
+             <VideoSection />
+           </motion.div>
 
-          {/* Q&A Section */}
-          <motion.div variants={sectionVariants}>
-            <div className="space-y-6">
-              <ExpandableItem
-                question="How Much Price About Tour & Travels?"
-                answer="Our tours are priced competitively, offering premium experiences starting from $129. From kayaking in Phuket to luxurious villas in the Maldives, we tailor adventures to your budget."
-                isExpandedByDefault={true}
-              />
-              <ExpandableItem
-                question="What Services Do You Provide?"
-                answer="We offer comprehensive travel planning, including guided tours, accommodations, transportation, and 24/7 support to ensure a seamless and unforgettable journey."
-              />
-              <ExpandableItem
-                question="Why Choose Our Travel Agency?"
-                answer="With years of expertise, we curate personalized adventures to the world's most stunning destinations, delivering exceptional service and memorable experiences."
-              />
-            </div>
-          </motion.div>
+          
         </motion.div>
       </div>
     </motion.section>
   );
 };
 
-QASection.propTypes = {};
+AdventureVideoSection.propTypes = {};
 
-export default QASection;
+export default AdventureVideoSection;

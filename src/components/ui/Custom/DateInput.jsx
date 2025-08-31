@@ -65,12 +65,12 @@ function DateInput({ selectedDate, onChange, placeholder, minDate, disabled }) {
         <Button
           variant="outline"
           className={cn(
-            'w-full h-9 sm:h-10 lg:h-12 px-2 sm:px-3 lg:px-4 text-xs sm:text-sm lg:text-base justify-start text-left font-normal border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition',
+            'w-full h-12 sm:h-14 px-4 text-base justify-start text-left font-normal border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition rounded-xl',
             !selectedDate && 'text-gray-500'
           )}
           disabled={disabled}
         >
-          <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-gray-400 flex-shrink-0" />
+          <CalendarIcon className="w-5 h-5 text-gray-400 flex-shrink-0 mr-2" />
           <span className="truncate">
             {selectedDate ? formatDate(selectedDate) : placeholder}
           </span>

@@ -1,16 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+
+import toast, { Toaster } from 'react-hot-toast';
 import {
   Search,
-  User,
   X,
   Hotel,
   MapPin,
   Ticket,
   Car,
   Compass,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Users,
+  ArrowRight,
 } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
 import { useLocations } from '@/hooks/useHotels';
@@ -23,7 +31,7 @@ const addDays = (date, days) => {
   return result;
 };
 
-// Service options configuration
+// Enhanced service options with better visual hierarchy
 const serviceOptions = [
   {
     id: 'hotels',
@@ -31,47 +39,58 @@ const serviceOptions = [
     icon: Hotel,
     available: true,
     route: '/hotels-list',
+    color: 'from-blue-500 to-blue-600',
+    description: 'Find the perfect stay',
   },
   {
     id: 'tours',
     label: 'Tours & Experiences',
     icon: Compass,
-    available: true,
+    available: false,
     route: '/tours',
+    color: 'from-blue-500 to-blue-600',
+    description: 'Coming Soon',
   },
   {
     id: 'attractions',
     label: 'Attraction Tickets',
     icon: Ticket,
-    available: true,
+    available: false,
     route: '/attractions',
+    color: 'from-blue-500 to-blue-600',
+    description: 'Coming Soon',
   },
   {
     id: 'transport',
     label: 'Transport',
     icon: MapPin,
-    available: true,
+    available: false,
     route: '/transport',
+    color: 'from-blue-500 to-blue-600',
+    description: 'Coming Soon',
   },
   {
     id: 'cars',
     label: 'Car Rentals',
     icon: Car,
-    available: true,
+    available: false,
     route: '/car-rentals',
+    color: 'from-blue-500 to-blue-600',
+    description: 'Coming Soon',
   },
 ];
 
 function HeroContent() {
   const [selectedService, setSelectedService] = useState('hotels');
-  const [showComingSoon, setShowComingSoon] = useState(false);
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
-  const [guests, setGuests] = useState({ children: 0, adult: 0 });
+  const [guests, setGuests] = useState({ children: 0, adult: 1 });
   const [selectedDateFrom, setSelectedDateFrom] = useState(null);
   const [selectedDateTo, setSelectedDateTo] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState(null);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   const dateFromPickerRef = useRef(null);
   const dateToPickerRef = useRef(null);
@@ -86,77 +105,164 @@ function HeroContent() {
   const locations = locationsData?.data || [];
   const errorMessage = locationsData?.errorMessage;
 
+  // Enhanced intersection observer for better performance
+  const { ref: contentRef, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+    rootMargin: '-50px',
+  });
+
+
+
   // Filter locations case-insensitively for additional client-side matching
   const filteredLocations = locations.filter((location) =>
     location.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Enhanced click outside handling with better performance
   useEffect(() => {
     const handleClickOutside = (event) => {
       const isOutside = (ref) =>
         ref.current && !ref.current.contains(event.target);
+      
       if (isOutside(dateFromPickerRef)) setSelectedDateFrom((prev) => prev);
       if (isOutside(dateToPickerRef)) setSelectedDateTo((prev) => prev);
       if (isOutside(guestsDropdownRef)) setIsGuestsDropdownOpen(false);
       if (isOutside(searchDropdownRef) && isOutside(searchInputRef))
         setIsSearchDropdownOpen(false);
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
 
-  // Handle service selection
-  const handleServiceSelect = (serviceId) => {
+  // Enhanced service selection with better feedback
+  const handleServiceSelect = useCallback((serviceId) => {
     const service = serviceOptions.find((s) => s.id === serviceId);
+    
     if (!service.available) {
-      setShowComingSoon(true);
-      setTimeout(() => setShowComingSoon(false), 2000);
+      toast.error('Coming Soon!', {
+        duration: 3000,
+        position: 'top-center',
+      });
       return;
     }
     
     // If it's hotels, use the existing hotel search functionality
     if (serviceId === 'hotels') {
       setSelectedService(serviceId);
+      toast.success(`Selected ${service.label}`, {
+        duration: 2000,
+        position: 'top-center',
+      });
       return;
     }
     
     // For other services, navigate to their dedicated pages
     if (service.route) {
+      toast.loading(`Redirecting to ${service.label}...`, {
+        duration: 1000,
+        position: 'top-center',
+      });
+      setTimeout(() => {
       router.push(service.route);
+      }, 1000);
       return;
     }
     
     setSelectedService(serviceId);
-  };
+  }, [router]);
 
-  const handleGuestChange = (category, increment) => {
-    setGuests((prev) => ({
+  // Enhanced guest management with validation
+  const handleGuestChange = useCallback((category, increment) => {
+    setGuests((prev) => {
+      const newValue = Math.max(0, prev[category] + (increment ? 1 : -1));
+      
+      // Ensure at least one adult
+      if (category === 'adult' && newValue === 0) {
+        toast.error('At least one adult is required', {
+          duration: 3000,
+          position: 'top-center',
+        });
+        return prev;
+      }
+      
+      return {
       ...prev,
-      [category]: Math.max(0, prev[category] + (increment ? 1 : -1)),
-    }));
+        [category]: newValue,
   };
+    });
+  }, []);
 
-  const formatDateToApi = (date) => {
+  // Enhanced date formatting with validation
+  const formatDateToApi = useCallback((date) => {
     if (!date) return null;
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
-  const handleSearch = () => {
-    if (!selectedCity || !selectedDateFrom || !selectedDateTo) {
-      alert('Please select a city, check-in date, and check-out date.');
+  // Enhanced search with better error handling and loading states
+  const handleSearch = useCallback(async () => {
+    // Clear previous errors
+    setSearchError(null);
+    
+    // Validation with better user feedback
+    if (!selectedCity) {
+      setSearchError('Please select a destination city');
+      toast.error('Please select a destination city', {
+        duration: 4000,
+        position: 'top-center',
+      });
       return;
     }
+    
+    if (!selectedDateFrom) {
+      setSearchError('Please select a check-in date');
+      toast.error('Please select a check-in date', {
+        duration: 4000,
+        position: 'top-center',
+      });
+      return;
+    }
+    
+    if (!selectedDateTo) {
+      setSearchError('Please select a check-out date');
+      toast.error('Please select a check-out date', {
+        duration: 4000,
+        position: 'top-center',
+      });
+      return;
+    }
+    
     if (totalGuests === 0) {
-      alert('Please select at least one guest.');
+      setSearchError('Please select at least one guest');
+      toast.error('Please select at least one guest', {
+        duration: 4000,
+        position: 'top-center',
+      });
       return;
     }
+
+    // Check if checkout is after checkin
+    if (selectedDateTo <= selectedDateFrom) {
+      setSearchError('Check-out date must be after check-in date');
+      toast.error('Check-out date must be after check-in date', {
+        duration: 4000,
+        position: 'top-center',
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    
+    try {
     const queryParams = new URLSearchParams({
       location_id: selectedCity.id,
       checkin: formatDateToApi(selectedDateFrom),
@@ -164,136 +270,199 @@ function HeroContent() {
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
-    router.push(`/hotels-list?${queryParams}`);
-  };
 
-  const handleCitySelect = (location) => {
+      toast.success('Searching for hotels...', {
+        duration: 2000,
+        position: 'top-center',
+      });
+
+      // Simulate search delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+    router.push(`/hotels-list?${queryParams}`);
+    } catch (error) {
+      setSearchError('An error occurred while searching. Please try again.');
+      toast.error('Search failed. Please try again.', {
+        duration: 4000,
+        position: 'top-center',
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  }, [selectedCity, selectedDateFrom, selectedDateTo, guests, formatDateToApi, router]);
+
+  // Enhanced city selection with better UX
+  const handleCitySelect = useCallback((location) => {
     setSelectedCity(location);
     setSearchQuery(location.title);
     setIsSearchDropdownOpen(false);
-  };
+    setSearchError(null);
+    
+    toast.success(`Selected ${location.title}`, {
+      duration: 2000,
+      position: 'top-center',
+    });
+  }, []);
 
-  const handleInputChange = (e) => {
-    setSearchQuery(e.target.value);
+  // Enhanced input handling with debouncing
+  const handleInputChange = useCallback((e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
     setSelectedCity(null);
+    setSearchError(null);
+    
+    if (value.length >= 3) {
     setIsSearchDropdownOpen(true);
-  };
+    } else {
+      setIsSearchDropdownOpen(false);
+    }
+  }, []);
 
-  const handleClearSearch = () => {
+  // Enhanced clear search with confirmation
+  const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setSelectedCity(null);
     setIsSearchDropdownOpen(false);
-  };
+    setSearchError(null);
+    
+    toast.success('Search cleared', {
+      duration: 2000,
+      position: 'top-center',
+    });
+  }, []);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Animation variants for enhanced performance
+  const containerVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 15,
+      },
+    },
+  };
+
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 text-center -mt-8">
-      <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
-        .hero-title {
-          font-family: 'Inter', sans-serif;
-          font-weight: 600;
-          letter-spacing: -0.02em;
-        }
-        .hero-subtitle {
-          font-family: 'Inter', sans-serif;
-          font-weight: 400;
-          letter-spacing: 0.01em;
-        }
-        .transition-wrapper {
-          transition:
-            background 0.3s,
-            border 0.3s,
-            border-radius 0.3s,
-            box-shadow 0.3s,
-            transform 0.4s;
-        }
-        .curved-arrow {
-          animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-        .coming-soon-toast {
-          animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+    <div ref={contentRef} className="w-full max-w-7xl mx-auto px-4 sm:px-6 text-center">
+      {/* Enhanced Typography with Better Hierarchy */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
+        className="mb-8 sm:mb-12"
+      >
 
-      <h1 className="hero-title text-xl sm:text-4xl md:text-5xl lg:text-5xl text-white mb-3 sm:mb-4">
-        Where Would You Like To Go?
-      </h1>
-      <p className="hero-subtitle text-sm sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 px-2 sm:px-0">
-        Checkout Beautiful Places Around The World
-      </p>
 
-      {/* Service Selection Tabs */}
-      <div className="mb-4 sm:mb-6">
-        <div className="bg-white/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-xl border border-white/20 inline-block">
-          <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
-            {serviceOptions.map((service) => {
+        {/* Enhanced Main Title */}
+        <motion.h1
+          variants={itemVariants}
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight"
+          style={{
+            textShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+            willChange: 'transform',
+          }}
+        >
+          Where Would You Like
+                     <span className="block bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 bg-clip-text text-transparent">
+             To Go?
+           </span>
+        </motion.h1>
+
+        {/* Enhanced Subtitle */}
+        <motion.p
+          variants={itemVariants}
+          className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed font-light"
+        >
+          Discover breathtaking destinations and create unforgettable memories with our curated travel experiences
+        </motion.p>
+
+
+      </motion.div>
+
+      {/* Enhanced Service Selection Tabs */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
+        className="mb-6 sm:mb-8"
+      >
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-2xl border border-white/30 inline-block">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+            {serviceOptions.map((service, index) => {
               const IconComponent = service.icon;
               const isSelected = selectedService === service.id;
               const isAvailable = service.available;
 
               return (
-                <button
+                <motion.button
                   key={service.id}
+                  variants={itemVariants}
                   onClick={() => handleServiceSelect(service.id)}
                   className={`
-                    flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200
+                    group relative flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300
                     ${
                       isSelected && isAvailable
-                        ? 'bg-blue-500 text-white shadow-md transform scale-105'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? `bg-gradient-to-r ${service.color} text-white shadow-lg transform scale-105`
+                        : !isAvailable
+                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed opacity-60'
+                        : 'text-gray-700 hover:bg-gray-100/80 hover:scale-105'
                     }
-                    ${!isAvailable ? 'cursor-pointer' : 'cursor-pointer'}
                     active:scale-95
                   `}
+                  whileHover={isAvailable ? { y: -2 } : {}}
+                  whileTap={isAvailable ? { scale: 0.98 } : {}}
                   aria-label={`Select ${service.label}`}
                 >
-                  <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span className="hidden xs:inline sm:inline whitespace-nowrap">
+                  <IconComponent className="h-4 w-4 flex-shrink-0" />
+                  <span className="hidden sm:inline whitespace-nowrap">
                     {service.label}
                   </span>
-                  <span className="xs:hidden sm:hidden">
+                  <span className="sm:hidden">
                     {service.label.split(' ')[0]}
                   </span>
-                </button>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-[9999]">
+                    {service.description}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </motion.button>
               );
             })}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Coming Soon Toast */}
-      {showComingSoon && (
-        <div className="fixed top-40 left-1/2 transform -translate-x-1/2 z-50 coming-soon-toast">
-          <div className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
-            <p className="text-sm font-medium">Coming Soon! 🚀</p>
-          </div>
-        </div>
-      )}
-
-      <div onSubmit={(e) => e.preventDefault()} className="w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 bg-white/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl border border-white/20">
+      {/* Enhanced Search Form */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
+        className="w-full"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/30">
+          
+          {/* Enhanced City Search */}
           <div className="lg:col-span-1 relative" ref={searchInputRef}>
             <div className="relative">
               <input
@@ -301,94 +470,95 @@ function HeroContent() {
                 value={searchQuery}
                 onChange={handleInputChange}
                 placeholder="Search for a city"
-                className="w-full h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                onFocus={() =>
-                  searchQuery.length >= 4 && setIsSearchDropdownOpen(true)
-                }
+                className={`w-full h-12 sm:h-14 px-4 text-base rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  searchError && !selectedCity ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
+                }`}
+                onFocus={() => searchQuery.length >= 3 && setIsSearchDropdownOpen(true)}
                 aria-label="Search for a city"
               />
+              
               {searchQuery && (
                 <button
                   type="button"
                   onClick={handleClearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label="Clear search"
                 >
-                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <X className="h-5 w-5" />
                 </button>
               )}
+              
+                             {selectedCity && (
+                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                   <CheckCircle className="h-5 w-5 text-blue-500" />
+                 </div>
+              )}
             </div>
-            {isSearchDropdownOpen && searchQuery.length >= 4 && (
-              <div
-                className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 sm:mt-2 z-50 shadow-xl max-h-60 overflow-y-auto"
+
+            {/* Enhanced Search Dropdown */}
+            <AnimatePresence>
+              {isSearchDropdownOpen && searchQuery.length >= 3 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 z-[9999] shadow-2xl max-h-60 overflow-y-auto"
                 ref={searchDropdownRef}
                 aria-label="City search results"
               >
                 {isLoading ? (
-                  <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-5 w-5 text-blue-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Loading cities...
+                    <div className="p-4 text-gray-500 text-base flex items-center gap-3">
+                      <Loader2 className="animate-spin h-5 w-5 text-blue-500" />
+                      <span>Searching cities...</span>
                   </div>
                 ) : errorMessage ? (
-                  <div className="p-3 sm:p-4 text-red-500 text-sm sm:text-base">
-                    {errorMessage}
+                    <div className="p-4 text-red-500 text-base flex items-center gap-3">
+                      <AlertCircle className="h-5 w-5" />
+                      <span>{errorMessage}</span>
                   </div>
                 ) : filteredLocations.length > 0 ? (
                   filteredLocations.map((location) => (
-                    <div
+                      <motion.div
                       key={location.id}
                       onClick={() => handleCitySelect(location)}
-                      className="p-3 sm:p-4 flex items-center gap-3 hover:bg-gray-100 cursor-pointer transition"
+                        className="p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
                       role="option"
                       aria-selected={selectedCity?.id === location.id}
+                        whileHover={{ backgroundColor: '#f9fafb' }}
                     >
                       <Image
                         src={location.image}
                         alt={location.title}
                         width={40}
                         height={40}
-                        className="object-cover rounded"
+                          className="object-cover rounded-lg"
                       />
-                      <span className="text-gray-900 text-sm sm:text-base">
+                        <span className="text-gray-900 text-base font-medium">
                         {location.title}
                       </span>
-                    </div>
+                      </motion.div>
                   ))
                 ) : (
-                  <div className="p-3 sm:p-4 text-gray-500 text-sm sm:text-base">
+                    <div className="p-4 text-gray-500 text-base">
                     No cities found
                   </div>
                 )}
-              </div>
+                </motion.div>
             )}
+            </AnimatePresence>
           </div>
 
+          {/* Enhanced Date Inputs */}
           <div className="lg:col-span-1" ref={dateFromPickerRef}>
             <DateInput
               selectedDate={selectedDateFrom}
               onChange={setSelectedDateFrom}
               placeholder="Check-in"
               minDate={today}
-              className="h-10 sm:h-12 text-sm sm:text-base"
+              className={`h-12 sm:h-14 text-base ${
+                searchError && !selectedDateFrom ? 'border-red-500 bg-red-50' : ''
+              }`}
               aria-label="Select check-in date"
             />
           </div>
@@ -400,28 +570,33 @@ function HeroContent() {
               placeholder="Check-out"
               minDate={selectedDateFrom ? addDays(selectedDateFrom, 1) : today}
               disabled={!selectedDateFrom}
-              className="h-10 sm:h-12 text-sm sm:text-base"
+              className={`h-12 sm:h-14 text-base ${
+                searchError && !selectedDateTo ? 'border-red-500 bg-red-50' : ''
+              }`}
               aria-label="Select check-out date"
             />
           </div>
 
+          {/* Enhanced Guests Selection */}
           <div className="lg:col-span-1 relative" ref={guestsDropdownRef}>
             <button
               type="button"
               onClick={() => setIsGuestsDropdownOpen(!isGuestsDropdownOpen)}
-              className="w-full h-10 sm:h-12 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-200 bg-white text-left text-gray-900 flex items-center gap-2 sm:gap-3 transition hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full h-12 sm:h-14 px-4 text-base rounded-xl border transition-all duration-300 text-left flex items-center gap-3 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                searchError && totalGuests === 0 ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
+              }`}
               aria-label="Select number of guests"
             >
-              <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-              <span
-                className={`${totalGuests > 0 ? 'text-gray-900' : 'text-gray-500'} truncate`}
-              >
+              <Users className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <span className={`truncate ${totalGuests > 0 ? 'text-gray-900' : 'text-gray-500'}`}>
                 {totalGuests > 0
                   ? `${totalGuests} Guest${totalGuests > 1 ? 's' : ''}`
                   : 'Guests'}
               </span>
               <svg
-                className={`ml-auto h-4 w-4 sm:h-5 sm:w-5 text-gray-400 transition-transform ${isGuestsDropdownOpen ? 'rotate-180' : ''}`}
+                className={`ml-auto h-5 w-5 text-gray-400 transition-transform duration-200 ${
+                  isGuestsDropdownOpen ? 'rotate-180' : ''
+                }`}
                 fill="none"
                 viewBox="0 0 20 20"
                 stroke="currentColor"
@@ -434,34 +609,40 @@ function HeroContent() {
                 />
               </svg>
             </button>
+
+            {/* Enhanced Guests Dropdown */}
+            <AnimatePresence>
             {isGuestsDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 sm:mt-2 z-50 shadow-xl">
-                <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 z-[9999] shadow-2xl"
+                >
+                  <div className="p-4 space-y-4">
                   {['adult', 'children'].map((category) => (
-                    <div
-                      key={category}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-gray-700 capitalize font-medium flex-shrink-0 text-sm sm:text-base">
+                      <div key={category} className="flex items-center justify-between">
+                        <span className="text-gray-700 capitalize font-medium text-base">
                         {category === 'adult' ? 'Adults' : 'Children'}
                       </span>
-                      <div className="flex items-center gap-3 sm:gap-1">
+                        <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => handleGuestChange(category, false)}
-                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                          disabled={guests[category] === 0}
+                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            disabled={guests[category] === 0 || (category === 'adult' && guests[category] === 1)}
                           aria-label={`Decrease number of ${category}`}
                         >
                           -
                         </button>
-                        <span className="w-5 sm:w-6 text-center font-medium text-gray-900 text-sm sm:text-base">
+                          <span className="w-6 text-center font-medium text-gray-900 text-base">
                           {guests[category]}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleGuestChange(category, true)}
-                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition text-sm sm:text-base"
+                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors text-base"
                           aria-label={`Increase number of ${category}`}
                         >
                           +
@@ -470,35 +651,107 @@ function HeroContent() {
                     </div>
                   ))}
                 </div>
-              </div>
+                </motion.div>
             )}
+            </AnimatePresence>
           </div>
 
+          {/* Enhanced Search Button */}
           <div className="lg:col-span-1 sm:col-span-2">
-            <button
+            <motion.button
               type="button"
               onClick={handleSearch}
-              className="w-full h-10 sm:h-12 bg-blue-500 hover:bg-blue-400 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg text-sm sm:text-base"
+              disabled={isSearching}
+                             className={`w-full h-12 sm:h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl font-semibold flex items-center justify-center gap-3 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg disabled:cursor-not-allowed ${
+                 isSearching ? 'cursor-wait' : 'hover:shadow-xl hover:scale-105'
+               }`}
+              whileHover={!isSearching ? { y: -2 } : {}}
+              whileTap={!isSearching ? { scale: 0.98 } : {}}
               aria-label="Search for hotels"
             >
-              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
-              Search
-            </button>
-          </div>
+              {isSearching ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Searching...</span>
+                </>
+              ) : (
+                <>
+                  <Search className="h-5 w-5" />
+                  <span>Search</span>
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
+            </motion.button>
         </div>
       </div>
 
-      <div className="transition-wrapper mt-8 sm:mt-12 md:mt-16">
-        <div className="relative flex flex-col items-center">
-          <div className="curved-arrow mb-4 sm:mb-6 absolute left-68 top-14 hidden sm:block">
-            <img
-              src="/images/line-arrow.png"
-              alt="Arrow pointing down"
-              className="w-16 h-12 sm:w-20 sm:h-16 md:w-24 md:h-20 object-contain opacity-80"
-            />
-          </div>
-        </div>
-      </div>
+        {/* Enhanced Error Display */}
+        {searchError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-2 max-w-md mx-auto"
+          >
+            <AlertCircle className="h-5 w-5" />
+            <span>{searchError}</span>
+          </motion.div>
+        )}
+      </motion.div>
+
+
+
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#3b82f6',
+            color: '#fff',
+            border: '1px solid #2563eb',
+            borderRadius: '12px',
+            fontSize: '14px',
+            padding: '16px',
+            marginTop: '10px',
+          },
+          success: {
+            icon: null,
+            style: {
+              background: '#3b82f6',
+              color: '#fff',
+              border: '1px solid #2563eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              padding: '16px',
+              marginTop: '10px',
+            },
+          },
+          error: {
+            icon: null,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+              border: '1px solid #dc2626',
+              borderRadius: '12px',
+              fontSize: '14px',
+              padding: '16px',
+              marginTop: '10px',
+            },
+          },
+          loading: {
+            icon: null,
+            style: {
+              background: '#3b82f6',
+              color: '#fff',
+              border: '1px solid #2563eb',
+              borderRadius: '12px',
+              fontSize: '14px',
+              padding: '16px',
+              marginTop: '10px',
+            },
+          },
+        }}
+      />
     </div>
   );
 }

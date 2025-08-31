@@ -59,7 +59,7 @@ const ContactIcon = ({ type }) => {
   const icons = {
     phone: (
               <svg
-          className="w-4 h-4 text-blue-400"
+          className="w-4 h-4 text-blue-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -74,7 +74,7 @@ const ContactIcon = ({ type }) => {
     ),
     email: (
               <svg
-          className="w-4 h-4 text-blue-400"
+          className="w-4 h-4 text-blue-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -89,7 +89,7 @@ const ContactIcon = ({ type }) => {
     ),
     address: (
               <svg
-          className="w-4 h-4 text-blue-400"
+          className="w-4 h-4 text-blue-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

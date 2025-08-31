@@ -1,43 +1,98 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import HeroSection from '@/components/feature/HeroSection/HeroSection';
-import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
-import AdventureTours from '@/components/feature/AdventureSection/AdventureTours';
-import GoWildSection from '@/components/feature/GoWildSection/GoWildSection';
-import WhoWeAreSection from '@/components/feature/WhoWeAreSection/WhoWeAre';
-import QA from '@/components/feature/QASection/QA';
-import Tour from '@/components/feature/TourSection/Tour';
+// import GoWildSection from '@/components/feature/GoWildSection/GoWildSection';
+import AdventureVideoSection from '@/components/feature/QASection/QA';
+import FAQ from '@/components/feature/FAQSection/FAQ';
+// import Tour from '@/components/feature/TourSection/Tour';
 import WhyChooseUs from '@/components/feature/WhyChooseUsSection/WhyChooseUs';
-import TravelGallerySection from '@/components/feature/TravelGallerySection/TravelGallery';
+// import BrowseTypes from '@/components/feature/BrowseTypeSection/BrowseTypes';
+// import AdventureTours from '@/components/feature/AdventureSection/AdventureTours';
+// import TravelGallerySection from '@/components/feature/TravelGallerySection/TravelGallery';
+// import WhoWeAreSection from '@/components/feature/WhoWeAreSection/WhoWeAre';
+// import TransportSection from '@/components/feature/TransportSection/TransportSection';
+// import CarRentalsSection from '@/components/feature/CarRentalsSection/CarRentalsSection';
+// import AttractionsSection from '@/components/feature/AttractionsSection/AttractionsSection';
+// import HotelsList from '@/components/feature/HotelsList/HotelsList';
+
+// New sections we'll create
+// import FeaturedDestinations from '@/components/feature/FeaturedDestinations/FeaturedDestinations';
+import TestimonialsSection from '@/components/feature/TestimonialsSection/TestimonialsSection';
+import StatsSection from '@/components/feature/StatsSection/StatsSection';
+// import NewsletterSection from '@/components/feature/NewsletterSection/NewsletterSection';
+// import PartnersSection from '@/components/feature/PartnersSection/PartnersSection';
+// import TrendingDeals from '@/components/feature/TrendingDeals/TrendingDeals';
+// import TravelTips from '@/components/feature/TravelTips/TravelTips';
+// import MobileAppSection from '@/components/feature/MobileAppSection/MobileAppSection';
+
 
 export default function HomePage() {
   return (
-    <main className="relative">
+    <main className="relative overflow-hidden">
+      {/* Hero Section - Already Enhanced */}
       <HeroSection />
-      <BrowseTypes />
-      <AdventureTours />
-      <GoWildSection />
-      <WhoWeAreSection />
       
-      {/* Connecting Visual Element */}
-      <div className="relative">
-        <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent"></div>
-      </div>
+      {/* Stats Section - Social Proof */}
+      {/* <StatsSection /> */}
       
-      <QA />
+      {/* Browse Types - Service Categories */}
+      {/* <BrowseTypes /> */}
       
-      {/* Connecting Visual Element */}
-      <div className="relative">
-        <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent"></div>
-      </div>
+      {/* Featured Destinations - Trending Places */}
+      {/* <FeaturedDestinations /> */}
       
+      {/* Go Wild Section - Adventure Activities */}
+      {/* <GoWildSection /> */}
+      
+      {/* Adventure Tours - Curated Experiences */}
+      {/* <AdventureTours /> */}
+      
+      {/* Trending Deals - Special Offers */}
+      {/* <TrendingDeals /> */}
+      
+      {/* Adventure Video Section */}
+      <AdventureVideoSection />
+      
+      {/* Why Choose Us - Trust & Benefits */}
       <WhyChooseUs />
       
-      {/* Connecting Visual Element */}
-      <div className="relative">
-        <div className="absolute left-1/2 transform -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-blue-300 to-transparent"></div>
-      </div>
+      {/* Testimonials - Customer Reviews */}
+      <TestimonialsSection />
       
-      <TravelGallerySection />
+      {/* Travel Gallery - Visual Inspiration */}
+      {/* <TravelGallerySection /> */}
+      
+      {/* Who We Are - Company Story */}
+      {/* <WhoWeAreSection /> */}
+      
+      {/* Transport Section - Getting Around */}
+      {/* <TransportSection /> */}
+      
+      {/* Car Rentals - Freedom to Explore */}
+      {/* <CarRentalsSection /> */}
+      
+      {/* Attractions - Must-See Places */}
+      {/* <AttractionsSection /> */}
+      
+      {/* Tour Section - Guided Experiences */}
+      {/* <Tour /> */}
+      
+      {/* Travel Tips - Expert Advice */}
+      {/* <TravelTips /> */}
+      
+      {/* FAQ Section - Common Questions */}
+      <FAQ />
+      
+      {/* Partners Section - Trusted Brands */}
+      {/* <PartnersSection /> */}
+      
+      {/* Mobile App Section - Download CTA */}
+      {/* <MobileAppSection /> */}
+      
+      {/* Newsletter Section - Stay Updated */}
+      {/* <NewsletterSection /> */}
+      
+      
     </main>
   );
 }

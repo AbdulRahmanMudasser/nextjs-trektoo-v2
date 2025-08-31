@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ErrorBoundary } from 'next/dist/client/components/error-boundary';
+import ErrorBoundary from '@/components/security/ErrorBoundary';
 import { useHotels } from '@/hooks/useHotels';
 import FilterSidebar from './FilterSidebar';
 import TourListSection from './ToursListSection';

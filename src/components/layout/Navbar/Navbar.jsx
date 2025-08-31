@@ -23,6 +23,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [topOffset, setTopOffset] = useState('top-10');
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // New state for loading
   const {
     user,
     logout,
@@ -48,25 +49,19 @@ const Navbar = () => {
     if (!isProfileOpen) clearMessages();
   }, [isProfileOpen, clearMessages]);
 
-  // Listen for route changes to ensure auth state updates
-  useEffect(() => {
-    const handleStorageChange = () => {
-      // Force re-render by triggering a state update
-      setIsMobileMenuOpen(false); // Reset mobile menu to ensure UI consistency
-      setIsProfileOpen(false); // Reset profile dropdown
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  // No need for storage event listener anymore - context handles state updates automatically
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple logout attempts
+    
+    setIsLoggingOut(true);
     try {
       await logout();
     } catch (error) {
       console.error('Logout failed in Navbar:', error.message);
     } finally {
       setIsProfileOpen(false);
+      setIsLoggingOut(false);
     }
   };
 
@@ -128,8 +123,9 @@ const Navbar = () => {
             {/* Profile */}
             <div className="relative">
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="p-1.5 rounded-full text-white hover:bg-blue-400 transition-colors flex items-center gap-1"
+                onClick={() => !isLoggingOut && setIsProfileOpen(!isProfileOpen)}
+                disabled={isLoggingOut}
+                className="p-1.5 rounded-full text-white hover:bg-blue-400 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Profile menu"
               >
                 {user?.avatar_url ? (
@@ -183,9 +179,10 @@ const Navbar = () => {
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900"
+                        disabled={isLoggingOut}
+                        className="block w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-blue-100 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Logout
+                        {isLoggingOut ? 'Logging out...' : 'Logout'}
                       </button>
                     </>
                   ) : (
@@ -281,9 +278,10 @@ const Navbar = () => {
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                      disabled={isLoggingOut}
+                      className="block w-full text-left text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Logout
+                      {isLoggingOut ? 'Logging out...' : 'Logout'}
                     </button>
                   </>
                 ) : (
