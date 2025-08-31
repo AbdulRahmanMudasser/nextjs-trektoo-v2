@@ -48,7 +48,7 @@ const ReviewScores = ({
 
   return (
     <motion.div
-      className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 py-10 px-6 sm:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white rounded-3xl shadow-lg"
+      className="relative w-full py-10 px-6 sm:px-8 lg:px-12"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -62,7 +62,7 @@ const ReviewScores = ({
       </motion.h2>
       <div className="flex flex-col lg:flex-row gap-8">
         <motion.div className="flex-1 space-y-6" variants={itemVariants}>
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100" data-testid="overall-rating">
+          <div className="p-6 rounded-xl border border-gray-100" data-testid="overall-rating">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Overall Rating</h3>
             <div className="flex items-center mb-4">
               <div className="flex">
@@ -85,7 +85,7 @@ const ReviewScores = ({
               </span>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100" data-testid="rating-distribution">
+          <div className="p-6 rounded-xl border border-gray-100" data-testid="rating-distribution">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Rating Distribution</h3>
             {['5', '4', '3', '2', '1'].map((rating) => {
               const score = rateScores[rating] || { title: '', total: 0, percent: 0 };
@@ -107,7 +107,7 @@ const ReviewScores = ({
           </div>
         </motion.div>
         <motion.div className="flex-1" variants={itemVariants}>
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100" data-testid="review-stats">
+          <div className="p-6 rounded-xl border border-gray-100" data-testid="review-stats">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Review Categories</h3>
             {reviewStatsWithScores.length > 0 ? (
               reviewStatsWithScores.map((stat, index) => (

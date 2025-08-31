@@ -130,12 +130,48 @@ export const fetchHotels = async (searchParams) => {
 /**
  * Fetch hotel details by ID
  * @param {string} id - Hotel ID
- * @returns {Promise<Object>} Hotel data
+ * @returns {Promise<Object>} Hotel data with proper structure
  */
 export const fetchHotelDetails = async (id) => {
     try {
         const response = await secureApiClient.get(`/hotel/detail/${id}`);
-        return response.data.data || {};
+        const hotelData = response.data.data || {};
+
+        // Transform and clean hotel data
+        return {
+            ...hotelData,
+            // Clean title (remove extra whitespace)
+            title: hotelData.title?.trim() || 'Hotel Name Not Available',
+            // Ensure proper price handling
+            price: hotelData.price || '0.00',
+            sale_price: hotelData.sale_price || hotelData.price || '0.00',
+            // Ensure proper address
+            address: hotelData.address || 'Address not available',
+            // Ensure proper content
+            content: hotelData.content || '<p>No description available.</p>',
+            // Ensure proper gallery
+            gallery: hotelData.gallery || [hotelData.image].filter(Boolean),
+            // Ensure proper banner image
+            banner_image: hotelData.banner_image || hotelData.image,
+            // Ensure proper location
+            location: hotelData.location || { name: 'Location not available' },
+            // Ensure proper review score
+            review_score: hotelData.review_score || {
+                score_total: 0,
+                total_review: 0,
+                score_text: 'Not rated'
+            },
+            // Ensure proper map coordinates
+            map_lat: hotelData.map_lat || '0',
+            map_lng: hotelData.map_lng || '0',
+            map_zoom: hotelData.map_zoom || 10,
+            // Ensure proper rooms array
+            rooms: hotelData.rooms || [],
+            // Ensure proper terms structure
+            terms: hotelData.terms || {},
+            // Ensure proper policy array
+            policy: hotelData.policy || []
+        };
     } catch (error) {
         console.error('Hotel Details API error:', formatError(error));
         throw new Error(getUserFriendlyError(error));
@@ -162,12 +198,35 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
 /**
  * Fetch hotel room availability by ID
  * @param {string} id - Hotel ID
- * @returns {Promise<Array>} Array of room data
+ * @returns {Promise<Array>} Array of room data with formatted properties
  */
 export const fetchHotelAvailability = async (id) => {
     try {
         const response = await secureApiClient.get(`/hotel/availability/${id}`);
-        return response.data.rooms || [];
+        const rooms = response.data.rooms || [];
+
+        // Transform room data to match component expectations
+        return rooms.map(room => ({
+            ...room,
+            // Format price display
+            price_text: room.price ? `$${parseFloat(room.price).toFixed(2)}` : 'Price on request',
+            // Format capacity display
+            adults_html: room.adults ? `${room.adults} Adult${room.adults > 1 ? 's' : ''}` : 'Not specified',
+            children_html: room.children ? `${room.children} Child${room.children > 1 ? 'ren' : ''}` : 'Not specified',
+            beds_html: room.beds ? `${room.beds} Bed${room.beds > 1 ? 's' : ''}` : 'Not specified',
+            size_html: room.size ? `${room.size} m²` : 'Not specified',
+            // Add default amenities if none exist
+            term_features: room.term_features || [
+                { title: 'Wi-Fi', icon: 'fas fa-wifi' },
+                { title: 'Air Conditioning', icon: 'fas fa-snowflake' },
+                { title: 'Private Bathroom', icon: 'fas fa-bath' },
+                { title: 'TV', icon: 'fas fa-tv' }
+            ],
+            // Add gallery fallback
+            gallery: room.gallery || [],
+            // Add image fallback
+            image: room.image || room.gallery?.[0] || null
+        }));
     } catch (error) {
         console.error('Hotel Availability API error:', formatError(error));
         throw new Error(getUserFriendlyError(error));

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import DropdownMenu from './DropdownMenu';
+import toast from 'react-hot-toast';
 
 const dropdownItems = {
   exploreTrektoo: [
@@ -67,7 +68,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed ${topOffset} z-20 w-full bg-gradient-to-r from-white via-[url('/patterns/wave.svg')] via-30% to-blue-500 bg-blend-multiply bg-opacity-90 transition-all duration-300 font-montserrat shadow-2xl`}
+      className={`fixed ${topOffset} z-20 w-full bg-gradient-to-r from-white via-[url('/patterns/wave.svg')] via-30% to-blue-500 bg-blend-multiply transition-all duration-300 font-montserrat shadow-2xl`}
       aria-label="Main navigation"
     >
       {(authSuccess || authError) && (
@@ -96,10 +97,27 @@ const Navbar = () => {
                 Home
               </Link>
 
-              <DropdownMenu
+              {/* <DropdownMenu
                 title="Explore TrekToo"
                 items={dropdownItems.exploreTrektoo}
-              />
+              /> */}
+              
+              <button
+                onClick={() => toast.error('Coming Soon!', {
+                  duration: 3000,
+                  position: 'top-center',
+                  style: {
+                    background: '#ef4444',
+                    color: '#fff',
+                    fontSize: '16px',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                  },
+                })}
+                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+              >
+                Explore TrekToo
+              </button>
               <Link
                 href="/about"
                 className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"

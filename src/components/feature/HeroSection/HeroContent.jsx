@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
 import { useLocations } from '@/hooks/useHotels';
-import Image from 'next/image';
+
 
 // Utility function to add days to a date
 const addDays = (date, days) => {
@@ -522,18 +522,11 @@ function HeroContent() {
                       <motion.div
                       key={location.id}
                       onClick={() => handleCitySelect(location)}
-                        className="p-4 flex items-center gap-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                        className="p-4 flex items-center hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
                       role="option"
                       aria-selected={selectedCity?.id === location.id}
                         whileHover={{ backgroundColor: '#f9fafb' }}
                     >
-                      <Image
-                        src={location.image}
-                        alt={location.title}
-                        width={40}
-                        height={40}
-                          className="object-cover rounded-lg"
-                      />
                         <span className="text-gray-900 text-base font-medium">
                         {location.title}
                       </span>
