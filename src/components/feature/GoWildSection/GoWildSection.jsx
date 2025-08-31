@@ -90,9 +90,9 @@ const GoWildSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-6">
-            Go Wild
-          </h2>
+                  <h2 className="text-4xl md:text-5xl font-bold text-blue-500 tracking-tight mb-6">
+          Go Wild
+        </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             We are the most exciting company for travel and adventure
           </p>

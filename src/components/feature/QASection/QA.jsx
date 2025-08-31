@@ -11,11 +11,13 @@ const VideoSection = () => {
       className="relative w-full pt-[56.25%] rounded-3xl overflow-hidden shadow-2xl"
       initial={{ opacity: 0, y: 50, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileHover={{ 
         scale: 1.02,
-        boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)"
+        boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)",
+        transition: { duration: 0.3, ease: "easeOut" }
       }}
+      style={{ willChange: 'transform, opacity' }}
     >
       {/* YouTube Video Embed */}
       <iframe
@@ -28,11 +30,47 @@ const VideoSection = () => {
       />
       
       {/* Enhanced overlay with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent pointer-events-none" />
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5 }}
+      />
       
-      {/* Decorative elements */}
-      <div className="absolute top-4 right-4 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-      <div className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+      {/* Enhanced decorative elements */}
+      <motion.div 
+        className="absolute top-4 right-4 w-3 h-3 bg-blue-500 rounded-full"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        style={{ willChange: 'transform, opacity' }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [1, 0.7, 1],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div 
+        className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, delay: 1.0 }}
+        style={{ willChange: 'transform, opacity' }}
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.7, 1, 0.7],
+        }}
+        transition={{
+          duration: 2.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.5
+        }}
+      />
     </motion.div>
   );
 };
@@ -160,7 +198,10 @@ const AdventureVideoSection = () => {
            variants={headerVariants}
          >
            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-6">
-             Enjoy Real Adventure
+             Enjoy{' '}
+             <span className="text-blue-500">
+               Real Adventure
+             </span>
            </h2>
            
            <motion.p 

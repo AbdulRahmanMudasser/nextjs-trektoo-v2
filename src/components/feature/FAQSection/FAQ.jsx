@@ -10,38 +10,47 @@ const ExpandableItem = ({ question, answer, isExpandedByDefault = false, index }
   const [isExpanded, setIsExpanded] = useState(isExpandedByDefault);
 
   return (
-         <motion.div
-       className="border border-gray-200 rounded-2xl p-6 bg-white transition-all duration-300 hover:border-blue-500"
-       initial={{ opacity: 0, y: 20 }}
-       animate={{ opacity: 1, y: 0 }}
-       transition={{ 
-         duration: 0.4, 
-         delay: index * 0.1,
-         ease: "easeOut"
-       }}
-       whileHover={{ 
-         y: -2
-       }}
-     >
-      <div
+    <motion.div
+      className="border border-gray-200 rounded-2xl p-6 bg-white transition-all duration-300 hover:border-blue-500 shadow-lg hover:shadow-xl"
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ 
+        duration: 0.6, 
+        delay: index * 0.1,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }}
+      whileHover={{ 
+        y: -4,
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
+      style={{ willChange: 'transform, opacity' }}
+    >
+      <motion.div
         className="flex justify-between items-center cursor-pointer group"
         onClick={() => setIsExpanded(!isExpanded)}
+        whileHover={{ scale: 1.01 }}
+        style={{ willChange: 'transform' }}
       >
-                 <h4 className="text-lg font-bold text-gray-900 tracking-tight m-0 pr-4 group-hover:text-blue-500 transition-colors duration-200">
+        <motion.h4 
+          className="text-lg font-bold text-gray-900 tracking-tight m-0 pr-4 group-hover:text-blue-500 transition-colors duration-200"
+          style={{ willChange: 'color' }}
+        >
           {question}
-        </h4>
-                 <motion.div
-           className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0"
-           whileHover={{ scale: 1.1 }}
-           transition={{ duration: 0.2 }}
-         >
+        </motion.h4>
+        <motion.div
+          className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0 shadow-lg"
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.2 }}
+          style={{ willChange: 'transform' }}
+        >
           <motion.svg
             className="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            style={{ willChange: 'transform' }}
           >
             <path
               strokeLinecap="round"
@@ -51,7 +60,7 @@ const ExpandableItem = ({ question, answer, isExpandedByDefault = false, index }
             />
           </motion.svg>
         </motion.div>
-      </div>
+      </motion.div>
       
       <Collapse
         isOpened={isExpanded}
@@ -66,7 +75,7 @@ const ExpandableItem = ({ question, answer, isExpandedByDefault = false, index }
         }}
         className="mt-4 pt-4 border-t border-gray-100"
         style={{
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       >
         <motion.p 
@@ -78,8 +87,9 @@ const ExpandableItem = ({ question, answer, isExpandedByDefault = false, index }
           }}
           transition={{ 
             duration: 0.4,
-            ease: "easeOut"
+            ease: [0.25, 0.46, 0.45, 0.94]
           }}
+          style={{ willChange: 'transform, opacity' }}
         >
           {answer}
         </motion.p>
@@ -103,9 +113,36 @@ const FAQSection = () => {
     visible: {
       opacity: 1,
       transition: { 
-        duration: 0.6, 
-        staggerChildren: 0.1
-      },
+        duration: 1, 
+        ease: [0.25, 0.46, 0.45, 0.94], 
+        staggerChildren: 0.15,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -30, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
+  const backgroundVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 1.5, ease: "easeOut" }
     },
   };
 
@@ -130,32 +167,82 @@ const FAQSection = () => {
   return (
     <motion.section
       ref={ref}
-      className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden"
+      className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50 relative overflow-hidden"
       variants={sectionVariants}
       initial="hidden"
       animate={inView ? 'visible' : 'hidden'}
       aria-labelledby="faq-section-heading"
     >
-                    {/* Subtle background texture */}
-       <div className="absolute inset-0 opacity-5 pointer-events-none">
-         <div className="absolute inset-0" style={{
-           backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%)`
-         }}></div>
-       </div>
+                    {/* Enhanced Background Elements */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        variants={backgroundVariants}
+        initial="hidden"
+        animate={inView ? 'visible' : 'hidden'}
+      >
+        <motion.div 
+          className="absolute top-20 left-10 w-32 h-32 bg-blue-100 rounded-full opacity-20 blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-10 w-40 h-40 bg-indigo-100 rounded-full opacity-20 blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.3, 0.2, 0.3],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full opacity-10 blur-3xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.1, 0.15, 0.1],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+      </motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          variants={headerVariants}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
-            Frequently Asked Questions
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Get answers to common questions about our travel services and adventures.
-          </p>
+          <motion.h2 
+            id="faq-section-heading"
+            className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-6"
+            style={{ willChange: 'transform, opacity' }}
+          >
+            Frequently Asked{' '}
+            <span className="text-blue-500">
+              Questions
+            </span>
+          </motion.h2>
+          <motion.p 
+            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            style={{ willChange: 'transform, opacity' }}
+          >
+            Everything you need to know about planning your perfect adventure with TrekToo
+          </motion.p>
         </motion.div>
 
         <motion.div

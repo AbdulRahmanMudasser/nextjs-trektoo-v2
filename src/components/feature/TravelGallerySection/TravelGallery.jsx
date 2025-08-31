@@ -155,9 +155,9 @@ const TravelGallerySection = () => {
         >
 
           
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
-            Explore Your Next Adventure
-          </h2>
+                  <h2 className="text-4xl md:text-5xl font-bold text-blue-500 tracking-tight">
+          Explore Your Next Adventure
+        </h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             Discover breathtaking destinations that ignite your wanderlust and
             create unforgettable memories.
