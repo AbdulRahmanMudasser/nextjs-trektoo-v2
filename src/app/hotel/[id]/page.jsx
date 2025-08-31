@@ -19,7 +19,6 @@ import ErrorBoundary from '@/components/security/ErrorBoundary';
 import {
   useHotelDetails,
   useHotelReviews,
-  useHotelAvailability,
 } from '@/hooks/useHotels';
 
 const TourDetail = ({ params }) => {
@@ -38,16 +37,15 @@ const TourDetail = ({ params }) => {
     isLoading: isReviewsLoading,
     error: reviewsError,
   } = useHotelReviews(id, currentPage, itemsPerPage);
-  const {
-    data: rooms = [],
-    isLoading: isRoomsLoading,
-    error: roomsError,
-  } = useHotelAvailability(id);
-
-  console.log('Hotel data:', hotel);
-  console.log('Reviews data:', reviewsData);
-  console.log('Rooms data:', rooms);
-  console.log('Hotel policy:', hotel?.policy?.[0]?.title);
+  // Use rooms directly from hotel data since they're included in the main response
+  const availableRooms = hotel?.rooms || [];
+  const isRoomsLoading = false; // No separate loading state needed
+  const roomsError = null; // No separate error state needed
+  
+  // Debug: Log the hotel and rooms data
+  console.log('Hotel detail page - hotel data:', hotel);
+  console.log('Hotel detail page - availableRooms:', availableRooms);
+  console.log('Hotel detail page - rooms length:', availableRooms?.length);
 
   if (isHotelLoading) {
     return (
@@ -115,96 +113,96 @@ const TourDetail = ({ params }) => {
 
   return (
     <ErrorBoundary>
-      <div className="font-sans min-h-screen">
-        <HotelHeader
-          id={hotel.id}
-          title={hotel.title}
-          location={hotel.location?.name || 'Unknown Location'}
-          price={hotel.sale_price || hotel.price}
-          duration="Per Night"
-          rating={parseFloat(hotel.review_score?.score_total) || 0}
-          photoCount={hotel.review_score?.total_review || 0}
-          discount={hotel.discount_percent ? `${hotel.discount_percent}%` : ''}
-          image={hotel.banner_image || hotel.image}
-        />
-        <ImageGallery images={hotel.gallery || []} />
-        <HotelDetails
-          id={hotel.id}
-          description={hotel.content}
-          address={hotel.address}
-        />
-        <RoomAvailability
-          rooms={rooms}
-          loading={isRoomsLoading}
-          error={roomsError?.message}
-          hotelId={id}
-          hotelData={{
-            id: hotel.id,
-            title: hotel.title,
-            price: hotel.sale_price || hotel.price,
-            bookingFee: hotel.booking_fee || '0',
-            policy: hotel.policy || [],
-          }}
-        />
-        <TourInformation
-          facilities={hotel.terms?.['6']?.child || []}
-          services={hotel.terms?.['7']?.child || []}
-          extraPrices={hotel.extra_price || []}
-          policies={hotel.policy || []}
-          checkInTime={hotel.check_in_time || 'Not specified'}
-          checkOutTime={hotel.check_out_time || 'Not specified'}
-        />
-        <Map
-          lat={parseFloat(hotel.map_lat) || 0}
-          lng={parseFloat(hotel.map_lng) || 0}
-          zoom={parseInt(hotel.map_zoom) || 10}
-        />
-        {/* <CalendarPrice
-          price={hotel.sale_price || hotel.price}
-          bookingFees={hotel.booking_fee || '0'}
-        /> */}
-        <ReviewScores
-          scoreTotal={hotel.review_score?.score_total || 0}
-          scoreText={hotel.review_score?.score_text || 'No rating'}
-          totalReviews={hotel.review_score?.total_review || 0}
-          reviewStats={hotel.review_stats || []}
-          rateScores={hotel.review_score?.rate_score || {}}
-        />
-        {isReviewsLoading ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="max-w-7xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl mt-12"
-          >
-            <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
-            <p className="text-gray-600 text-sm mt-2">Loading reviews...</p>
-          </motion.div>
-        ) : reviewsError ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="max-w-7xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl mt-12"
-          >
-            <p className="text-gray-600 text-sm">
-              Failed to load reviews. Please try again later.
-            </p>
-          </motion.div>
-        ) : (
-          <ReviewList
-            reviews={reviewsData?.data || []}
-            pagination={{
-              current_page: reviewsData?.current_page || 1,
-              total_pages: reviewsData?.last_page || 1,
-              total: reviewsData?.total || 0,
-            }}
-            onPageChange={handlePageChange}
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={(value) => {
-              setItemsPerPage(value);
-              setCurrentPage(1);
+      <div className="font-sans min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        {/* Main Content Container */}
+        <div className="w-full">
+          <HotelHeader
+            id={hotel.id}
+            title={hotel.title}
+            location={hotel.location?.name || 'Unknown Location'}
+            price={hotel.sale_price || hotel.price}
+            duration="Per Night"
+            rating={parseFloat(hotel.review_score?.score_total) || 0}
+            photoCount={hotel.review_score?.total_review || 0}
+            discount={hotel.discount_percent ? `${hotel.discount_percent}%` : ''}
+            image={hotel.banner_image || hotel.image}
+          />
+          
+          <ImageGallery images={hotel.gallery || []} />
+          
+          <HotelDetails
+            id={hotel.id}
+            description={hotel.content}
+            address={hotel.address}
+          />
+          
+          <RoomAvailability
+            rooms={availableRooms}
+            loading={isRoomsLoading}
+            error={roomsError?.message}
+            hotelId={id}
+            hotelData={{
+              id: hotel.id,
+              title: hotel.title,
+              price: hotel.sale_price || hotel.price,
+              bookingFee: hotel.booking_fee || '0',
+              policy: hotel.policy || [],
             }}
           />
-        )}
+          
+          <TourInformation
+            facilities={hotel.terms?.['6']?.child || []}
+            services={hotel.terms?.['7']?.child || []}
+            extraPrices={hotel.extra_price || []}
+            policies={hotel.policy || []}
+            checkInTime={hotel.check_in_time || 'Not specified'}
+            checkOutTime={hotel.check_out_time || 'Not specified'}
+          />
+          
+          <Map
+            lat={parseFloat(hotel.map_lat) || 0}
+            lng={parseFloat(hotel.map_lng) || 0}
+            zoom={parseInt(hotel.map_zoom) || 10}
+            address={hotel.address}
+            hotelName={hotel.title}
+          />
+          
+          <ReviewScores
+            scoreTotal={hotel.review_score?.score_total || 0}
+            scoreText={hotel.review_score?.score_text || 'No rating'}
+            totalReviews={hotel.review_score?.total_review || 0}
+            reviewStats={hotel.review_score?.review_stats || []}
+            rateScores={hotel.review_score?.rate_score || {}}
+          />
+          
+          {isReviewsLoading ? (
+            <div className="w-full py-16 text-center">
+              <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+              <p className="text-gray-600 text-sm mt-2">Loading reviews...</p>
+            </div>
+          ) : reviewsError ? (
+            <div className="w-full py-16 text-center">
+              <p className="text-gray-600 text-sm">
+                Failed to load reviews. Please try again later.
+              </p>
+            </div>
+          ) : (
+            <ReviewList
+              reviews={reviewsData?.data || []}
+              pagination={{
+                current_page: reviewsData?.current_page || 1,
+                total_pages: reviewsData?.last_page || 1,
+                total: reviewsData?.total || 0,
+              }}
+              onPageChange={handlePageChange}
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={(value) => {
+                setItemsPerPage(value);
+                setCurrentPage(1);
+              }}
+            />
+          )}
+        </div>
       </div>
     </ErrorBoundary>
   );

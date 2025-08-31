@@ -3,21 +3,12 @@ const nextConfig = {
     // Enable React strict mode for better development experience
     reactStrictMode: true,
 
-    // Enable SWC minification for better performance
-    swcMinify: true,
-
-    // Image optimization
+    // NUCLEAR OPTION: Disable image optimization completely
     images: {
-        domains: [
-            'staging.trektoo.com',
-            'api.trektoo.com',
-            'images.unsplash.com',
-            'via.placeholder.com',
-        ],
-        formats: ['image/webp', 'image/avif'],
-        deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-        imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-        minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days
+        unoptimized: true,
+        dangerouslyAllowSVG: true,
+        contentDispositionType: 'attachment',
+        contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     },
 
     // Security headers
@@ -62,10 +53,10 @@ const nextConfig = {
                             "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com",
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                             "font-src 'self' https://fonts.gstatic.com",
-                            "img-src 'self' data: https: blob:",
-                            "media-src 'self' https:",
-                            "connect-src 'self' https: wss:",
-                            "frame-src 'self' https://www.google.com https://www.youtube.com",
+                            "img-src 'self' data: https: http: blob: *",
+                            "media-src 'self' https: http:",
+                            "connect-src 'self' https: http: wss:",
+                            "frame-src 'self' https://www.google.com https://www.youtube.com https://www.openstreetmap.org",
                             "object-src 'none'",
                             "base-uri 'self'",
                             "form-action 'self'",
@@ -166,31 +157,12 @@ const nextConfig = {
         return config;
     },
 
-    // Experimental features for better performance
-    experimental: {
-        // Enable modern JavaScript features
-        esmExternals: true,
-
-        // Optimize package imports
-        optimizePackageImports: [
-            'lucide-react',
-            'framer-motion',
-            'react-intersection-observer',
-        ],
-
-        // Enable server components (if using)
-        serverComponentsExternalPackages: [],
-
-        // Enable turbo (if using)
-        turbo: {
-            rules: {
-                '*.svg': {
-                    loaders: ['@svgr/webpack'],
-                    as: '*.js',
-                },
-            },
-        },
-    },
+    // Optimize package imports
+    optimizePackageImports: [
+        'lucide-react',
+        'framer-motion',
+        'react-intersection-observer',
+    ],
 
     // Environment variables
     env: {
