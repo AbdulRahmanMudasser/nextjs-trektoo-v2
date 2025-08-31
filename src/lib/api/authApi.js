@@ -1,13 +1,4 @@
-import axios from 'axios';
-
-const authApi = axios.create({
-    baseURL: 'https://staging.trektoo.com/api',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-    },
-    timeout: 10000,
-});
+import secureApiClient from './secureApiClient';
 
 // Helper function to format errors for logging
 const formatError = (error) => ({
@@ -49,7 +40,7 @@ const getUserFriendlyError = (error) => {
 // Login API call
 export const login = async (credentials) => {
     try {
-        const response = await authApi.post('/auth/login', credentials);
+        const response = await secureApiClient.post('/auth/login', credentials);
         if (!response.data) {
             throw new Error('No response received from server');
         }
@@ -63,7 +54,7 @@ export const login = async (credentials) => {
 // Register API call
 export const register = async (userData) => {
     try {
-        const response = await authApi.post('/auth/register', userData);
+        const response = await secureApiClient.post('/auth/register', userData);
         if (!response.data) {
             throw new Error('No response received from server');
         }
@@ -77,7 +68,7 @@ export const register = async (userData) => {
 // Logout API call
 export const logout = async (email, token) => {
     try {
-        const response = await authApi.post('/auth/logout', { email }, {
+        const response = await secureApiClient.post('/auth/logout', { email }, {
             headers: {
                 Authorization: token ? `Bearer ${token}` : undefined,
             },
@@ -95,7 +86,7 @@ export const logout = async (email, token) => {
 // Get user profile API call
 export const getUserProfile = async (token) => {
     try {
-        const response = await authApi.get('/auth/me', {
+        const response = await secureApiClient.get('/auth/me', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -113,7 +104,7 @@ export const getUserProfile = async (token) => {
 // Update user profile API call
 export const updateUserProfile = async (userData, token) => {
     try {
-        const response = await authApi.post('/auth/me', userData, {
+        const response = await secureApiClient.post('/auth/me', userData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -131,7 +122,7 @@ export const updateUserProfile = async (userData, token) => {
 // Get booking history API call
 export const getBookingHistory = async (token, page = 1) => {
     try {
-        const response = await authApi.get(`/user/booking-history?page=${page}`, {
+        const response = await secureApiClient.get(`/user/booking-history?page=${page}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
