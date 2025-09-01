@@ -106,10 +106,9 @@ const nextConfig = {
         ];
     },
 
-    // Redirects for security and SEO
+    // Redirects for security
     async redirects() {
         return [
-            // Redirect HTTP to HTTPS (handled by hosting provider)
             {
                 source: '/admin',
                 destination: '/404',
@@ -127,42 +126,6 @@ const nextConfig = {
             },
         ];
     },
-
-    // Webpack configuration for optimization
-    webpack: (config, { dev, isServer }) => {
-        // Production optimizations
-        if (!dev && !isServer) {
-            // Enable tree shaking
-            config.optimization.usedExports = true;
-            config.optimization.sideEffects = false;
-
-            // Bundle analyzer (optional)
-            if (process.env.ANALYZE === 'true') {
-                const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-                config.plugins.push(
-                    new BundleAnalyzerPlugin({
-                        analyzerMode: 'static',
-                        openAnalyzer: false,
-                    })
-                );
-            }
-        }
-
-        // Security: Prevent access to sensitive files
-        config.module.rules.push({
-            test: /\.(env|config|secret)/,
-            use: 'ignore-loader',
-        });
-
-        return config;
-    },
-
-    // Optimize package imports
-    optimizePackageImports: [
-        'lucide-react',
-        'framer-motion',
-        'react-intersection-observer',
-    ],
 
     // Environment variables
     env: {
