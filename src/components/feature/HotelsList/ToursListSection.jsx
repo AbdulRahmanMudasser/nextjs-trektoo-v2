@@ -1,21 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Listbox, Transition } from '@headlessui/react';
-// Fallback SVG icons in case Heroicons has issues
-const ChevronDownIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-  </svg>
-);
-
-const CheckIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  </svg>
-);
 
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
@@ -99,7 +86,10 @@ const Pagination = ({
 
         {visiblePages.map((page, index) =>
           page === '...' ? (
-            <span key={`ellipsis-${index}`} className="px-3 py-2.5 text-gray-500 font-medium">
+            <span
+              key={`ellipsis-${index}`}
+              className="px-3 py-2.5 text-gray-500 font-medium"
+            >
               ...
             </span>
           ) : (
@@ -132,121 +122,13 @@ Pagination.propTypes = {
   setItemsPerPage: PropTypes.func.isRequired,
 };
 
-const CustomDropdown = ({ value, onChange, options, placeholder, className = "" }) => {
-  const selectedOption = options.find(option => option.value === value);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-
-  const updatePosition = (buttonElement) => {
-    if (buttonElement) {
-      const rect = buttonElement.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-        width: rect.width
-      });
-    }
-  };
-
-  return (
-    <Listbox value={value} onChange={onChange}>
-      {({ open }) => (
-        <div className="relative">
-          <Listbox.Button 
-            ref={updatePosition}
-            className={`relative w-full cursor-pointer rounded-xl bg-white border-2 border-blue-100 py-3 pl-4 pr-10 text-left shadow-sm hover:border-blue-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${className}`}
-          >
-            <span className="block truncate text-sm font-medium text-gray-900">
-              {selectedOption ? selectedOption.label : placeholder}
-            </span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <ChevronDownIcon
-                className="h-5 w-5 text-blue-500 transition-transform duration-200 ui-open:rotate-180"
-                aria-hidden="true"
-              />
-            </span>
-          </Listbox.Button>
-          <Transition
-            as={React.Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            {open && (
-              <div 
-                className="fixed inset-0 z-[999999]"
-                style={{ pointerEvents: 'none' }}
-              >
-                <Listbox.Options 
-                  className="absolute max-h-60 overflow-auto rounded-xl bg-white py-2 shadow-xl border border-blue-100 ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  style={{ 
-                    position: 'absolute',
-                    top: dropdownPosition.top,
-                    left: dropdownPosition.left,
-                    width: dropdownPosition.width,
-                    pointerEvents: 'auto',
-                    zIndex: 999999
-                  }}
-                >
-                  {options.map((option) => (
-                    <Listbox.Option
-                      key={option.value}
-                      className={({ active }) =>
-                        `relative cursor-pointer select-none py-2.5 pl-4 pr-10 transition-colors duration-150 ${
-                          active ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
-                        }`
-                      }
-                      value={option.value}
-                    >
-                      {({ selected }) => (
-                        <>
-                          <span className={`block truncate text-sm font-medium ${selected ? 'text-blue-600' : ''}`}>
-                            {option.label}
-                          </span>
-                          {selected ? (
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-500">
-                              <CheckIcon className="h-4 w-4" aria-hidden="true" />
-                            </span>
-                          ) : null}
-                        </>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </div>
-            )}
-          </Transition>
-        </div>
-      )}
-    </Listbox>
-  );
-};
-
-CustomDropdown.propTypes = {
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      value: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  placeholder: PropTypes.string,
-  className: PropTypes.string,
-};
-
-const TourListHeader = ({ tourCount, sortBy, onSortChange }) => {
-  const sortOptions = [
-    { value: 'name', label: 'Name (A-Z)' },
-    { value: 'price', label: 'Price (Low to High)' },
-    { value: 'rating', label: 'Rating (High to Low)' },
-  ];
-
+const TourListHeader = ({ tourCount }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-8 mb-8"
+      className="mb-8"
     >
       <div className="flex-1">
         <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">
@@ -256,27 +138,12 @@ const TourListHeader = ({ tourCount, sortBy, onSortChange }) => {
           Discover amazing places to stay for your next adventure
         </p>
       </div>
-      
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-gray-700">Sort by:</span>
-          <CustomDropdown
-            value={sortBy}
-            onChange={onSortChange}
-            options={sortOptions}
-            placeholder="Select sorting"
-            className="min-w-[180px]"
-          />
-        </div>
-      </div>
     </motion.div>
   );
 };
 
 TourListHeader.propTypes = {
   tourCount: PropTypes.number.isRequired,
-  sortBy: PropTypes.string.isRequired,
-  onSortChange: PropTypes.func.isRequired,
 };
 
 const TourCardSkeleton = () => (
@@ -290,7 +157,7 @@ const TourCardSkeleton = () => (
         </div>
       </div>
     </div>
-    
+
     {/* Content skeleton */}
     <div className="p-6 flex flex-col justify-between w-full md:w-1/2">
       <div className="space-y-3">
@@ -298,28 +165,31 @@ const TourCardSkeleton = () => (
         <div className="flex items-center gap-2">
           <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="w-4 h-4 bg-gray-300 rounded animate-pulse"></div>
+              <div
+                key={i}
+                className="w-4 h-4 bg-gray-300 rounded animate-pulse"
+              ></div>
             ))}
           </div>
           <div className="h-4 bg-gray-300 rounded w-12 animate-pulse"></div>
         </div>
-        
+
         {/* Title skeleton */}
         <div className="h-6 bg-gray-300 rounded w-3/4 animate-pulse"></div>
-        
+
         {/* Location skeleton */}
         <div className="h-4 bg-gray-300 rounded w-1/2 animate-pulse"></div>
-        
+
         {/* Description skeleton */}
         <div className="space-y-2">
           <div className="h-3 bg-gray-300 rounded w-full animate-pulse"></div>
           <div className="h-3 bg-gray-300 rounded w-2/3 animate-pulse"></div>
         </div>
-        
+
         {/* Price skeleton */}
         <div className="h-8 bg-gray-300 rounded w-1/3 animate-pulse"></div>
       </div>
-      
+
       {/* Button skeleton */}
       <div className="h-10 bg-gray-300 rounded-xl w-full animate-pulse"></div>
     </div>
@@ -400,16 +270,16 @@ const ImageWithFallback = ({ src, alt, ...props }) => {
           </span>
         </div>
       ) : (
-                 <img
-           src={cleanedSrc}
-           alt={alt}
-           onError={handleImageError}
-           onLoad={() => {
-             // Reset error state if image loads successfully
-             if (hasError) setHasError(false);
-           }}
-           className="w-full h-full object-cover"
-         />
+        <img
+          src={cleanedSrc}
+          alt={alt}
+          onError={handleImageError}
+          onLoad={() => {
+            // Reset error state if image loads successfully
+            if (hasError) setHasError(false);
+          }}
+          className="w-full h-full object-cover"
+        />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
     </div>
@@ -434,7 +304,6 @@ const TourListSection = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [sortBy, setSortBy] = useState('name');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Get current page and items per page from URL params
@@ -443,32 +312,14 @@ const TourListSection = ({
     parseInt(searchParams.get('per_page') || '15', 10)
   );
 
-  const { ref, inView } = useInView({ 
-    triggerOnce: true, 
+  const { ref, inView } = useInView({
+    triggerOnce: true,
     threshold: 0.1,
-    rootMargin: '50px'
+    rootMargin: '50px',
   });
 
-  // Performance optimization: Memoize sorted hotels
-  const sortedHotels = useMemo(() => {
-    if (!hotels.length) return [];
-    
-    return [...hotels].sort((a, b) => {
-      if (sortBy === 'price') {
-        return (
-          parseFloat(a.sale_price || a.price) -
-          parseFloat(b.sale_price || b.price)
-        );
-      }
-      if (sortBy === 'rating') {
-        return (
-          parseFloat(b.review_score.score_total) -
-          parseFloat(a.review_score.score_total)
-        );
-      }
-      return a.title.localeCompare(b.title);
-    });
-  }, [hotels, sortBy]);
+  // Use hotels directly without sorting
+  const displayHotels = hotels;
 
   // Handle initial load state
   useEffect(() => {
@@ -501,8 +352,6 @@ const TourListSection = ({
     setItemsPerPage(urlPerPage);
   }, [searchParams]);
 
-
-
   const sectionVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -530,7 +379,7 @@ const TourListSection = ({
               <div className="h-8 bg-gray-300 rounded w-1/3 mb-3 animate-pulse"></div>
               <div className="h-4 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             </div>
-            
+
             {/* Loading cards with staggered animation */}
             <div className="space-y-6">
               {[...Array(itemsPerPage)].map((_, i) => (
@@ -538,22 +387,24 @@ const TourListSection = ({
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.5, 
+                  transition={{
+                    duration: 0.5,
                     delay: i * 0.1,
-                    ease: "easeOut"
+                    ease: 'easeOut',
                   }}
                 >
                   <TourCardSkeleton />
                 </motion.div>
               ))}
             </div>
-            
+
             {/* Loading progress indicator */}
             <div className="mt-8 text-center">
               <div className="inline-flex items-center gap-2 text-blue-600">
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span className="text-sm font-medium">Loading amazing hotels...</span>
+                <span className="text-sm font-medium">
+                  Loading amazing hotels...
+                </span>
               </div>
             </div>
           </motion.div>
@@ -584,23 +435,46 @@ const TourListSection = ({
             >
               {/* Error Icon */}
               <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                <svg
+                  className="w-10 h-10 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
                 </svg>
               </div>
-              
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Oops! Something went wrong</h3>
+
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Oops! Something went wrong
+              </h3>
               <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto">
-                We couldn't load the hotels right now. This might be a temporary issue.
+                We couldn't load the hotels right now. This might be a temporary
+                issue.
               </p>
-              
+
               {/* Retry Button */}
               <button
                 onClick={() => window.location.reload()}
                 className="inline-flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600 transition-colors duration-200 shadow-lg hover:shadow-xl"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
                 Try Again
               </button>
@@ -633,19 +507,34 @@ const TourListSection = ({
             >
               {/* Empty State Icon */}
               <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                <svg
+                  className="w-12 h-12 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
                 </svg>
               </div>
-              
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">No Hotels Found</h3>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                No Hotels Found
+              </h3>
               <p className="text-gray-600 text-lg mb-6 max-w-lg mx-auto">
-                We couldn't find any hotels matching your search criteria. Try adjusting your dates, location, or guest count.
+                We couldn't find any hotels matching your search criteria. Try
+                adjusting your dates, location, or guest count.
               </p>
-              
+
               {/* Suggestions */}
               <div className="bg-blue-50 rounded-xl p-4 max-w-md mx-auto mb-6">
-                <h4 className="font-semibold text-blue-900 mb-2">💡 Try these tips:</h4>
+                <h4 className="font-semibold text-blue-900 mb-2">
+                  💡 Try these tips:
+                </h4>
                 <ul className="text-sm text-blue-800 space-y-1 text-left">
                   <li>• Check different dates</li>
                   <li>• Try a nearby location</li>
@@ -653,14 +542,24 @@ const TourListSection = ({
                   <li>• Clear some filters</li>
                 </ul>
               </div>
-              
+
               {/* Back to Search Button */}
               <button
                 onClick={() => window.history.back()}
                 className="inline-flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600 transition-colors duration-200 shadow-lg hover:shadow-xl"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
                 Back to Search
               </button>
@@ -686,14 +585,10 @@ const TourListSection = ({
           variants={sectionVariants}
         >
           <div className="space-y-8">
-            <TourListHeader
-              tourCount={totalHotels}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-            />
+            <TourListHeader tourCount={totalHotels} />
             <div className="grid grid-cols-1 gap-8">
               <AnimatePresence mode="wait">
-                {sortedHotels.map((hotel, index) => {
+                {displayHotels.map((hotel, index) => {
                   const queryParams = new URLSearchParams({
                     ...(checkin && { checkin: format(checkin, 'yyyy-MM-dd') }),
                     ...(checkout && {
@@ -702,17 +597,17 @@ const TourListSection = ({
                     adults: String(adults),
                     children: String(children),
                   }).toString();
-                  
+
                   return (
                     <motion.div
-                      key={`${hotel.id}-${sortBy}-${currentPage}`}
+                      key={`${hotel.id}-${currentPage}`}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
-                      transition={{ 
-                        duration: 0.4, 
+                      transition={{
+                        duration: 0.4,
                         delay: Math.min(index * 0.08, 0.8),
-                        ease: "easeOut"
+                        ease: 'easeOut',
                       }}
                       className="relative bg-white/95 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row h-auto border border-blue-50 hover:shadow-2xl transition-all duration-300"
                       role="article"
@@ -720,11 +615,11 @@ const TourListSection = ({
                       whileHover={{ y: -5 }}
                     >
                       <div className="relative w-full md:w-1/2 h-85">
-                                                 <ImageWithFallback
-                           src={hotel.image}
-                           alt={hotel.title}
-                           className="object-cover transition-transform duration-700 hover:scale-105"
-                         />
+                        <ImageWithFallback
+                          src={hotel.image}
+                          alt={hotel.title}
+                          className="object-cover transition-transform duration-700 hover:scale-105"
+                        />
                         {hotel.discount_percent && (
                           <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
                             {hotel.discount_percent}% Off

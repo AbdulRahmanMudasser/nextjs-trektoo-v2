@@ -205,7 +205,16 @@ export const fetchLocations = async (query) => {
     try {
         const response = await secureApiClient.get(`/locations?service_name=${encodeURIComponent(query)}`);
         console.log('Locations API response:', { total: response.data.total, data: response.data.data });
-        return response.data.data || [];
+
+        // Transform location data to match frontend expectations
+        const locations = response.data.data || [];
+        return locations.map(location => ({
+            ...location,
+            // Ensure title property exists for frontend compatibility
+            title: location.title || location.name || location.city || 'Unknown Location',
+            // Ensure id property exists
+            id: location.id || location.location_id || Math.random().toString(36).substr(2, 9)
+        }));
     } catch (error) {
         logError('Locations API', error);
         throw new Error(getUserFriendlyError(error));
