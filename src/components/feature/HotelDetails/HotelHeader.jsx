@@ -87,16 +87,16 @@ const ImageWithFallback = ({ src, alt, ...props }) => {
           </span>
         </div>
       ) : (
-                 <img
-           src={cleanedSrc}
-           alt={alt}
-           onError={handleImageError}
-           onLoad={() => {
-             // Reset error state if image loads successfully
-             if (hasError) setHasError(false);
-           }}
-           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-         />
+        <img
+          src={cleanedSrc}
+          alt={alt}
+          onError={handleImageError}
+          onLoad={() => {
+            // Reset error state if image loads successfully
+            if (hasError) setHasError(false);
+          }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
       )}
     </div>
   );
@@ -155,35 +155,38 @@ const HotelHeader = ({
       variants={containerVariants}
     >
       {/* Hero Image Section */}
-      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden">
-                 <ImageWithFallback
-           src={image}
-           alt={title}
-           className="w-full h-full object-cover transform transition-transform duration-1000 hover:scale-105"
-         />
+      <div className="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] min-h-[300px] sm:min-h-[400px] max-h-[600px] overflow-hidden">
+        <ImageWithFallback
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover transform transition-transform duration-1000 hover:scale-105"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50" />
       </div>
 
       {/* Main Content Section */}
       <motion.div
-        className="relative bg-white/95 backdrop-blur-sm py-8 sm:py-12 px-4 sm:px-6 lg:px-8 -mt-16 mx-4 sm:mx-6 lg:mx-12 rounded-3xl"
+        className="relative bg-white/95 backdrop-blur-sm py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6 lg:px-8 -mt-12 sm:-mt-16 mx-2 sm:mx-4 md:mx-6 lg:mx-12 rounded-2xl sm:rounded-3xl"
         variants={itemVariants}
       >
         <div className="w-full">
-          <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
-            <motion.div className="space-y-4" variants={itemVariants}>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
+          <div className="flex flex-col lg:flex-row lg:justify-between gap-6 sm:gap-8">
+            <motion.div
+              className="space-y-3 sm:space-y-4"
+              variants={itemVariants}
+            >
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
                 {title}
               </h1>
               <div className="flex items-center text-gray-600 group cursor-pointer">
-                <MapPin className="h-5 w-5 text-blue-500 mr-2 transition-transform group-hover:scale-110" />
-                <span className="text-base sm:text-lg font-medium">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mr-2 transition-transform group-hover:scale-110 flex-shrink-0" />
+                <span className="text-sm sm:text-base md:text-lg font-medium break-words">
                   {location}
                 </span>
               </div>
             </motion.div>
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-4 lg:mt-0"
               variants={containerVariants}
             >
               {[
@@ -199,12 +202,14 @@ const HotelHeader = ({
                   variants={itemVariants}
                   whileHover={{ x: 5 }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mr-4 shadow-sm transition-shadow group-hover:shadow-md">
-                    <item.icon className="h-6 w-6 text-blue-500" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-50 flex items-center justify-center mr-3 sm:mr-4 shadow-sm transition-shadow group-hover:shadow-md flex-shrink-0">
+                    <item.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">{item.label}</p>
-                    <p className="text-lg font-semibold text-gray-800">
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      {item.label}
+                    </p>
+                    <p className="text-sm sm:text-lg font-semibold text-gray-800 truncate">
                       {item.value}
                     </p>
                   </div>
@@ -217,17 +222,17 @@ const HotelHeader = ({
 
       {/* Footer Actions Section */}
       <motion.div
-        className="bg-white border-t border-gray-100 py-6 px-4 sm:px-6 lg:px-8"
+        className="bg-white border-t border-gray-100 py-4 sm:py-6 px-3 sm:px-4 md:px-6 lg:px-8"
         variants={itemVariants}
       >
         <div className="w-full">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
             <motion.div className="flex items-center" variants={itemVariants}>
-              <div className="flex">
+              <div className="flex flex-wrap">
                 {[...Array(fullStars)].map((_, i) => (
                   <motion.svg
                     key={i}
-                    className="w-5 h-5 text-yellow-400 fill-yellow-400"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     initial={{ rotate: -10 }}
@@ -239,7 +244,7 @@ const HotelHeader = ({
                 ))}
                 {hasHalfStar && (
                   <motion.svg
-                    className="w-5 h-5 text-yellow-400"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -257,7 +262,7 @@ const HotelHeader = ({
                   (_, i) => (
                     <svg
                       key={i + fullStars + 1}
-                      className="w-5 h-5 text-gray-200"
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-gray-200"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                       fill="currentColor"
@@ -267,12 +272,12 @@ const HotelHeader = ({
                   )
                 )}
               </div>
-              <span className="ml-3 text-base text-gray-600 font-medium">
+              <span className="ml-2 sm:ml-3 text-sm sm:text-base text-gray-600 font-medium">
                 {numericRating.toFixed(1)} ({numericPhotoCount} reviews)
               </span>
             </motion.div>
             <motion.div
-              className="flex flex-wrap justify-center gap-3"
+              className="flex flex-wrap justify-center gap-2 sm:gap-3 w-full sm:w-auto"
               variants={containerVariants}
             >
               {[
@@ -282,14 +287,17 @@ const HotelHeader = ({
               ].map((button, index) => (
                 <motion.button
                   key={index}
-                  className="flex items-center px-5 py-2.5 bg-blue-50 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-500 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="flex items-center px-3 sm:px-5 py-2 sm:py-2.5 bg-blue-50 text-blue-600 rounded-full text-xs sm:text-sm font-medium hover:bg-blue-500 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md flex-1 sm:flex-none justify-center"
                   aria-label={button.aria}
                   variants={itemVariants}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <button.icon className="h-4 w-4 mr-2 transition-colors" />
-                  {button.label}
+                  <button.icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 transition-colors flex-shrink-0" />
+                  <span className="hidden xs:inline">{button.label}</span>
+                  <span className="xs:hidden">
+                    {button.label.split(' ')[0]}
+                  </span>
                 </motion.button>
               ))}
             </motion.div>

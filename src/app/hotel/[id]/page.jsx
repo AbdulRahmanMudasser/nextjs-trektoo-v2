@@ -16,10 +16,7 @@ import CalendarPrice from '@/components/feature/HotelDetails/CalendarPrice';
 import ReviewScores from '@/components/feature/HotelDetails/ReviewScores';
 import ReviewList from '@/components/feature/HotelDetails/ReviewList';
 import ErrorBoundary from '@/components/security/ErrorBoundary';
-import {
-  useHotelDetails,
-  useHotelReviews,
-} from '@/hooks/useHotels';
+import { useHotelDetails, useHotelReviews } from '@/hooks/useHotels';
 
 const TourDetail = ({ params }) => {
   const { id } = React.use(params); // Unwrap params with React.use()
@@ -41,7 +38,7 @@ const TourDetail = ({ params }) => {
   const availableRooms = hotel?.rooms || [];
   const isRoomsLoading = false; // No separate loading state needed
   const roomsError = null; // No separate error state needed
-  
+
   // Debug: Log the hotel and rooms data
   console.log('Hotel detail page - hotel data:', hotel);
   console.log('Hotel detail page - availableRooms:', availableRooms);
@@ -124,18 +121,20 @@ const TourDetail = ({ params }) => {
             duration="Per Night"
             rating={parseFloat(hotel.review_score?.score_total) || 0}
             photoCount={hotel.review_score?.total_review || 0}
-            discount={hotel.discount_percent ? `${hotel.discount_percent}%` : ''}
+            discount={
+              hotel.discount_percent ? `${hotel.discount_percent}%` : ''
+            }
             image={hotel.banner_image || hotel.image}
           />
-          
+
           <ImageGallery images={hotel.gallery || []} />
-          
+
           <HotelDetails
             id={hotel.id}
             description={hotel.content}
             address={hotel.address}
           />
-          
+
           <RoomAvailability
             rooms={availableRooms}
             loading={isRoomsLoading}
@@ -149,7 +148,7 @@ const TourDetail = ({ params }) => {
               policy: hotel.policy || [],
             }}
           />
-          
+
           <TourInformation
             facilities={hotel.terms?.['6']?.child || []}
             services={hotel.terms?.['7']?.child || []}
@@ -158,7 +157,7 @@ const TourDetail = ({ params }) => {
             checkInTime={hotel.check_in_time || 'Not specified'}
             checkOutTime={hotel.check_out_time || 'Not specified'}
           />
-          
+
           <Map
             lat={parseFloat(hotel.map_lat) || 0}
             lng={parseFloat(hotel.map_lng) || 0}
@@ -166,7 +165,7 @@ const TourDetail = ({ params }) => {
             address={hotel.address}
             hotelName={hotel.title}
           />
-          
+
           <ReviewScores
             scoreTotal={hotel.review_score?.score_total || 0}
             scoreText={hotel.review_score?.score_text || 'No rating'}
@@ -174,14 +173,14 @@ const TourDetail = ({ params }) => {
             reviewStats={hotel.review_score?.review_stats || []}
             rateScores={hotel.review_score?.rate_score || {}}
           />
-          
+
           {isReviewsLoading ? (
-            <div className="w-full py-16 text-center">
+            <div className="w-full py-12 sm:py-16 text-center px-4">
               <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
               <p className="text-gray-600 text-sm mt-2">Loading reviews...</p>
             </div>
           ) : reviewsError ? (
-            <div className="w-full py-16 text-center">
+            <div className="w-full py-12 sm:py-16 text-center px-4">
               <p className="text-gray-600 text-sm">
                 Failed to load reviews. Please try again later.
               </p>

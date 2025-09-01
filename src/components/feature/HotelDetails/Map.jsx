@@ -87,253 +87,161 @@ const Map = ({ lat = 0, lng = 0, zoom = 10, address = '', hotelName = '' }) => {
 
   return (
     <motion.section
-      className="w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
+      className="w-full py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-6 lg:px-8"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8">
         {/* Header */}
-        <motion.div className="text-center mb-12" variants={itemVariants}>
+        <motion.div
+          className="text-center mb-8 sm:mb-12"
+          variants={itemVariants}
+        >
           <motion.div
-            className="inline-flex items-center justify-center p-2 bg-blue-50 rounded-full mb-4"
+            className="inline-flex items-center justify-center p-2 bg-blue-50 rounded-full mb-3 sm:mb-4"
             whileHover={{ scale: 1.05 }}
           >
-            <MapPin className="h-8 w-8 text-blue-600" />
+            <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
           </motion.div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-            Location & Directions
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight">
+            Location
           </h2>
+          <p className="text-gray-600 text-sm sm:text-base md:text-lg max-w-3xl mx-auto">
+            Find us easily with our interactive map and detailed location
+            information
+          </p>
         </motion.div>
 
-        {/* Main Content */}
-                 <motion.div
-           className="rounded-3xl border border-gray-100 overflow-hidden"
-           variants={itemVariants}
-         >
-          {/* Hotel Location Info */}
-          <div className="p-8 border-b border-gray-100">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-gray-900 flex items-center justify-center mb-4">
-                <MapPin className="h-6 w-6 text-blue-500 mr-2" />
-                Hotel Location
-              </h3>
-
-              {hotelName && (
-                                 <div className="p-6 rounded-2xl border border-blue-100 mb-6 max-w-2xl mx-auto">
-                  <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                    {hotelName}
-                  </h4>
-                  {address && (
-                    <p className="text-gray-700 text-lg">{address}</p>
+        {/* Map Container */}
+        <motion.div
+          className="bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden mb-6 sm:mb-8"
+          variants={itemVariants}
+        >
+          {/* Map Header */}
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">
+                  {hotelName}
+                </h3>
+                <p className="text-blue-100 text-sm sm:text-base break-words">
+                  {address}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <motion.button
+                  onClick={handleCopyCoordinates}
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium hover:bg-white/30 transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {copied ? (
+                    <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+                  ) : (
+                    <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                   )}
-                </div>
-              )}
+                  <span className="hidden sm:inline">
+                    {copied ? 'Copied!' : 'Copy Coords'}
+                  </span>
+                  <span className="sm:hidden">
+                    {copied ? 'Copied!' : 'Copy'}
+                  </span>
+                </motion.button>
+              </div>
+            </div>
+          </div>
 
-                             <div className="p-4 rounded-xl border border-gray-200 max-w-md mx-auto">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600 text-left">
-                    <p>
-                      <strong>Latitude:</strong> {lat}
-                    </p>
-                    <p>
-                      <strong>Longitude:</strong> {lng}
-                    </p>
-                  </div>
+          {/* Map Content */}
+          <div className="p-4 sm:p-6">
+            {iframeError ? (
+              <div className="text-center py-12 sm:py-16">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                  Map Unavailable
+                </h3>
+                <p className="text-gray-600 text-sm sm:text-base mb-4">
+                  Interactive map cannot be displayed due to browser
+                  restrictions.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <motion.button
-                    onClick={handleCopyCoordinates}
-                    className="flex items-center space-x-1 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all text-sm ml-4"
+                    onClick={handleViewOnGoogleMaps}
+                    className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {copied ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                    <span>{copied ? 'Copied!' : 'Copy'}</span>
+                    <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="hidden sm:inline">
+                      View on Google Maps
+                    </span>
+                    <span className="sm:hidden">Google Maps</span>
+                  </motion.button>
+                  <motion.button
+                    onClick={handleViewOnOpenStreetMap}
+                    className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="hidden sm:inline">
+                      View on OpenStreetMap
+                    </span>
+                    <span className="sm:hidden">OpenStreetMap</span>
                   </motion.button>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Static Map Display */}
-          <div className="p-8">
-                         <motion.div
-               className="relative w-full h-96 rounded-2xl overflow-hidden border border-gray-200"
-               variants={itemVariants}
-               whileHover={{ scale: 1.01 }}
-               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-             >
-                             {/* OpenStreetMap Integration with Fallback */}
-               <div className="relative w-full h-full">
-                 {!iframeError ? (
-                   <iframe
-                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lng}`}
-                     width="100%"
-                     height="100%"
-                     frameBorder="0"
-                     scrolling="no"
-                     marginHeight="0"
-                     marginWidth="0"
-                     title={`OpenStreetMap showing ${hotelName || 'hotel location'}`}
-                     className="w-full h-full rounded-2xl"
-                     onLoad={() => setMapLoaded(true)}
-                     onError={() => setIframeError(true)}
-                   />
-                 ) : (
-                   <div className="w-full h-full flex items-center justify-center rounded-2xl">
-                     <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200 max-w-md">
-                       <MapPin className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                       <h3 className="text-xl font-bold text-gray-900 mb-2">
-                         {hotelName || 'Hotel Location'}
-                       </h3>
-                       <p className="text-gray-600 mb-2">{address}</p>
-                       <p className="text-sm text-gray-500 mb-4">
-                         Coordinates: {lat}, {lng}
-                       </p>
-                       <div className="flex gap-2 justify-center">
-                         <button
-                           onClick={handleViewOnOpenStreetMap}
-                           className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
-                         >
-                           View on OpenStreetMap
-                         </button>
-                         <button
-                           onClick={handleViewOnGoogleMaps}
-                           className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                         >
-                           View on Google Maps
-                         </button>
-                       </div>
-                     </div>
-                   </div>
-                 )}
-
-                {/* Map Loading Overlay */}
-                                 {!mapLoaded && (
-                   <div className="absolute inset-0 flex items-center justify-center rounded-2xl">
-                    <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200">
-                      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        Loading Map...
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        Please wait while we load the location
-                      </p>
-                    </div>
+            ) : (
+              <div className="relative">
+                <iframe
+                  ref={mapRef}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}&layer=mapnik&marker=${lat},${lng}`}
+                  width="100%"
+                  height="400"
+                  className="rounded-lg border-0"
+                  onLoad={() => setMapLoaded(true)}
+                  title={`Map showing location of ${hotelName}`}
+                  loading="lazy"
+                />
+                {!mapLoaded && (
+                  <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
-                
-                                 {/* Info Overlay on Hover */}
-                 <div className="absolute inset-0 flex items-center justify-center rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200">
-                    <MapPin className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {hotelName || 'Hotel Location'}
-                    </h3>
-                    <p className="text-gray-600 mb-2">{address}</p>
-                    <p className="text-sm text-gray-500">
-                      Coordinates: {lat}, {lng}
-                    </p>
-                  </div>
-                </div>
               </div>
-
-              {/* Overlay buttons */}
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <motion.button
-                  onClick={handleViewOnGoogleMaps}
-                  className="bg-white/90 backdrop-blur-sm text-gray-700 p-2 rounded-full shadow-lg hover:bg-white hover:shadow-xl transition-all"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  title="View on Google Maps"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </motion.button>
-                <motion.button
-                  onClick={handleViewOnOpenStreetMap}
-                  className="bg-green-500/90 backdrop-blur-sm text-white p-2 rounded-full shadow-lg hover:bg-green-500 hover:shadow-xl transition-all"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  title="View on OpenStreetMap"
-                >
-                  <MapPin className="h-4 w-4" />
-                </motion.button>
-              </div>
-            </motion.div>
-
-                                                   {/* Map Info */}
-              <div className="text-center mb-6">
-                {iframeError && (
-                  <p className="text-sm text-gray-600">
-                    <span className="block text-blue-600">
-                      🔒 <strong>Note:</strong> Using fallback view due to security restrictions. Click the buttons below to view on external maps.
-                    </span>
-                  </p>
-                )}
-              </div>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-              <motion.button
-                onClick={handleViewOnOpenStreetMap}
-                className="flex items-center justify-center space-x-2 bg-green-500 text-white font-medium py-3 px-4 rounded-xl hover:bg-green-600 transition-all shadow-lg hover:shadow-xl"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <MapPin className="h-4 w-4" />
-                <span>View on OpenStreetMap</span>
-              </motion.button>
-
-              <motion.button
-                onClick={handleViewOnGoogleMaps}
-                className="flex items-center justify-center space-x-2 bg-white border border-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ExternalLink className="h-4 w-4" />
-                <span>View on Google Maps</span>
-              </motion.button>
-            </div>
+            )}
           </div>
         </motion.div>
 
-        {/* Quick Info Cards */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-           <motion.div
-             className="p-6 rounded-2xl border border-gray-100 text-center"
-             variants={itemVariants}
-             whileHover={{ y: -5 }}
-           >
-            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Precise Location
-            </h3>
-            <p className="text-gray-600 text-sm">
-              GPS coordinates provided for accurate navigation
-            </p>
-          </motion.div>
+        {/* Action Buttons */}
+        <motion.div
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+          variants={itemVariants}
+        >
+          <motion.button
+            onClick={handleViewOnGoogleMaps}
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Navigation className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">Get Directions</span>
+            <span className="sm:hidden">Directions</span>
+          </motion.button>
 
-                     <motion.div
-             className="p-6 rounded-2xl border border-gray-100 text-center"
-             variants={itemVariants}
-             whileHover={{ y: -5 }}
-           >
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Interactive Map
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Embedded OpenStreetMap with real-time navigation
-            </p>
-          </motion.div>
-        </div>
+          <motion.button
+            onClick={handleViewOnGoogleMaps}
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">View on Google Maps</span>
+            <span className="sm:hidden">Google Maps</span>
+          </motion.button>
+        </motion.div>
       </div>
     </motion.section>
   );
