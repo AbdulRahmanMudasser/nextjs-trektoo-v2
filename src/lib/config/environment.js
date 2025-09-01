@@ -6,7 +6,7 @@
 const ENV = process.env.NODE_ENV || 'development';
 
 // API Configuration
-export const API_CONFIG = {
+const API_CONFIG = {
     // Base URLs - Use environment variables in production
     BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://staging.trektoo.com/api',
     STAGING_URL: 'https://staging.trektoo.com/api',
@@ -27,7 +27,7 @@ export const API_CONFIG = {
 };
 
 // Security Configuration
-export const SECURITY_CONFIG = {
+const SECURITY_CONFIG = {
     // Token configuration
     TOKEN_EXPIRY: 24 * 60 * 60 * 1000, // 24 hours
     REFRESH_THRESHOLD: 5 * 60 * 1000, // 5 minutes before expiry
@@ -48,7 +48,7 @@ export const SECURITY_CONFIG = {
 };
 
 // Payment Configuration
-export const PAYMENT_CONFIG = {
+const PAYMENT_CONFIG = {
     // Supported payment methods
     SUPPORTED_METHODS: ['card', 'paypal', 'bank_transfer'],
 
@@ -68,7 +68,7 @@ export const PAYMENT_CONFIG = {
 };
 
 // Feature Flags
-export const FEATURES = {
+const FEATURES = {
     // Development features
     DEBUG_MODE: ENV === 'development',
     LOGGING_ENABLED: ENV === 'development',
@@ -88,7 +88,7 @@ export const FEATURES = {
 };
 
 // Performance Configuration
-export const PERFORMANCE_CONFIG = {
+const PERFORMANCE_CONFIG = {
     // Image optimization
     IMAGE_QUALITY: 80,
     IMAGE_FORMATS: ['webp', 'avif', 'jpeg'],
@@ -106,7 +106,7 @@ export const PERFORMANCE_CONFIG = {
 };
 
 // Validation Rules
-export const VALIDATION_RULES = {
+const VALIDATION_RULES = {
     // Email validation
     EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 
@@ -124,7 +124,7 @@ export const VALIDATION_RULES = {
 };
 
 // Error Messages
-export const ERROR_MESSAGES = {
+const ERROR_MESSAGES = {
     // Authentication
     INVALID_CREDENTIALS: 'Invalid email or password. Please try again.',
     ACCOUNT_LOCKED: 'Account temporarily locked due to multiple failed attempts.',
@@ -147,7 +147,7 @@ export const ERROR_MESSAGES = {
 };
 
 // Logging Configuration
-export const LOGGING_CONFIG = {
+const LOGGING_CONFIG = {
     LEVEL: ENV === 'production' ? 'error' : 'debug',
     ENABLE_CONSOLE: ENV === 'development',
     ENABLE_REMOTE: ENV === 'production',
@@ -157,7 +157,7 @@ export const LOGGING_CONFIG = {
     MASK_FIELDS: ['password', 'token', 'card_number', 'cvv', 'ssn'],
 };
 
-export default {
+module.exports = {
     ENV,
     API_CONFIG,
     SECURITY_CONFIG,
