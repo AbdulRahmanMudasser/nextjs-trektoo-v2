@@ -68,7 +68,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed ${topOffset} z-20 w-full bg-gradient-to-r from-white via-[url('/patterns/wave.svg')] via-30% to-blue-500 bg-blend-multiply transition-all duration-300 font-montserrat shadow-2xl`}
+      className={`fixed ${topOffset} z-20 w-full bg-white border-b border-gray-200 transition-all duration-300 font-montserrat shadow-lg`}
       aria-label="Main navigation"
     >
       {(authSuccess || authError) && (
@@ -92,7 +92,7 @@ const Navbar = () => {
             <div className="hidden lg:flex items-center space-x-2">
               <Link
                 href="/"
-                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+                className="text-gray-800 hover:text-blue-600 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 Home
               </Link>
@@ -114,19 +114,19 @@ const Navbar = () => {
                     borderRadius: '8px',
                   },
                 })}
-                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+                className="text-gray-800 hover:text-blue-600 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 Explore TrekToo
               </button>
               <Link
                 href="/about"
-                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+                className="text-gray-800 hover:text-blue-600 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 About Us
               </Link>
               <Link
                 href="/contact"
-                className="text-white hover:text-blue-400 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
+                className="text-gray-800 hover:text-blue-600 transition-colors font-medium text-sm md:text-base uppercase tracking-wide py-2 px-3 focus:outline-none"
               >
                 Contact
               </Link>
@@ -143,7 +143,7 @@ const Navbar = () => {
               <button
                 onClick={() => !isLoggingOut && setIsProfileOpen(!isProfileOpen)}
                 disabled={isLoggingOut}
-                className="p-1.5 rounded-full text-white hover:bg-blue-400 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 rounded-full text-gray-800 hover:bg-blue-100 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Profile menu"
               >
                 {user?.avatar_url ? (
@@ -227,7 +227,7 @@ const Navbar = () => {
 
             {/* Mobile Toggle Button */}
             <button
-              className="lg:hidden p-1.5 text-white hover:text-blue-400 transition-colors z-30 relative"
+              className="lg:hidden p-1.5 text-gray-800 hover:text-blue-600 transition-colors z-30 relative"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
@@ -251,14 +251,14 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-blue-500 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto z-20">
+          <div className="lg:hidden bg-white border border-gray-200 rounded-lg shadow-lg fixed top-10 left-0 right-0 max-h-[calc(100vh-3rem)] overflow-y-auto z-20">
             <div className="px-3 py-4 space-y-3">
               <div className="sm:hidden mb-3">
                 <SearchInput />
               </div>
               <Link
                 href="/"
-                className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                className="block text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
@@ -270,7 +270,7 @@ const Navbar = () => {
               />
               <Link
                 href="/about"
-                className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                className="block text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About Us
@@ -278,18 +278,18 @@ const Navbar = () => {
 
               <Link
                 href="/contact"
-                className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                className="block text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Contact
               </Link>
 
-              <div className="pt-2 border-t border-blue-700">
+              <div className="pt-2 border-t border-gray-200">
                 {isAuthenticated ? (
                   <>
                     <Link
                       href="/profile"
-                      className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                      className="block text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Profile
@@ -297,7 +297,7 @@ const Navbar = () => {
                     <button
                       onClick={handleLogout}
                       disabled={isLoggingOut}
-                      className="block w-full text-left text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="block w-full text-left text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoggingOut ? 'Logging out...' : 'Logout'}
                     </button>
@@ -306,14 +306,14 @@ const Navbar = () => {
                   <>
                     <Link
                       href="/login"
-                      className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                      className="block text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Login
                     </Link>
                     <Link
                       href="/signup"
-                      className="block text-white hover:text-blue-400 font-medium text-sm uppercase tracking-wide py-1.5"
+                      className="block text-gray-800 hover:text-blue-600 font-medium text-sm uppercase tracking-wide py-1.5"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Sign Up

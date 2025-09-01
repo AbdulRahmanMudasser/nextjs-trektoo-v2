@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { API_CONFIG, SECURITY_CONFIG, ERROR_MESSAGES, LOGGING_CONFIG } from '@/lib/config/environment';
+import { API_CONFIG, SECURITY_CONFIG, LOGGING_CONFIG } from '@/lib/config/environment';
+import { logError, getUserFriendlyError, ERROR_TYPES, getErrorType } from '@/lib/services/errorHandler';
 
 /**
  * Secure API Client with enhanced security and error handling
@@ -196,61 +197,15 @@ class SecureApiClient {
      * Get user-friendly error message
      */
     getUserFriendlyMessage(error) {
-        if (!error.response) {
-            return ERROR_MESSAGES.NETWORK_ERROR;
-        }
-
-        const status = error.response.status;
-        const data = error.response.data;
-
-        // Check for custom error message from API
-        if (data?.message) {
-            return data.message;
-        }
-
-        // Map status codes to user-friendly messages
-        switch (status) {
-            case 400:
-                return ERROR_MESSAGES.INVALID_EMAIL;
-            case 401:
-                return ERROR_MESSAGES.INVALID_CREDENTIALS;
-            case 403:
-                return 'You are not allowed to perform this action.';
-            case 404:
-                return 'The requested resource was not found.';
-            case 429:
-                return 'Too many requests. Please wait a moment and try again.';
-            case 500:
-                return ERROR_MESSAGES.SERVER_ERROR;
-            case 502:
-            case 503:
-            case 504:
-                return 'Service temporarily unavailable. Please try again later.';
-            default:
-                return ERROR_MESSAGES.NETWORK_ERROR;
-        }
+        return getUserFriendlyError(error);
     }
 
     /**
      * Check if error is retryable
      */
     isRetryable(error) {
-        // Don't retry on 4xx errors (client errors)
-        if (error.response?.status >= 400 && error.response?.status < 500) {
-            return false;
-        }
-
-        // Don't retry on network errors (no response)
-        if (!error.response) {
-            return true;
-        }
-
-        // Don't retry on 5xx errors that indicate server issues
-        if (error.response?.status >= 500) {
-            return true;
-        }
-
-        return false;
+        const errorType = getErrorType(error);
+        return [ERROR_TYPES.NETWORK, ERROR_TYPES.SERVER].includes(errorType);
     }
 
     /**
@@ -300,45 +255,10 @@ class SecureApiClient {
      * Log errors with proper formatting
      */
     logError(message, error) {
-        if (LOGGING_CONFIG.ENABLE_CONSOLE) {
-            console.error(message, {
-                message: error.message,
-                status: error.response?.status,
-                url: error.config?.url,
-                method: error.config?.method,
-                timestamp: new Date().toISOString(),
-                userMessage: error.userMessage,
-                retryable: error.retryable,
-            });
-        }
-
-        // Could send to remote logging service in production
-        if (LOGGING_CONFIG.ENABLE_REMOTE && LOGGING_CONFIG.REMOTE_ENDPOINT) {
-            this.sendToRemoteLogging(message, error);
-        }
+        logError(message, error);
     }
 
-    /**
-     * Send error to remote logging service
-     */
-    async sendToRemoteLogging(message, error) {
-        try {
-            await fetch(LOGGING_CONFIG.REMOTE_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    level: 'error',
-                    message,
-                    error: this.maskSensitiveData(error),
-                    timestamp: new Date().toISOString(),
-                    userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
-                }),
-            });
-        } catch (loggingError) {
-            // Don't let logging errors break the app
-            console.error('Failed to send error to remote logging:', loggingError);
-        }
-    }
+
 
     /**
      * Make HTTP request with retry logic

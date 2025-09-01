@@ -4,8 +4,8 @@ import axios from 'axios';
  * Centralized API client for Klook-related requests
  */
 const klookApi = axios.create({
-    baseURL: process.env.NODE_ENV === 'production' 
-        ? 'https://api.klktech.com/v3' 
+    baseURL: process.env.NODE_ENV === 'production'
+        ? 'https://api.klktech.com/v3'
         : 'https://sandbox-api.klktech.com/v3',
     headers: {
         'Accept': 'application/json',
@@ -14,43 +14,7 @@ const klookApi = axios.create({
     timeout: 30000, // 30-second timeout
 });
 
-/**
- * Helper function to format errors for logging
- */
-const formatError = (error) => ({
-    message: error.message || 'Unknown error',
-    status: error.response?.status || 'No status',
-    data: error.response?.data || 'No data',
-    stack: error.stack || 'No stack trace',
-});
-
-/**
- * Convert technical errors to user-friendly messages
- */
-const getUserFriendlyError = (error) => {
-    if (!error.response) {
-        return 'Unable to connect to the server. Please check your internet and try again.';
-    }
-    const status = error.response?.status;
-    const data = error.response?.data;
-
-    if (status === 400) {
-        return data?.message || 'Invalid request. Please try again.';
-    }
-    if (status === 401) {
-        return 'Authentication failed. Please log in again.';
-    }
-    if (status === 403) {
-        return 'You are not allowed to perform this action. Contact support.';
-    }
-    if (status === 429) {
-        return 'Too many attempts. Please wait a few minutes and try again.';
-    }
-    if (status >= 500) {
-        return 'Something went wrong on our server. Please try again later.';
-    }
-    return data?.message || 'An unexpected error occurred. Please try again.';
-};
+import { logError, getUserFriendlyError } from '@/lib/services/errorHandler';
 
 /**
  * Fetch activity categories
@@ -73,7 +37,7 @@ export const fetchCategories = async () => {
         console.log('Categories API response:', data);
         return data;
     } catch (error) {
-        console.error('Categories API error:', formatError(error));
+        logError('Categories API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -118,7 +82,7 @@ export const fetchActivities = async (params = {}) => {
             success: data.success || false,
         };
     } catch (error) {
-        console.error('Activities API error:', formatError(error));
+        logError('Activities API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -144,7 +108,7 @@ export const fetchActivityDetails = async (id) => {
         const data = await response.json();
         return data.data || {};
     } catch (error) {
-        console.error('Activity Details API error:', formatError(error));
+        logError('Activity Details API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };

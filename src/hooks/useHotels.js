@@ -14,11 +14,8 @@ export const useBookingDetails = (code, token) => {
         queryFn: () => fetchBookingDetails(code, token),
         enabled: !!code && !!token,
         onError: (error) => {
-            console.error('useBookingDetails error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -32,11 +29,8 @@ export const useDoCheckout = (token) => {
     return useMutation({
         mutationFn: (checkoutData) => doCheckout(checkoutData, token),
         onError: (error) => {
-            console.error('useDoCheckout error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -50,11 +44,8 @@ export const useAddToCart = (token) => {
     return useMutation({
         mutationFn: (bookingData) => addToCart(bookingData, token),
         onError: (error) => {
-            console.error('useAddToCart error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -86,11 +77,8 @@ export const useHotels = (searchParams) => {
             perPage: response.per_page || 15,
         }),
         onError: (error) => {
-            console.error('useHotels error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -106,11 +94,8 @@ export const useHotelDetails = (id) => {
         queryFn: () => fetchHotelDetails(id),
         enabled: !!id,
         onError: (error) => {
-            console.error('useHotelDetails error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -129,11 +114,8 @@ export const useHotelReviews = (id, page = 1, perPage = 5) => {
         enabled: !!id,
         keepPreviousData: true,
         onError: (error) => {
-            console.error('useHotelReviews error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -149,11 +131,8 @@ export const useHotelAvailability = (id) => {
         queryFn: () => fetchHotelAvailability(id),
         enabled: !!id,
         onError: (error) => {
-            console.error('useHotelAvailability error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -175,11 +154,8 @@ export const useLocations = (query) => {
             errorMessage: null,
         }),
         onError: (error) => {
-            console.error('useLocations error:', {
-                message: error.message,
-                status: error.response?.status,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
             return { data: [], errorMessage: error.message };
         },
     });

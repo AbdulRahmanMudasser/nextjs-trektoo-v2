@@ -1,4 +1,4 @@
-    import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { fetchCategories, fetchActivities, fetchActivityDetails } from '@/lib/api/klookApi';
 import { useDebounce } from 'use-debounce';
 
@@ -17,10 +17,8 @@ export const useCategories = () => {
             success: data.success || false,
         }),
         onError: (error) => {
-            console.error('useCategories error:', {
-                message: error.message,
-                stack: error.stack,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -54,11 +52,8 @@ export const useActivities = (params = {}) => {
             success: response.success || false,
         }),
         onError: (error) => {
-            console.error('useActivities error:', {
-                message: error.message,
-                stack: error.stack,
-                params: queryParams,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -75,11 +70,8 @@ export const useActivityDetails = (id) => {
         enabled: !!id,
         staleTime: 1000 * 60 * 30, // Consider data fresh for 30 minutes
         onError: (error) => {
-            console.error('useActivityDetails error:', {
-                message: error.message,
-                stack: error.stack,
-                id,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };
@@ -107,11 +99,8 @@ export const useFilteredActivities = (filters = {}) => {
             success: response.success || false,
         }),
         onError: (error) => {
-            console.error('useFilteredActivities error:', {
-                message: error.message,
-                stack: error.stack,
-                filters: debouncedFilters,
-            });
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };

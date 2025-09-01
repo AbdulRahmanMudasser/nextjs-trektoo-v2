@@ -23,7 +23,7 @@ function SearchInput() {
     <div className="relative" ref={searchRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full text-white hover:bg-blue-500 transition-colors"
+        className="p-2 rounded-full text-gray-800 hover:bg-blue-100 transition-colors"
         aria-label="Toggle search"
       >
         <svg

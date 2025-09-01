@@ -1,42 +1,5 @@
 import secureApiClient from './secureApiClient';
-
-/**
- * Helper function to format errors for logging
- */
-const formatError = (error) => ({
-    message: error.message || 'Unknown error',
-    status: error.response?.status || 'No status',
-    data: error.response?.data || 'No data',
-    stack: error.stack || 'No stack trace',
-});
-
-/**
- * Convert technical errors to user-friendly messages
- */
-const getUserFriendlyError = (error) => {
-    if (!error.response) {
-        return 'Unable to connect to the server. Please check your internet and try again.';
-    }
-    const status = error.response?.status;
-    const data = error.response?.data;
-
-    if (status === 400) {
-        return data?.message || 'Invalid request. Please try again.';
-    }
-    if (status === 401) {
-        return 'Authentication failed. Please log in again.';
-    }
-    if (status === 403) {
-        return 'You are not allowed to perform this action. Contact support.';
-    }
-    if (status === 429) {
-        return 'Too many attempts. Please wait a few minutes and try again.';
-    }
-    if (status >= 500) {
-        return 'Something went wrong on our server. Please try again later.';
-    }
-    return data?.message || 'An unexpected error occurred. Please try again.';
-};
+import { logError, getUserFriendlyError } from '@/lib/services/errorHandler';
 
 /**
  * Fetch booking details by booking code
@@ -54,7 +17,7 @@ export const fetchBookingDetails = async (code, token) => {
         console.log('fetchBookingDetails response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Booking Details API error:', formatError(error));
+        logError('Booking Details API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -77,7 +40,7 @@ export const doCheckout = async (checkoutData, token) => {
         console.log('doCheckout response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Do Checkout API error:', formatError(error));
+        logError('Do Checkout API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -97,7 +60,7 @@ export const addToCart = async (bookingData, token) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Add to Cart API error:', formatError(error));
+        logError('Add to Cart API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -122,7 +85,7 @@ export const fetchHotels = async (searchParams) => {
             per_page: response.data.per_page || 15,
         };
     } catch (error) {
-        console.error('Hotel API error:', formatError(error));
+        logError('Hotel API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -173,7 +136,7 @@ export const fetchHotelDetails = async (id) => {
             policy: hotelData.policy || []
         };
     } catch (error) {
-        console.error('Hotel Details API error:', formatError(error));
+        logError('Hotel Details API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -190,7 +153,7 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
         const response = await secureApiClient.get(`/hotel/detail/${id}?page=${page}&per_page=${perPage}`);
         return response.data.data?.review_lists || { data: [], current_page: 1, total_pages: 1, total: 0 };
     } catch (error) {
-        console.error('Hotel Reviews API error:', formatError(error));
+        logError('Hotel Reviews API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -228,7 +191,7 @@ export const fetchHotelAvailability = async (id) => {
             image: room.image || room.gallery?.[0] || null
         }));
     } catch (error) {
-        console.error('Hotel Availability API error:', formatError(error));
+        logError('Hotel Availability API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
@@ -244,7 +207,7 @@ export const fetchLocations = async (query) => {
         console.log('Locations API response:', { total: response.data.total, data: response.data.data });
         return response.data.data || [];
     } catch (error) {
-        console.error('Locations API error:', formatError(error));
+        logError('Locations API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
