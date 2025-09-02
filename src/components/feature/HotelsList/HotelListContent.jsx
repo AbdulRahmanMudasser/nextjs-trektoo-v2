@@ -34,7 +34,7 @@ export default function HotelListContent() {
       params.set('page', '1');
     }
     if (!params.has('per_page')) {
-      params.set('per_page', '15');
+      params.set('per_page', '10');
     }
     return params;
   };
@@ -62,14 +62,7 @@ export default function HotelListContent() {
     setCheckout(checkoutParam ? new Date(checkoutParam) : null);
   }, [searchParams]);
 
-  const handleApplyFilters = ({
-    priceRange,
-    selectedCategories,
-    checkin,
-    checkout,
-    adults,
-    children,
-  }) => {
+  const handleApplyFilters = ({ checkin, checkout, adults, children }) => {
     // Create new search parameters, preserving location_id but resetting page to 1
     const updatedParams = new URLSearchParams(searchParams);
     updatedParams.set('adults', String(adults));
@@ -88,16 +81,13 @@ export default function HotelListContent() {
       updatedParams.delete('checkout');
     }
 
-    updatedParams.set('minPrice', String(priceRange[0]));
-    updatedParams.set('maxPrice', String(priceRange[1]));
+    // Remove price range parameters since we removed the price range filter
+    updatedParams.delete('minPrice');
+    updatedParams.delete('maxPrice');
+    updatedParams.delete('ratings');
 
-    if (selectedCategories.length > 0) {
-      updatedParams.set('categories', selectedCategories.join(','));
-    } else {
-      updatedParams.delete('categories');
-    }
-
-    router.push(`/hotels-list?${updatedParams.toString()}`);
+    // Update URL without page refresh
+    router.push(`/hotels-list?${updatedParams.toString()}`, { scroll: false });
   };
 
   return (
@@ -106,20 +96,26 @@ export default function HotelListContent() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl my-12 border border-blue-50"
+          className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-8 sm:p-12 text-center"
         >
-          <Loader2 className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
-          <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
-            Finding Your Hotels
-          </h3>
-          <p className="text-gray-600 text-sm mt-2">
-            Searching for the best accommodations...
-          </p>
+          <div className="flex flex-col items-center space-y-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <Loader2 className="h-8 w-8 text-white animate-spin" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Finding Your Hotels
+              </h3>
+              <p className="text-gray-600 text-lg">
+                Searching for the best accommodations...
+              </p>
+            </div>
+          </div>
         </motion.div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="w-full">
           <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-1/4">
+            <div className="lg:w-1/5">
               <FilterSidebar
                 adults={adults}
                 setAdults={setAdults}
@@ -132,7 +128,7 @@ export default function HotelListContent() {
                 onApplyFilters={handleApplyFilters}
               />
             </div>
-            <div className="lg:w-3/4">
+            <div className="lg:w-4/5">
               <TourListSection
                 hotels={hotels}
                 loading={isLoading}

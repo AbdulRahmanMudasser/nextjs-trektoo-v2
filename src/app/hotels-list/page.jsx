@@ -1,26 +1,19 @@
-import { Suspense } from 'react';
+import React from 'react';
 import HeaderSection from '@/components/feature/HotelsList/HeaderSection';
 import HotelListContent from '@/components/feature/HotelsList/HotelListContent';
 
 export default function HotelsList() {
   return (
-    <>
+    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Header Section */}
       <HeaderSection />
-      <Suspense
-        fallback={
-          <div className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl my-12 border border-blue-50">
-            <div className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
-            <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
-              Loading Hotels
-            </h3>
-            <p className="text-gray-600 text-sm mt-2">
-              Please wait while we fetch the best accommodations...
-            </p>
-          </div>
-        }
-      >
-        <HotelListContent />
-      </Suspense>
-    </>
+
+      {/* Main Content */}
+      <section className="relative w-full py-8 sm:py-12">
+        <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
+          <HotelListContent />
+        </div>
+      </section>
+    </main>
   );
 }
