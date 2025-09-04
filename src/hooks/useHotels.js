@@ -123,13 +123,25 @@ export const useHotelReviews = (id, page = 1, perPage = 5) => {
 /**
  * Custom hook to fetch hotel room availability by ID with React Query
  * @param {string} id - Hotel ID
+ * @param {string} checkin - Check-in date (YYYY-MM-DD format)
+ * @param {string} checkout - Check-out date (YYYY-MM-DD format)
+ * @param {number} adults - Number of adults
+ * @param {number} children - Number of children
  * @returns {Object} Query result with room availability, loading state, and error
  */
-export const useHotelAvailability = (id) => {
+export const useHotelAvailability = (id, checkin, checkout, adults = 1, children = 0) => {
     return useQuery({
-        queryKey: ['hotelAvailability', id],
-        queryFn: () => fetchHotelAvailability(id),
-        enabled: !!id,
+        queryKey: ['hotelAvailability', id, checkin, checkout, adults, children],
+        queryFn: () => {
+            if (!id || id === 'null' || id === 'undefined') {
+                throw new Error('Invalid hotel ID provided');
+            }
+            if (!checkin || !checkout) {
+                throw new Error('Check-in and check-out dates are required');
+            }
+            return fetchHotelAvailability(id, checkin, checkout, adults, children);
+        },
+        enabled: !!id && id !== 'null' && id !== 'undefined' && !!checkin && !!checkout,
         onError: (error) => {
             // Error is already logged by the API layer
             // Additional hook-specific error handling can be added here
