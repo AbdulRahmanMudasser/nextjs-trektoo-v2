@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
 
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
-import { Loader2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { useRouter, useSearchParams } from 'next/navigation';
+import EmptyState from '@/components/ui/EmptyState';
 
 const PaginationButton = ({ label, active, onClick, disabled }) => (
   <motion.button
@@ -260,37 +261,23 @@ const TourListSection = ({
 
   if (error) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center py-12"
-      >
-        <div className="bg-red-50 border border-red-200 rounded-3xl p-8">
-          <h3 className="text-xl font-semibold text-red-800 mb-2">
-            Error Loading Hotels
-          </h3>
-          <p className="text-red-600">{error}</p>
-        </div>
-      </motion.div>
+      <EmptyState
+        icon={Search}
+        title="Error Loading Hotels"
+        subtitle={error}
+        className="bg-red-50 border border-red-200 rounded-3xl p-8"
+      />
     );
   }
 
   if (!displayHotels || displayHotels.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center py-12"
-      >
-        <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">
-            No Hotels Found
-          </h3>
-          <p className="text-gray-600">
-            Try adjusting your search criteria or filters.
-          </p>
-        </div>
-      </motion.div>
+      <EmptyState
+        icon={Search}
+        title="No Hotels Found"
+        subtitle="Try adjusting your search criteria or filters."
+        className="bg-gray-50 border border-gray-200 rounded-3xl p-8"
+      />
     );
   }
 

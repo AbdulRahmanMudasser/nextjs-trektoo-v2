@@ -1,12 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+// Removed unused Loader2 import to fix HMR issues
 import { useSearchParams, useRouter } from 'next/navigation';
 import ErrorBoundary from '@/components/security/ErrorBoundary';
 import { useHotels } from '@/hooks/useHotels';
 import FilterSidebar from './FilterSidebar';
 import TourListSection from './ToursListSection';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default function HotelListContent() {
   const searchParams = useSearchParams();
@@ -93,25 +94,11 @@ export default function HotelListContent() {
   return (
     <ErrorBoundary>
       {isLoading ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-8 sm:p-12 text-center"
-        >
-          <div className="flex flex-col items-center space-y-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-              <Loader2 className="h-8 w-8 text-white animate-spin" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Finding Your Hotels
-              </h3>
-              <p className="text-gray-600 text-lg">
-                Searching for the best accommodations...
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        <EmptyState
+          loading={true}
+          title="Finding Your Hotels"
+          subtitle="Searching for the best accommodations..."
+        />
       ) : (
         <div className="w-full">
           <div className="flex flex-col lg:flex-row gap-8">
