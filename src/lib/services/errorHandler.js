@@ -95,6 +95,15 @@ const formatError = (error, context = {}) => {
  * @returns {string} Error type
  */
 const getErrorType = (error) => {
+    // Check if this is a validation error thrown by our own code
+    if (error.message && typeof error.message === 'string' &&
+        (error.message.includes('required') ||
+            error.message.includes('already been taken') ||
+            error.message.includes('invalid') ||
+            error.message.includes('must be'))) {
+        return ERROR_TYPES.VALIDATION;
+    }
+
     if (!error.response) {
         return ERROR_TYPES.NETWORK;
     }

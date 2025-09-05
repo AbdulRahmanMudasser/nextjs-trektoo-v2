@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ToastProvider } from '@/components/ui/toast';
 import Topbar from '@/components/layout/Topbar';
 import Navbar from '@/components/layout/Navbar/Navbar';
 import Footer from '@/components/layout/Footer/Footer';
@@ -57,12 +58,14 @@ export default function ClientWrapper({ children }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
-        <AuthProvider>
-          <Topbar cartCount={99} />
-          <Navbar />
-          <main className="relative overflow-hidden">{children}</main>
-          <Footer />
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <Topbar cartCount={99} />
+            <Navbar />
+            <main className="relative overflow-hidden">{children}</main>
+            <Footer />
+          </AuthProvider>
+        </ToastProvider>
       </ErrorBoundary>
     </QueryClientProvider>
   );

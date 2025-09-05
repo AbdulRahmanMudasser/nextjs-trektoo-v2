@@ -8,6 +8,7 @@ import {
   logout as logoutApi,
 } from '@/lib/api/authApi';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/toast';
 
 const AuthContext = createContext();
 
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   // Load user and token from localStorage on mount
   useEffect(() => {
@@ -77,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        setAuthError('Failed to load your session. Please log in again.');
+        toast.error('Failed to load your session. Please log in again.');
         // Clear potentially corrupted data
         try {
           localStorage.removeItem('authToken');
@@ -138,7 +140,7 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('authUser', JSON.stringify(data.user));
           setToken(data.access_token);
           setUser(data.user);
-          setAuthSuccess("Welcome back! You're logged in.");
+          toast.success("Welcome back! You're logged in.");
 
           // Clear any cached data that might be user-specific
           queryClient.clear();
@@ -160,10 +162,23 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      setAuthError(
-        error.message ||
-          'An unexpected error occurred during login. Please try again.'
-      );
+
+      // Handle different error types
+      let errorMessage =
+        'An unexpected error occurred during login. Please try again.';
+
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        errorMessage = errorMessages.join(', ');
+      }
+
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +218,7 @@ export const AuthProvider = ({ children }) => {
       const data = await registerApi(userData);
 
       if (data.status === true || data.status === 1) {
-        setAuthSuccess(
+        toast.success(
           data.message || 'Registration successful! Please log in.'
         );
         router.push('/login');
@@ -214,10 +229,26 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setAuthError(
-        error.message ||
-          'An unexpected error occurred during registration. Please try again.'
-      );
+
+      // Handle different error types
+      let errorMessage =
+        'An unexpected error occurred during registration. Please try again.';
+
+      if (error.message && typeof error.message === 'string') {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        errorMessage = errorMessages.join(', ');
+      } else {
+        // Fallback: try to convert error to string
+        errorMessage = error.toString();
+      }
+
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -267,12 +298,15 @@ export const AuthProvider = ({ children }) => {
           console.log('Making logout API call');
           await logoutApi(currentUser.email, currentToken);
           console.log('Logout API call successful');
+          toast.success('Logged out successfully');
         } else {
           console.log('Skipping logout API call - missing email or token');
+          toast.success('Logged out successfully');
         }
       } catch (error) {
         console.error('Logout API error:', error.message);
         // Don't show error to user since they're already logged out
+        toast.success('Logged out successfully');
       }
     } catch (error) {
       console.error('Unexpected error during logout:', error);
