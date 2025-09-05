@@ -111,7 +111,26 @@ const Map = ({
   const getMapUrl = () => {
     if (useFallbackMap) {
       // Use Google Maps embed as fallback
-      return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dOWWgUfXrH3y1Y&q=${mapLat},${mapLng}&zoom=${mapZoom}`;
+      const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (googleMapsApiKey) {
+        return `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${mapLat},${mapLng}&zoom=${mapZoom}`;
+      } else {
+        // Fallback to Mapbox static image if Google Maps API key is not available
+        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+        if (mapboxToken) {
+          return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${mapLng},${mapLat})/${mapLng},${mapLat},${mapZoom},0/600x400@2x?access_token=${mapboxToken}`;
+        } else {
+          // Final fallback: return a simple placeholder
+          return `data:image/svg+xml;base64,${btoa(`
+            <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100%" height="100%" fill="#f3f4f6"/>
+              <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
+                Map unavailable - API key required
+              </text>
+            </svg>
+          `)}`;
+        }
+      }
     } else {
       // Use OpenStreetMap
       return `https://www.openstreetmap.org/export/embed.html?bbox=${mapLng - 0.01},${mapLat - 0.01},${mapLng + 0.01},${mapLat + 0.01}&layer=mapnik&marker=${mapLat},${mapLng}`;
