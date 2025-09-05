@@ -23,8 +23,6 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCw,
-  Download,
-  Share2,
   Maximize2,
   Grid3X3,
 } from 'lucide-react';
@@ -200,44 +198,6 @@ const ImageModal = ({
   const handleZoomOut = () => setZoom((prev) => Math.max(prev / 1.5, 1));
   const handleRotate = () => setRotation((prev) => prev + 90);
 
-  const handleDownload = async () => {
-    try {
-      const response = await fetch(images[currentIndex]);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `image-${currentIndex + 1}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-    }
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Gallery Image ${currentIndex + 1}`,
-          url: images[currentIndex],
-        });
-      } catch (error) {
-        console.error('Share failed:', error);
-      }
-    } else {
-      // Fallback: copy to clipboard
-      try {
-        await navigator.clipboard.writeText(images[currentIndex]);
-        // You could show a toast notification here
-      } catch (error) {
-        console.error('Copy failed:', error);
-      }
-    }
-  };
-
   const showControlsTemporarily = () => {
     setShowControls(true);
     if (controlsTimeout.current) clearTimeout(controlsTimeout.current);
@@ -347,22 +307,6 @@ const ImageModal = ({
                 <RotateCw className="h-5 w-5" />
               </motion.button>
               <motion.button
-                onClick={handleShare}
-                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Share2 className="h-5 w-5" />
-              </motion.button>
-              <motion.button
-                onClick={handleDownload}
-                className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Download className="h-5 w-5" />
-              </motion.button>
-              <motion.button
                 onClick={onClose}
                 className="p-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all"
                 whileHover={{ scale: 1.1 }}
@@ -386,10 +330,10 @@ const ImageModal = ({
           <motion.div
             key={currentIndex}
             className="relative w-full h-[80vh] rounded-lg overflow-hidden cursor-grab active:cursor-grabbing"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, scale: 0.8, x: 50 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.8, x: -50 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
             drag={zoom === 1 ? 'x' : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
@@ -404,7 +348,12 @@ const ImageModal = ({
                 x: panOffset.x,
                 y: panOffset.y,
               }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 35,
+                mass: 0.8,
+              }}
             >
               <ImageWithFallback
                 src={images[currentIndex]}
@@ -634,14 +583,16 @@ const ImageGallery = ({
 
   const itemVariants = useMemo(
     () => ({
-      hidden: { y: 20, opacity: 0 },
+      hidden: { y: 30, opacity: 0, scale: 0.95 },
       visible: {
         y: 0,
         opacity: 1,
+        scale: 1,
         transition: {
           type: 'spring',
-          stiffness: 100,
-          damping: 20,
+          stiffness: 120,
+          damping: 25,
+          mass: 0.8,
         },
       },
     }),
@@ -669,144 +620,151 @@ const ImageGallery = ({
   return (
     <>
       <motion.div
-        className="relative w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
+        className="relative w-full py-8 sm:py-12"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >
-        {/* Gallery Header */}
-        <motion.div
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0"
-          variants={itemVariants}
-        >
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Image Gallery
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600">
-              {images.length} {images.length === 1 ? 'image' : 'images'}
-            </p>
-          </div>
-          <motion.button
-            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
-              isAutoPlaying
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Gallery Header */}
+          <motion.div
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0"
+            variants={itemVariants}
           >
-            {isAutoPlaying ? 'Pause' : 'Play'} Auto-scroll
-          </motion.button>
-        </motion.div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Image Gallery
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                {images.length} {images.length === 1 ? 'image' : 'images'}
+              </p>
+            </div>
+            <motion.button
+              onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+              className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
+                isAutoPlaying
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isAutoPlaying ? 'Pause' : 'Play'} Auto-scroll
+            </motion.button>
+          </motion.div>
 
-        <motion.div className="relative" variants={itemVariants}>
-          {/* Left Arrow */}
-          <motion.button
-            onClick={scrollLeft}
-            disabled={!canScrollLeft}
-            className={`absolute left-0 top-1/2 transform -translate-y-1/2 -ml-2 sm:-ml-6 md:-ml-12 z-10 p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 ${
-              canScrollLeft
-                ? 'bg-white text-blue-500 hover:bg-blue-500 hover:text-white cursor-pointer shadow-blue-200/50'
-                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-            }`}
-            aria-label="Scroll left"
-            whileHover={canScrollLeft ? { scale: 1.1, x: -2 } : {}}
-            whileTap={canScrollLeft ? { scale: 0.9 } : {}}
-          >
-            <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
-          </motion.button>
+          <motion.div className="relative" variants={itemVariants}>
+            {/* Left Arrow */}
+            <motion.button
+              onClick={scrollLeft}
+              disabled={!canScrollLeft}
+              className={`absolute left-0 top-1/2 transform -translate-y-1/2 -ml-2 sm:-ml-6 md:-ml-12 z-10 p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 ${
+                canScrollLeft
+                  ? 'bg-white text-blue-500 hover:bg-blue-500 hover:text-white cursor-pointer shadow-blue-200/50'
+                  : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+              }`}
+              aria-label="Scroll left"
+              whileHover={canScrollLeft ? { scale: 1.1, x: -2 } : {}}
+              whileTap={canScrollLeft ? { scale: 0.9 } : {}}
+            >
+              <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
+            </motion.button>
 
-          {/* Images Container */}
-          <div
-            ref={galleryRef}
-            className="w-full overflow-x-hidden whitespace-nowrap flex items-center gap-2 sm:gap-4 md:gap-6 py-2 sm:py-4 scroll-smooth"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {images.map((src, index) => (
-              <motion.div
-                key={index}
-                className="relative w-64 sm:w-72 md:w-80 lg:w-96 h-48 sm:h-56 md:h-64 lg:h-80 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer"
-                variants={itemVariants}
-                whileHover={{ scale: 1.02, y: -5 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                onClick={() => openModal(index)}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
-                <ImageWithFallback
-                  src={src}
-                  alt={`Gallery Image ${index + 1}`}
-                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
-                  onLoad={() => handleImageLoad(index)}
-                />
+            {/* Images Container */}
+            <div
+              ref={galleryRef}
+              className="w-full overflow-x-hidden whitespace-nowrap flex items-center gap-2 sm:gap-4 md:gap-6 py-2 sm:py-4 scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {images.map((src, index) => (
+                <motion.div
+                  key={index}
+                  className="relative w-64 sm:w-72 md:w-80 lg:w-96 h-48 sm:h-56 md:h-64 lg:h-80 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer"
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.03, y: -8 }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 30,
+                    mass: 0.6,
+                  }}
+                  onClick={() => openModal(index)}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  <ImageWithFallback
+                    src={src}
+                    alt={`Gallery Image ${index + 1}`}
+                    className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110"
+                    onLoad={() => handleImageLoad(index)}
+                  />
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-400 ease-out" />
 
-                {/* Loading State */}
-                {!loadedImages.has(index) && (
-                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-
-                {/* Hover Effects */}
-                <AnimatePresence>
-                  {hoveredIndex === index && (
-                    <motion.div
-                      className="absolute inset-0 flex items-center justify-center"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <motion.div
-                        className="bg-white/90 backdrop-blur-sm rounded-full p-2 sm:p-3 shadow-lg"
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        <Maximize2 className="h-4 w-4 sm:h-6 sm:w-6 text-gray-800" />
-                      </motion.div>
-                    </motion.div>
+                  {/* Loading State */}
+                  {!loadedImages.has(index) && (
+                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
                   )}
-                </AnimatePresence>
 
-                {/* Image Counter */}
-                <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {index + 1} / {images.length}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  {/* Hover Effects */}
+                  <AnimatePresence>
+                    {hoveredIndex === index && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                      >
+                        <motion.div
+                          className="bg-white/90 backdrop-blur-sm rounded-full p-2 sm:p-3 shadow-lg"
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          <Maximize2 className="h-4 w-4 sm:h-6 sm:w-6 text-gray-800" />
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-          {/* Right Arrow */}
-          <motion.button
-            onClick={scrollRight}
-            disabled={!canScrollRight}
-            className={`absolute right-0 top-1/2 transform -translate-y-1/2 -mr-2 sm:-mr-6 md:-mr-12 z-10 p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 ${
-              canScrollRight
-                ? 'bg-white text-blue-500 hover:bg-blue-500 hover:text-white cursor-pointer shadow-blue-200/50'
-                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-            }`}
-            aria-label="Scroll right"
-            whileHover={canScrollRight ? { scale: 1.1, x: 2 } : {}}
-            whileTap={canScrollRight ? { scale: 0.9 } : {}}
+                  {/* Image Counter */}
+                  <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {index + 1} / {images.length}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <motion.button
+              onClick={scrollRight}
+              disabled={!canScrollRight}
+              className={`absolute right-0 top-1/2 transform -translate-y-1/2 -mr-2 sm:-mr-6 md:-mr-12 z-10 p-2 sm:p-3 rounded-full shadow-lg transition-all duration-300 ${
+                canScrollRight
+                  ? 'bg-white text-blue-500 hover:bg-blue-500 hover:text-white cursor-pointer shadow-blue-200/50'
+                  : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+              }`}
+              aria-label="Scroll right"
+              whileHover={canScrollRight ? { scale: 1.1, x: 2 } : {}}
+              whileTap={canScrollRight ? { scale: 0.9 } : {}}
+            >
+              <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
+            </motion.button>
+          </motion.div>
+
+          {/* Keyboard Shortcuts Info */}
+          <motion.div
+            className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-500 px-2"
+            variants={itemVariants}
           >
-            <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
-          </motion.button>
-        </motion.div>
-
-        {/* Keyboard Shortcuts Info */}
-        <motion.div
-          className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-500 px-2"
-          variants={itemVariants}
-        >
-          Use arrow keys to navigate • Space to pause/play • Click any image to
-          view fullscreen
-        </motion.div>
+            Use arrow keys to navigate • Space to pause/play • Click any image
+            to view fullscreen
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Enhanced Modal */}
