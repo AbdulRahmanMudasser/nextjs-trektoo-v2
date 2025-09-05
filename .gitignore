@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# API Documentation & Testing
+*.postman_collection.json
+*.postman_environment.json
+docs/api/
