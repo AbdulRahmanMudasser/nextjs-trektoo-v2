@@ -6,8 +6,8 @@ import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 
 function SignupForm() {
-  const { register, authError, authSuccess, isAuthenticated } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { register, authError, authSuccess, isAuthenticated, isLoading } =
+    useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -21,7 +21,6 @@ function SignupForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
       await register({
         first_name: e.target.first_name.value,
@@ -39,23 +38,24 @@ function SignupForm() {
           : '/login'
       );
     } catch (error) {
-      setIsLoading(false);
+      // Error handling is done in AuthContext
+      console.error('Registration error:', error);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white/95 backdrop-blur-sm p-8 rounded-3xl shadow-xl border border-blue-50">
         <h1 className="text-2xl font-bold text-center mb-6">Sign Up</h1>
 
         {authError && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm whitespace-pre-line">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm whitespace-pre-line">
             {authError}
           </div>
         )}
 
         {authSuccess && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded text-sm">
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
             {authSuccess}
           </div>
         )}
@@ -63,53 +63,72 @@ function SignupForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 text-sm">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                First Name
+              </label>
               <input
                 name="first_name"
                 type="text"
                 required
-                className="w-full p-2 border rounded"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                placeholder="First name"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name
+              </label>
               <input
                 name="last_name"
                 type="text"
                 required
-                className="w-full p-2 border rounded"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                placeholder="Last name"
               />
             </div>
           </div>
           <div>
-            <label className="block mb-1 text-sm">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
             <input
               name="email"
               type="email"
               required
-              className="w-full p-2 border rounded"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              placeholder="Enter your email"
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <input
               name="password"
               type="password"
               required
               minLength={6}
-              className="w-full p-2 border rounded"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              placeholder="Create a password"
             />
           </div>
           <div className="flex items-center">
-            <input name="terms" type="checkbox" required className="mr-2" />
-            <label className="text-sm">I agree to the terms</label>
+            <input
+              name="terms"
+              type="checkbox"
+              required
+              className="mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-sm text-gray-700">
+              I agree to the terms and conditions
+            </label>
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Registering...' : 'Sign Up'}
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
 
@@ -119,7 +138,7 @@ function SignupForm() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
