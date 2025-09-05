@@ -1,6 +1,61 @@
 import secureApiClient from './secureApiClient';
 import { logError, getUserFriendlyError } from '@/lib/services/errorHandler';
 
+// Enhanced error handling for authentication
+const handleAuthError = (error, operation) => {
+    console.log(`handleAuthError called for ${operation}:`, error);
+    logError(`${operation} API`, error);
+
+    // Handle specific HTTP status codes
+    if (error.response) {
+        const { status, data } = error.response;
+        console.log(`HTTP ${status} error:`, data);
+
+        switch (status) {
+            case 401:
+                return 'Invalid email or password. Please check your credentials and try again.';
+            case 422:
+                // Validation errors from Laravel
+                if (data.errors) {
+                    const errorMessages = Object.values(data.errors).flat();
+                    return errorMessages.join(', ');
+                }
+                // Handle validation errors in message field
+                if (data.message && typeof data.message === 'object') {
+                    const errorMessages = Object.values(data.message).flat();
+                    return errorMessages.join(', ');
+                }
+                return data.message || 'Please check your input and try again.';
+            case 429:
+                return 'Too many attempts. Please wait a moment before trying again.';
+            case 500:
+                return 'Server error. Please try again later.';
+            default:
+                // Handle API-specific error status (status: 0)
+                if (data.message && typeof data.message === 'object') {
+                    const errorMessages = Object.values(data.message).flat();
+                    return errorMessages.join(', ');
+                }
+                return data.message || getUserFriendlyError(error);
+        }
+    }
+
+    // Handle network errors
+    if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+        return 'Network error. Please check your internet connection and try again.';
+    }
+
+    // Handle API validation errors that come as Error objects with validation messages
+    if (error.message && typeof error.message === 'string' && error.message.includes(',')) {
+        // This is likely a validation error message we constructed
+        return error.message;
+    }
+
+    const friendlyError = getUserFriendlyError(error);
+    console.log('Using getUserFriendlyError:', friendlyError);
+    return typeof friendlyError === 'string' ? friendlyError : 'An unexpected error occurred. Please try again.';
+};
+
 // Login API call
 export const login = async (credentials) => {
     try {
@@ -11,6 +66,12 @@ export const login = async (credentials) => {
 
         if (!credentials.email || !credentials.password) {
             throw new Error('Email and password are required');
+        }
+
+        // Enhanced email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(credentials.email.trim())) {
+            throw new Error('Please enter a valid email address');
         }
 
         // Sanitize credentials
@@ -44,8 +105,7 @@ export const login = async (credentials) => {
 
         return response.data;
     } catch (error) {
-        logError('Login API', error);
-        throw new Error(getUserFriendlyError(error));
+        throw new Error(handleAuthError(error, 'Login'));
     }
 };
 
@@ -61,14 +121,38 @@ export const register = async (userData) => {
             throw new Error('Email and password are required');
         }
 
-        // Sanitize user data
+        // Enhanced email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(userData.email.trim())) {
+            throw new Error('Please enter a valid email address');
+        }
+
+        // Password strength validation
+        if (userData.password.length < 6) {
+            throw new Error('Password must be at least 6 characters long');
+        }
+
+        // Name validation
+        if (userData.first_name && userData.first_name.trim().length < 2) {
+            throw new Error('First name must be at least 2 characters long');
+        }
+
+        if (userData.last_name && userData.last_name.trim().length < 2) {
+            throw new Error('Last name must be at least 2 characters long');
+        }
+
+        // Terms validation
+        if (!userData.terms && !userData.term) {
+            throw new Error('You must agree to the terms and conditions');
+        }
+
+        // Sanitize user data - API expects 'term' not 'terms'
         const sanitizedUserData = {
             email: userData.email.trim().toLowerCase(),
             password: userData.password,
             first_name: userData.first_name?.trim() || '',
             last_name: userData.last_name?.trim() || '',
-            phone: userData.phone?.trim() || '',
-            country: userData.country?.trim() || ''
+            term: userData.terms || userData.term
         };
 
         const response = await secureApiClient.post('/auth/register', sanitizedUserData);
@@ -77,10 +161,38 @@ export const register = async (userData) => {
             throw new Error('No response received from server');
         }
 
+        // Check for API error status first
+        if (response.data.status === 0 || response.data.status === false) {
+            // Handle validation errors in message field
+            if (response.data.message && typeof response.data.message === 'object') {
+                const errorMessages = Object.values(response.data.message).flat();
+                throw new Error(errorMessages.join(', '));
+            }
+            // Handle simple error message
+            throw new Error(response.data.message || 'Registration failed');
+        }
+
+        // Check for API validation errors in errors field
+        if (response.data.errors) {
+            const errorMessages = Object.values(response.data.errors).flat();
+            throw new Error(errorMessages.join(', '));
+        }
+
         return response.data;
     } catch (error) {
-        logError('Register API', error);
-        throw new Error(getUserFriendlyError(error));
+        // If this is already a validation error with a proper message, just re-throw it
+        if (error.message && typeof error.message === 'string' &&
+            (error.message.includes('required') ||
+                error.message.includes('already been taken') ||
+                error.message.includes('invalid') ||
+                error.message.includes('must be'))) {
+            throw error;
+        }
+
+        const errorMessage = handleAuthError(error, 'Register');
+        // Ensure we always throw a proper Error object with a string message
+        const finalMessage = typeof errorMessage === 'string' ? errorMessage : 'Registration failed. Please try again.';
+        throw new Error(finalMessage);
     }
 };
 
@@ -110,8 +222,10 @@ export const logout = async (email, token) => {
 
         return response.data;
     } catch (error) {
+        // For logout, we don't want to throw errors that would prevent the user from logging out
+        // Just log the error and return a success response
         logError('Logout API', error);
-        throw new Error(getUserFriendlyError(error));
+        return { status: true, message: 'Logged out successfully' };
     }
 };
 

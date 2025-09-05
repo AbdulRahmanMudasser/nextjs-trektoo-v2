@@ -11,6 +11,7 @@ class SecureApiClient {
         this.lastRequestTime = 0;
         this.rateLimitWindow = API_CONFIG.RATE_LIMIT.WINDOW_MS;
 
+
         this.client = axios.create({
             baseURL: API_CONFIG.BASE_URL,
             timeout: API_CONFIG.TIMEOUT,
@@ -61,6 +62,7 @@ class SecureApiClient {
                     });
                 }
 
+
                 return config;
             },
             (error) => {
@@ -94,6 +96,7 @@ class SecureApiClient {
                 const responseTime = error.config?.metadata?.startTime
                     ? Date.now() - error.config.metadata.startTime
                     : 'unknown';
+
 
                 // Enhanced error handling
                 const enhancedError = this.enhanceError(error, responseTime);
