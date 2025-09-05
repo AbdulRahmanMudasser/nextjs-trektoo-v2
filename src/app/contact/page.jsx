@@ -149,7 +149,7 @@ const ContactUsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 bg-[url('/pattern.png')] bg-cover bg-fixed relative overflow-hidden">
+    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Premium Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-500/10"></div>
       <div className="absolute top-0 left-0 w-full h-full">
@@ -164,44 +164,46 @@ const ContactUsPage = () => {
         variants={containerVariants}
         className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[85vw] mx-auto">
           {/* Premium Hero Section */}
           <motion.div
             variants={itemVariants}
-            className="text-center mb-16 relative"
+            className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8 mb-8"
           >
-            <motion.div
-              animate={floatingAnimation}
-              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-2xl mb-8 relative"
-            >
-              <MessageCircle className="h-10 w-10 text-white" />
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              </div>
-            </motion.div>
+            <div className="text-center">
+              <motion.div
+                animate={floatingAnimation}
+                className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-2xl mb-8 relative"
+              >
+                <MessageCircle className="h-10 w-10 text-white" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                </div>
+              </motion.div>
 
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 bg-clip-text text-transparent font-montserrat mb-6 leading-tight">
-              Contact Trektoo
-            </h1>
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 bg-clip-text text-transparent font-montserrat mb-6 leading-tight">
+                Contact Trektoo
+              </h1>
 
-            <motion.p
-              variants={itemVariants}
-              className="text-xl md:text-2xl text-gray-700 font-montserrat max-w-4xl mx-auto leading-relaxed mb-8"
-            >
-              We're here to help make your travel dreams come true. Reach out to
-              us through any of the channels below and our team will assist you
-              promptly.
-            </motion.p>
+              <motion.p
+                variants={itemVariants}
+                className="text-xl md:text-2xl text-gray-700 font-montserrat max-w-4xl mx-auto leading-relaxed mb-8"
+              >
+                We're here to help make your travel dreams come true. Reach out
+                to us through any of the channels below and our team will assist
+                you promptly.
+              </motion.p>
 
-            {/* Premium Availability Badge */}
-            <motion.div
-              variants={itemVariants}
-              className="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full shadow-xl"
-            >
-              <div className="w-3 h-3 bg-green-300 rounded-full mr-3 animate-pulse"></div>
-              <Clock className="h-5 w-5 mr-2" />
-              <span className="font-semibold">24/7 Support Available</span>
-            </motion.div>
+              {/* Premium Availability Badge */}
+              <motion.div
+                variants={itemVariants}
+                className="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full shadow-xl"
+              >
+                <div className="w-3 h-3 bg-green-300 rounded-full mr-3 animate-pulse"></div>
+                <Clock className="h-5 w-5 mr-2" />
+                <span className="font-semibold">24/7 Support Available</span>
+              </motion.div>
+            </div>
           </motion.div>
 
           {/* Premium Phone Contacts */}
@@ -211,7 +213,7 @@ const ContactUsPage = () => {
             className="relative mb-12 group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
               <div className="flex items-center mb-10">
                 <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-4 rounded-2xl shadow-lg mr-6">
                   <Phone className="h-8 w-8 text-white" />
@@ -239,7 +241,7 @@ const ContactUsPage = () => {
                       <div
                         className={`absolute inset-0 bg-gradient-to-br ${contact.gradient} opacity-0 group-hover/card:opacity-100 rounded-2xl transition-all duration-500`}
                       ></div>
-                      <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/50 group-hover/card:shadow-2xl transition-all duration-300">
+                      <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-blue-50 group-hover/card:shadow-2xl transition-all duration-300">
                         <div className="flex items-center mb-4">
                           <div
                             className={`bg-gradient-to-br ${contact.gradient} p-3 rounded-xl shadow-md mr-4 group-hover/card:scale-110 transition-transform`}
@@ -274,7 +276,7 @@ const ContactUsPage = () => {
             className="relative mb-12 group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
               <div className="flex items-center mb-10">
                 <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-2xl shadow-lg mr-6">
                   <Mail className="h-8 w-8 text-white" />
@@ -300,7 +302,7 @@ const ContactUsPage = () => {
                     <div
                       className={`absolute inset-0 bg-gradient-to-br ${email.gradient} opacity-0 group-hover/card:opacity-100 rounded-2xl transition-all duration-500`}
                     ></div>
-                    <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/50 group-hover/card:shadow-2xl transition-all duration-300">
+                    <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-blue-50 group-hover/card:shadow-2xl transition-all duration-300">
                       <div className="flex items-center mb-4">
                         <div
                           className={`bg-gradient-to-br ${email.gradient} p-3 rounded-xl shadow-md mr-4 group-hover/card:scale-110 transition-transform`}
@@ -334,7 +336,7 @@ const ContactUsPage = () => {
             className="relative mb-12 group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
               <div className="flex items-center mb-10">
                 <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-4 rounded-2xl shadow-lg mr-6">
                   <Star className="h-8 w-8 text-white" />
@@ -361,7 +363,7 @@ const ContactUsPage = () => {
                       transition={{ duration: 0.4, delay: index * 0.1 }}
                       className="relative block"
                     >
-                      <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/50 text-center">
+                      <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-blue-50 text-center">
                         <div
                           className={`bg-gradient-to-br ${social.gradient} p-4 rounded-2xl shadow-lg mb-4 w-fit mx-auto`}
                         >
@@ -389,7 +391,7 @@ const ContactUsPage = () => {
             className="relative mb-12 group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-gray-500/10 to-blue-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
               <div className="flex items-center mb-8">
                 <div className="bg-gradient-to-br from-gray-700 to-gray-900 p-4 rounded-2xl shadow-lg mr-6">
                   <MapPin className="h-8 w-8 text-white" />
@@ -402,7 +404,7 @@ const ContactUsPage = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg border border-gray-100">
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-6 shadow-lg border border-gray-100">
                 <div className="text-center">
                   <motion.div animate={floatingAnimation}>
                     <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
@@ -494,7 +496,7 @@ const ContactUsPage = () => {
           </motion.div>
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 };
 
