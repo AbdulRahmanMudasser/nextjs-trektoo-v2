@@ -2,7 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { LoadingProvider } from '@/contexts/LoadingContext';
 import { ToastProvider } from '@/components/ui/toast';
+import { PageLoader } from '@/components/ui/PageLoader';
 import Topbar from '@/components/layout/Topbar';
 import Navbar from '@/components/layout/Navbar/Navbar';
 import Footer from '@/components/layout/Footer/Footer';
@@ -45,27 +47,22 @@ export default function ClientWrapper({ children }) {
 
   // Show a loading state instead of null to prevent blank screen
   if (!isClient) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader message="Initializing..." />;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
-        <ToastProvider>
-          <AuthProvider>
-            <Topbar cartCount={99} />
-            <Navbar />
-            <main className="relative overflow-hidden">{children}</main>
-            <Footer />
-          </AuthProvider>
-        </ToastProvider>
+        <LoadingProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <Topbar cartCount={99} />
+              <Navbar />
+              <main className="relative overflow-hidden">{children}</main>
+              <Footer />
+            </AuthProvider>
+          </ToastProvider>
+        </LoadingProvider>
       </ErrorBoundary>
     </QueryClientProvider>
   );
