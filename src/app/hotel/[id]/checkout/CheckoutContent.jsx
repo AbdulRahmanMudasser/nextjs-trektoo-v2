@@ -269,12 +269,21 @@ const CheckoutContent = ({ id }) => {
 
   if (!bookingCode && !localStorage.getItem('pending_booking')) {
     return (
+      <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-500/10"></div>
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/30 rounded-full blur-3xl"></div>
+          <div className="absolute top-40 right-20 w-48 h-48 bg-indigo-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-40 h-40 bg-purple-200/25 rounded-full blur-3xl"></div>
+        </div>
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center bg-gray-50"
+          className="relative z-10 flex items-center justify-center min-h-screen pt-24 pb-16 px-4"
       >
-        <div className="w-full max-w-md mx-auto p-6 text-center">
+          <div className="w-full max-w-md mx-auto p-6 text-center bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
           <h3 className="text-3xl font-bold text-gray-900 mt-4 font-montserrat">
             Invalid Booking
@@ -284,31 +293,43 @@ const CheckoutContent = ({ id }) => {
           </p>
           <Button
             onClick={() => router.push(`/hotel/${id}`)}
-            className="mt-6 bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-6 py-3 font-semibold transition-colors duration-200"
+              className="mt-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Hotel
           </Button>
         </div>
       </motion.div>
+      </main>
     );
   }
 
   return (
+    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-500/10"></div>
+      <div className="absolute top-0 left-0 w-full h-full">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-40 right-20 w-48 h-48 bg-indigo-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-40 h-40 bg-purple-200/25 rounded-full blur-3xl"></div>
+      </div>
+
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+        className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8"
     >
-      <div className="w-full max-w-7xl mx-auto my-12">
-        <div className="mb-12 text-center">
+        <div className="max-w-[85vw] mx-auto">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8 mb-8">
+            <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 font-montserrat tracking-tight">
             Complete Your Booking
           </h1>
           <p className="text-gray-600 text-lg mt-2 font-montserrat">
             Secure your stay with ease and confidence.
           </p>
+            </div>
         </div>
 
         {searchParams.get('roomImage') && (
@@ -316,7 +337,7 @@ const CheckoutContent = ({ id }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4 }}
-            className="relative h-80 sm:h-96 rounded-lg overflow-hidden mb-12"
+              className="relative h-80 sm:h-96 rounded-3xl overflow-hidden mb-8"
           >
             <Image
               src={
@@ -342,6 +363,7 @@ const CheckoutContent = ({ id }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
+                className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -371,7 +393,10 @@ const CheckoutContent = ({ id }) => {
                     <Input
                       value={formData.first_name}
                       onChange={(e) =>
-                        setFormData({ ...formData, first_name: e.target.value })
+                          setFormData({
+                            ...formData,
+                            first_name: e.target.value,
+                          })
                       }
                       placeholder="Enter first name"
                       className={`w-full border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-base py-3 rounded-lg ${
@@ -391,7 +416,10 @@ const CheckoutContent = ({ id }) => {
                     <Input
                       value={formData.last_name}
                       onChange={(e) =>
-                        setFormData({ ...formData, last_name: e.target.value })
+                          setFormData({
+                            ...formData,
+                            last_name: e.target.value,
+                          })
                       }
                       placeholder="Enter last name"
                       className={`w-full border-gray-300 focus:border-blue-600 focus:ring-blue-600 text-base py-3 rounded-lg ${
@@ -516,9 +544,15 @@ const CheckoutContent = ({ id }) => {
                         : 'border-gray-300'
                     }
                   />
-                  <label htmlFor="terms" className="ml-2 text-sm text-gray-700">
+                    <label
+                      htmlFor="terms"
+                      className="ml-2 text-sm text-gray-700"
+                    >
                     I agree to the{' '}
-                    <a href="/terms" className="text-blue-600 hover:underline">
+                      <a
+                        href="/terms"
+                        className="text-blue-600 hover:underline"
+                      >
                       Terms and Conditions
                     </a>
                   </label>
@@ -531,7 +565,7 @@ const CheckoutContent = ({ id }) => {
                 <Button
                   onClick={handleCheckout}
                   disabled={isCheckingOut || isAddingToCart}
-                  className="w-full bg-blue-500 text-white hover:bg-blue-700 rounded-lg py-4 text-lg transition-colors duration-200"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-xl py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   {isCheckingOut || isAddingToCart ? (
                     <>
@@ -551,7 +585,7 @@ const CheckoutContent = ({ id }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="bg-white p-6 rounded-lg"
+                className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 font-montserrat">
@@ -605,8 +639,9 @@ const CheckoutContent = ({ id }) => {
                       {(
                         (parseFloat(searchParams.get('roomPrice') || '0') ||
                           0) *
-                        (parseInt(searchParams.get('number_of_rooms') || '1') ||
-                          1)
+                          (parseInt(
+                            searchParams.get('number_of_rooms') || '1'
+                          ) || 1)
                       ).toFixed(2)}
                     </span>
                   </div>
@@ -631,6 +666,7 @@ const CheckoutContent = ({ id }) => {
         </div>
       </div>
     </motion.div>
+    </main>
   );
 };
 
