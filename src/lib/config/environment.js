@@ -5,11 +5,12 @@
 
 const ENV = process.env.NODE_ENV || 'development';
 
+
 // API Configuration
 const API_CONFIG = {
     // Base URLs - Use environment variables in production
-    BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://staging.trektoo.com/api',
-    STAGING_URL: 'https://staging.trektoo.com/api',
+    BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://staging.trektoo.com/api/',
+    STAGING_URL: 'https://staging.trektoo.com/api/',
     PRODUCTION_URL: 'https://api.trektoo.com',
 
     // Timeouts
@@ -25,6 +26,7 @@ const API_CONFIG = {
         WINDOW_MS: 15 * 60 * 1000, // 15 minutes
     },
 };
+
 
 // Security Configuration
 const SECURITY_CONFIG = {
