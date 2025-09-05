@@ -364,119 +364,122 @@ const TourDetail = ({ params }) => {
               {/* Date and Guest Selection */}
               <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Check-in Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Check-in Date
-                  </label>
-                  <DateInput
-                    selectedDate={checkin}
-                    onChange={(date) => handleDateChange('checkin', date)}
-                    placeholder="Select check-in date"
-                    minDate={new Date()}
-                  />
-                </div>
-
-                {/* Check-out Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Check-out Date
-                  </label>
-                  <DateInput
-                    selectedDate={checkout}
-                    onChange={(date) => handleDateChange('checkout', date)}
-                    placeholder="Select check-out date"
-                    minDate={addDays(checkin, 1)}
-                  />
-                </div>
-
-                {/* Adults */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Adults
-                  </label>
-                  <div className="flex items-center border border-gray-200 rounded-xl h-12 sm:h-14">
-                    <button
-                      onClick={() => handleGuestChange('adults', adults - 1)}
-                      disabled={adults <= 1}
-                      className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="flex-1 text-center py-3 font-medium text-base">
-                      {adults}
-                    </span>
-                    <button
-                      onClick={() => handleGuestChange('adults', adults + 1)}
-                      disabled={adults >= 10}
-                      className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
-                    >
-                      +
-                    </button>
+                  {/* Check-in Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Check-in Date
+                    </label>
+                    <DateInput
+                      selectedDate={checkin}
+                      onChange={(date) => handleDateChange('checkin', date)}
+                      placeholder="Select check-in date"
+                      minDate={new Date()}
+                    />
                   </div>
-                </div>
 
-                {/* Children */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Children
-                  </label>
-                  <div className="flex items-center border border-gray-200 rounded-xl h-12 sm:h-14">
-                    <button
-                      onClick={() =>
-                        handleGuestChange('children', children - 1)
-                      }
-                      disabled={children <= 0}
-                      className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="flex-1 text-center py-3 font-medium text-base">
-                      {children}
-                    </span>
-                    <button
-                      onClick={() =>
-                        handleGuestChange('children', children + 1)
-                      }
-                      disabled={children >= 10}
-                      className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
-                    >
-                      +
-                    </button>
+                  {/* Check-out Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Check-out Date
+                    </label>
+                    <DateInput
+                      selectedDate={checkout}
+                      onChange={(date) => handleDateChange('checkout', date)}
+                      placeholder="Select check-out date"
+                      minDate={addDays(checkin, 1)}
+                    />
                   </div>
-                </div>
+
+                  {/* Adults */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Adults
+                    </label>
+                    <div className="flex items-center border border-gray-200 rounded-xl h-12 sm:h-14">
+                      <button
+                        onClick={() => handleGuestChange('adults', adults - 1)}
+                        disabled={adults <= 1}
+                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                      >
+                        -
+                      </button>
+                      <span className="flex-1 text-center py-3 font-medium text-base">
+                        {adults}
+                      </span>
+                      <button
+                        onClick={() => handleGuestChange('adults', adults + 1)}
+                        disabled={adults >= 10}
+                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Children */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Children
+                    </label>
+                    <div className="flex items-center border border-gray-200 rounded-xl h-12 sm:h-14">
+                      <button
+                        onClick={() =>
+                          handleGuestChange('children', children - 1)
+                        }
+                        disabled={children <= 0}
+                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                      >
+                        -
+                      </button>
+                      <span className="flex-1 text-center py-3 font-medium text-base">
+                        {children}
+                      </span>
+                      <button
+                        onClick={() =>
+                          handleGuestChange('children', children + 1)
+                        }
+                        disabled={children >= 10}
+                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Stay Summary */}
               <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
                 <div className="p-4 bg-blue-50 rounded-xl text-center">
-                <div className="flex items-center justify-center gap-4 text-sm text-blue-800">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {format(checkin, 'MMM d')} -{' '}
-                      {format(checkout, 'MMM d, yyyy')}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>
-                      {adults} adult{adults !== 1 ? 's' : ''}
-                      {children > 0 &&
-                        `, ${children} child${children !== 1 ? 'ren' : ''}`}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-semibold">
-                      {Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24))}{' '}
-                      night
-                      {Math.ceil(
-                        (checkout - checkin) / (1000 * 60 * 60 * 24)
-                      ) !== 1
-                        ? 's'
-                        : ''}
-                    </span>
+                  <div className="flex items-center justify-center gap-4 text-sm text-blue-800">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        {format(checkin, 'MMM d')} -{' '}
+                        {format(checkout, 'MMM d, yyyy')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>
+                        {adults} adult{adults !== 1 ? 's' : ''}
+                        {children > 0 &&
+                          `, ${children} child${children !== 1 ? 'ren' : ''}`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold">
+                        {Math.ceil(
+                          (checkout - checkin) / (1000 * 60 * 60 * 24)
+                        )}{' '}
+                        night
+                        {Math.ceil(
+                          (checkout - checkin) / (1000 * 60 * 60 * 24)
+                        ) !== 1
+                          ? 's'
+                          : ''}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
