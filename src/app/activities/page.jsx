@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Loader2, AlertCircle } from 'lucide-react';
+import { Users, AlertCircle } from 'lucide-react';
 import { useActivities, useCategories } from '@/hooks/klookHooks';
 import ActivityCard from '@/components/feature/ActivitiesDetail/ActivityCard';
 import FilterDropdown from '@/components/feature/ActivitiesDetail/FilterDropdown';
+import EmptyState from '@/components/ui/EmptyState';
 
 const ActivitiesPage = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -18,7 +19,8 @@ const ActivitiesPage = () => {
   const [selectedActivity, setSelectedActivity] = useState(null);
 
   // Fetch categories
-  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useCategories();
 
   // Fetch activities with current filters
   const activitiesParams = {
@@ -29,11 +31,11 @@ const ActivitiesPage = () => {
     cityIds: selectedCities.join(','),
   };
 
-  const { 
-    data: activitiesData, 
-    isLoading: activitiesLoading, 
+  const {
+    data: activitiesData,
+    isLoading: activitiesLoading,
     error: activitiesError,
-    refetch: refetchActivities
+    refetch: refetchActivities,
   } = useActivities(activitiesParams);
 
   const handleFavoriteToggle = (activityId) => {
@@ -73,8 +75,12 @@ const ActivitiesPage = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-          <p className="text-gray-600 mb-4">Failed to load activities. Please try again.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Something went wrong
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Failed to load activities. Please try again.
+          </p>
           <button
             onClick={() => refetchActivities()}
             className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
@@ -109,13 +115,16 @@ const ActivitiesPage = () => {
               </span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
-              Explore incredible experiences and create unforgettable memories with our curated selection of premium activities worldwide
+              Explore incredible experiences and create unforgettable memories
+              with our curated selection of premium activities worldwide
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all duration-300 font-bold text-lg shadow-2xl hover:shadow-blue-500/25"
-              onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+              onClick={() =>
+                window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
+              }
             >
               Explore Now
             </motion.button>
@@ -158,7 +167,9 @@ const ActivitiesPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-gray-600">Sort by:</span>
+            <span className="text-sm font-semibold text-gray-600">
+              Sort by:
+            </span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -177,7 +188,9 @@ const ActivitiesPage = () => {
           <div className="flex justify-center items-center py-20">
             <div className="text-center">
               <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">Loading amazing activities...</p>
+              <p className="text-gray-600 text-lg">
+                Loading amazing activities...
+              </p>
             </div>
           </div>
         )}
@@ -204,74 +217,74 @@ const ActivitiesPage = () => {
         )}
 
         {/* Empty State */}
-        {!activitiesLoading && (!activitiesData?.data || activitiesData.data.length === 0) && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-24"
-          >
-            <div className="relative">
-              <div className="text-gray-300 mb-8">
-                <Users className="h-24 w-24 mx-auto" />
-              </div>
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              No activities found
-            </h3>
-            <p className="text-gray-600 mb-10 max-w-md mx-auto text-lg">
-              We couldn't find any activities matching your current filters. Try adjusting your search criteria.
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={clearFilters}
-              className="px-10 py-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all font-bold text-lg shadow-xl hover:shadow-2xl"
-            >
-              Clear All Filters
-            </motion.button>
-          </motion.div>
-        )}
+        {!activitiesLoading &&
+          (!activitiesData?.data || activitiesData.data.length === 0) && (
+            <EmptyState
+              icon={Users}
+              title="No activities found"
+              subtitle="We couldn't find any activities matching your current filters. Try adjusting your search criteria."
+              action={
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={clearFilters}
+                  className="px-10 py-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all font-bold text-lg shadow-xl hover:shadow-2xl"
+                >
+                  Clear All Filters
+                </motion.button>
+              }
+            />
+          )}
 
         {/* Pagination */}
-        {!activitiesLoading && activitiesData?.data && activitiesData.data.length > 0 && (
-          <div className="flex justify-center items-center mt-16 gap-4">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-6 py-3 border-2 border-gray-200 rounded-xl hover:border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
-            >
-              Previous
-            </button>
-            
-            <div className="flex items-center gap-2">
-              {Array.from({ length: Math.min(5, Math.ceil(activitiesData.total / activitiesData.limit)) }, (_, i) => {
-                const page = i + 1;
-                return (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`w-12 h-12 rounded-xl font-bold transition-all ${
-                      currentPage === page
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-            </div>
+        {!activitiesLoading &&
+          activitiesData?.data &&
+          activitiesData.data.length > 0 && (
+            <div className="flex justify-center items-center mt-16 gap-4">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-6 py-3 border-2 border-gray-200 rounded-xl hover:border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
+              >
+                Previous
+              </button>
 
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={!activitiesData?.hasNext}
-              className="px-6 py-3 border-2 border-gray-200 rounded-xl hover:border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
-            >
-              Next
-            </button>
-          </div>
-        )}
+              <div className="flex items-center gap-2">
+                {Array.from(
+                  {
+                    length: Math.min(
+                      5,
+                      Math.ceil(activitiesData.total / activitiesData.limit)
+                    ),
+                  },
+                  (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`w-12 h-12 rounded-xl font-bold transition-all ${
+                          currentPage === page
+                            ? 'bg-blue-500 text-white shadow-lg'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={!activitiesData?.hasNext}
+                className="px-6 py-3 border-2 border-gray-200 rounded-xl hover:border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
+              >
+                Next
+              </button>
+            </div>
+          )}
       </div>
 
       {/* Overlay for mobile filter */}

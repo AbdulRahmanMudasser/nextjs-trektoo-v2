@@ -103,6 +103,8 @@ export const fetchHotelDetails = async (id) => {
         // Transform and clean hotel data
         return {
             ...hotelData,
+            // Ensure ID is set
+            id: id,
             // Clean title (remove extra whitespace)
             title: hotelData.title?.trim() || 'Hotel Name Not Available',
             // Ensure proper price handling
@@ -159,14 +161,41 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
 };
 
 /**
- * Fetch hotel room availability by ID
+ * Fetch hotel room availability by ID with checkin/checkout dates
  * @param {string} id - Hotel ID
+ * @param {string} checkin - Check-in date (YYYY-MM-DD format)
+ * @param {string} checkout - Check-out date (YYYY-MM-DD format)
+ * @param {number} adults - Number of adults
+ * @param {number} children - Number of children
  * @returns {Promise<Array>} Array of room data with formatted properties
  */
-export const fetchHotelAvailability = async (id) => {
+export const fetchHotelAvailability = async (id, checkin, checkout, adults = 1, children = 0) => {
     try {
-        const response = await secureApiClient.get(`/hotel/availability/${id}`);
+        // Validate ID before making API call
+        if (!id || id === 'null' || id === 'undefined') {
+            throw new Error('Invalid hotel ID provided for availability check');
+        }
+
+        // Validate required parameters
+        if (!checkin || !checkout) {
+            throw new Error('Check-in and check-out dates are required for room availability');
+        }
+
+        // Build query parameters
+        const queryParams = new URLSearchParams({
+            checkin: checkin,
+            checkout: checkout,
+            adults: adults.toString(),
+            children: children.toString()
+        });
+
+        // New API call with date and guest parameters
+        const response = await secureApiClient.get(`/hotel/availability/${id}?${queryParams.toString()}`);
         const rooms = response.data.rooms || [];
+
+        // Previous API call (commented out)
+        // const response = await secureApiClient.get(`/hotel/availability/${id}`);
+        // const rooms = response.data.rooms || [];
 
         // Transform room data to match component expectations
         return rooms.map(room => ({
@@ -205,7 +234,16 @@ export const fetchLocations = async (query) => {
     try {
         const response = await secureApiClient.get(`/locations?service_name=${encodeURIComponent(query)}`);
         console.log('Locations API response:', { total: response.data.total, data: response.data.data });
-        return response.data.data || [];
+
+        // Transform location data to match frontend expectations
+        const locations = response.data.data || [];
+        return locations.map(location => ({
+            ...location,
+            // Ensure title property exists for frontend compatibility
+            title: location.title || location.name || location.city || 'Unknown Location',
+            // Ensure id property exists
+            id: location.id || location.location_id || Math.random().toString(36).substr(2, 9)
+        }));
     } catch (error) {
         logError('Locations API', error);
         throw new Error(getUserFriendlyError(error));

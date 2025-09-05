@@ -2,7 +2,11 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { login as loginApi, register as registerApi, logout as logoutApi } from '@/lib/api/authApi';
+import {
+  login as loginApi,
+  register as registerApi,
+  logout as logoutApi,
+} from '@/lib/api/authApi';
 import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext();
@@ -21,25 +25,73 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [authSuccess, setAuthSuccess] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
 
   // Load user and token from localStorage on mount
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem('authToken');
-      const storedUser = localStorage.getItem('authUser');
-      if (storedToken && storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setToken(storedToken);
-        setUser(parsedUser);
+    const initializeAuth = async () => {
+      try {
+        // Check if we're in browser environment
+        if (typeof window === 'undefined') {
+          setIsLoading(false);
+          setIsInitialized(true);
+          return;
+        }
+
+        const storedToken = localStorage.getItem('authToken');
+        const storedUser = localStorage.getItem('authUser');
+
+        if (storedToken && storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+
+            // Validate token format (basic check)
+            if (typeof storedToken === 'string' && storedToken.length > 10) {
+              setToken(storedToken);
+              setUser(parsedUser);
+
+              // Optionally validate token with server
+              try {
+                // This could be a token validation call
+                // await validateToken(storedToken);
+              } catch (validationError) {
+                console.warn('Token validation failed:', validationError);
+                // Clear invalid token
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('authUser');
+                setToken(null);
+                setUser(null);
+              }
+            } else {
+              // Invalid token format
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('authUser');
+            }
+          } catch (parseError) {
+            console.error('Error parsing stored user data:', parseError);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setAuthError('Failed to load your session. Please log in again.');
+        // Clear potentially corrupted data
+        try {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('authUser');
+        } catch (clearError) {
+          console.error('Error clearing corrupted auth data:', clearError);
+        }
+      } finally {
+        setIsLoading(false);
+        setIsInitialized(true);
       }
-    } catch (error) {
-      console.error('Error loading auth data:', error);
-      setAuthError('Failed to load your session. Please log in again.');
-    } finally {
-      setIsLoading(false);
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   // Clear error/success messages
@@ -51,36 +103,123 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (credentials) => {
     clearMessages();
+    setIsLoading(true);
+
     try {
+      // Validate credentials
+      if (!credentials || !credentials.email || !credentials.password) {
+        throw new Error('Email and password are required');
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(credentials.email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
       const data = await loginApi(credentials);
-      if (data.status === 1 && data.access_token) {
-        localStorage.setItem('authToken', data.access_token);
-        localStorage.setItem('authUser', JSON.stringify(data.user));
-        setToken(data.access_token);
-        setUser(data.user);
-        setAuthSuccess('Welcome back! You\'re logged in.');
-        router.push('/');
+
+      if (data.status === 1 && data.access_token && data.user) {
+        // Validate response data
+        if (
+          typeof data.access_token !== 'string' ||
+          data.access_token.length < 10
+        ) {
+          throw new Error('Invalid authentication token received');
+        }
+
+        if (!data.user || typeof data.user !== 'object') {
+          throw new Error('Invalid user data received');
+        }
+
+        // Store auth data
+        try {
+          localStorage.setItem('authToken', data.access_token);
+          localStorage.setItem('authUser', JSON.stringify(data.user));
+          setToken(data.access_token);
+          setUser(data.user);
+          setAuthSuccess("Welcome back! You're logged in.");
+
+          // Clear any cached data that might be user-specific
+          queryClient.clear();
+
+          // Redirect to home or intended destination
+          const redirectTo = router.query?.redirect || '/';
+          router.push(redirectTo);
+        } catch (storageError) {
+          console.error('Error storing auth data:', storageError);
+          throw new Error(
+            'Failed to save login information. Please try again.'
+          );
+        }
       } else {
-        setAuthError('Login failed. Please try again.');
+        throw new Error(
+          data.message ||
+            'Login failed. Please check your credentials and try again.'
+        );
       }
     } catch (error) {
-      setAuthError(error.message);
+      console.error('Login error:', error);
+      setAuthError(
+        error.message ||
+          'An unexpected error occurred during login. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Register function
   const register = async (userData) => {
     clearMessages();
+    setIsLoading(true);
+
     try {
+      // Validate user data
+      if (!userData || !userData.email || !userData.password) {
+        throw new Error('Email and password are required');
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userData.email)) {
+        throw new Error('Please enter a valid email address');
+      }
+
+      // Password strength validation
+      if (userData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
+      // Name validation
+      if (userData.first_name && userData.first_name.trim().length < 2) {
+        throw new Error('First name must be at least 2 characters long');
+      }
+
+      if (userData.last_name && userData.last_name.trim().length < 2) {
+        throw new Error('Last name must be at least 2 characters long');
+      }
+
       const data = await registerApi(userData);
-      if (data.status === true) {
-        setAuthSuccess(data.message || 'Registration successful! Please log in.');
+
+      if (data.status === true || data.status === 1) {
+        setAuthSuccess(
+          data.message || 'Registration successful! Please log in.'
+        );
         router.push('/login');
       } else {
-        setAuthError('Registration failed. Please try again.');
+        throw new Error(
+          data.message || 'Registration failed. Please try again.'
+        );
       }
     } catch (error) {
-      setAuthError(error.message);
+      console.error('Registration error:', error);
+      setAuthError(
+        error.message ||
+          'An unexpected error occurred during registration. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,16 +228,16 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Logout initiated', { user: user?.email, hasToken: !!token });
       clearMessages();
-      
+
       // Store current values for API call
       const currentUser = user;
       const currentToken = token;
-      
+
       // Immediately clear state and redirect to prevent flash
       setToken(null);
       setUser(null);
       queryClient.clear();
-      
+
       // Clean up storage immediately to prevent any state issues
       try {
         localStorage.removeItem('authToken');
@@ -107,7 +246,7 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error clearing storage:', error);
       }
-      
+
       // Redirect immediately
       try {
         router.push('/');
@@ -121,7 +260,7 @@ export const AuthProvider = ({ children }) => {
           console.error('Fallback redirect also failed:', fallbackError);
         }
       }
-      
+
       // Then handle API cleanup in background
       try {
         if (currentUser?.email && currentToken) {
@@ -162,8 +301,9 @@ export const AuthProvider = ({ children }) => {
     authError,
     authSuccess,
     clearMessages,
-    isAuthenticated: !!token,
+    isAuthenticated: !!token && !!user,
     isLoading,
+    isInitialized,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

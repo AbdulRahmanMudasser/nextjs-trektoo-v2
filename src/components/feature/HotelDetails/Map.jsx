@@ -5,10 +5,17 @@ import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { MapPin, Navigation, ExternalLink, Copy, Check } from 'lucide-react';
 
-const Map = ({ lat = 0, lng = 0, zoom = 10, address = '', hotelName = '' }) => {
+const Map = ({
+  lat = null,
+  lng = null,
+  zoom = 10,
+  address = '',
+  hotelName = '',
+}) => {
   const [copied, setCopied] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const [useFallbackMap, setUseFallbackMap] = useState(false);
   const mapRef = useRef(null);
 
   // Check if iframe is blocked by CSP and add timeout
@@ -20,6 +27,7 @@ const Map = ({ lat = 0, lng = 0, zoom = 10, address = '', hotelName = '' }) => {
         document.body.appendChild(testIframe);
         document.body.removeChild(testIframe);
       } catch (error) {
+        console.warn('Iframe support check failed:', error);
         setIframeError(true);
       }
     };
@@ -29,17 +37,31 @@ const Map = ({ lat = 0, lng = 0, zoom = 10, address = '', hotelName = '' }) => {
     // Add timeout to detect if iframe is blocked
     const timeout = setTimeout(() => {
       if (!mapLoaded) {
+        console.warn('Map iframe failed to load within timeout');
         setIframeError(true);
       }
-    }, 5000); // 5 seconds timeout
+    }, 8000); // 8 seconds timeout
 
     return () => clearTimeout(timeout);
   }, [mapLoaded]);
 
-  // Don't render if no valid coordinates
-  if (!lat || !lng || (lat === 0 && lng === 0)) {
-    return null;
-  }
+  // Use fallback coordinates if none provided (Paris coordinates as example)
+  const fallbackLat = 48.8566;
+  const fallbackLng = 2.3522;
+
+  // Robust coordinate validation and fallback
+  const isValidCoordinate = (coord) => {
+    if (coord === null || coord === undefined) return false;
+    const num = parseFloat(coord);
+    return !isNaN(num) && num !== 0 && num >= -90 && num <= 90;
+  };
+
+  const mapLat = isValidCoordinate(lat) ? parseFloat(lat) : fallbackLat;
+  const mapLng = isValidCoordinate(lng) ? parseFloat(lng) : fallbackLng;
+  const mapZoom = parseInt(zoom) || 10;
+
+  // Check if we're using fallback coordinates
+  const usingFallback = !isValidCoordinate(lat) || !isValidCoordinate(lng);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -66,18 +88,18 @@ const Map = ({ lat = 0, lng = 0, zoom = 10, address = '', hotelName = '' }) => {
   };
 
   const handleViewOnGoogleMaps = () => {
-    const googleMapsUrl = `https://www.google.com/maps/place/${lat},${lng}/@${lat},${lng},${zoom}z`;
+    const googleMapsUrl = `https://www.google.com/maps/place/${mapLat},${mapLng}/@${mapLat},${mapLng},${mapZoom}z`;
     window.open(googleMapsUrl, '_blank');
   };
 
   const handleViewOnOpenStreetMap = () => {
-    const osmUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=${zoom}#map=${zoom}/${lat}/${lng}`;
+    const osmUrl = `https://www.openstreetmap.org/?mlat=${mapLat}&mlon=${mapLng}&zoom=${mapZoom}#map=${mapZoom}/${mapLat}/${mapLng}`;
     window.open(osmUrl, '_blank');
   };
 
   const handleCopyCoordinates = async () => {
     try {
-      await navigator.clipboard.writeText(`${lat}, ${lng}`);
+      await navigator.clipboard.writeText(`${mapLat}, ${mapLng}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -85,257 +107,219 @@ const Map = ({ lat = 0, lng = 0, zoom = 10, address = '', hotelName = '' }) => {
     }
   };
 
+  // Generate map URL with fallback
+  const getMapUrl = () => {
+    if (useFallbackMap) {
+      // Use Google Maps embed as fallback
+      const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (googleMapsApiKey) {
+        return `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${mapLat},${mapLng}&zoom=${mapZoom}`;
+      } else {
+        // Fallback to Mapbox static image if Google Maps API key is not available
+        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+        if (mapboxToken) {
+          return `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+ff0000(${mapLng},${mapLat})/${mapLng},${mapLat},${mapZoom},0/600x400@2x?access_token=${mapboxToken}`;
+        } else {
+          // Final fallback: return a simple placeholder
+          return `data:image/svg+xml;base64,${btoa(`
+            <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100%" height="100%" fill="#f3f4f6"/>
+              <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-family="Arial, sans-serif" font-size="16" fill="#6b7280">
+                Map unavailable - API key required
+              </text>
+            </svg>
+          `)}`;
+        }
+      }
+    } else {
+      // Use OpenStreetMap
+      return `https://www.openstreetmap.org/export/embed.html?bbox=${mapLng - 0.01},${mapLat - 0.01},${mapLng + 0.01},${mapLat + 0.01}&layer=mapnik&marker=${mapLat},${mapLng}`;
+    }
+  };
+
+  const handleMapError = () => {
+    console.warn('Primary map failed, trying fallback');
+    if (!useFallbackMap) {
+      setUseFallbackMap(true);
+      setMapLoaded(false);
+      setIframeError(false);
+    } else {
+      setIframeError(true);
+    }
+  };
+
   return (
-    <motion.section
-      className="w-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
+    <motion.div
+      className="w-full"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div className="text-center mb-12" variants={itemVariants}>
-          <motion.div
-            className="inline-flex items-center justify-center p-2 bg-blue-50 rounded-full mb-4"
-            whileHover={{ scale: 1.05 }}
-          >
-            <MapPin className="h-8 w-8 text-blue-600" />
-          </motion.div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-            Location & Directions
-          </h2>
+      {/* Header */}
+      <motion.div className="text-center mb-8 sm:mb-12" variants={itemVariants}>
+        <motion.div
+          className="inline-flex items-center justify-center p-2 bg-blue-50 rounded-full mb-3 sm:mb-4"
+          whileHover={{ scale: 1.05 }}
+        >
+          <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
         </motion.div>
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 tracking-tight">
+          Location
+        </h2>
+        <p className="text-gray-600 text-sm sm:text-base md:text-lg max-w-3xl mx-auto">
+          {usingFallback
+            ? 'Interactive map showing approximate location (exact coordinates not available)'
+            : 'Find us easily with our interactive map and detailed location information'}
+        </p>
+        {usingFallback && (
+          <p className="text-xs text-orange-600 mt-2">
+            Note: This is a sample location. Hotel coordinates are not
+            available.
+          </p>
+        )}
+      </motion.div>
 
-        {/* Main Content */}
-                 <motion.div
-           className="rounded-3xl border border-gray-100 overflow-hidden"
-           variants={itemVariants}
-         >
-          {/* Hotel Location Info */}
-          <div className="p-8 border-b border-gray-100">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-gray-900 flex items-center justify-center mb-4">
-                <MapPin className="h-6 w-6 text-blue-500 mr-2" />
-                Hotel Location
+      {/* Map Container */}
+      <motion.div
+        className="bg-white rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100 overflow-hidden mb-6 sm:mb-8"
+        variants={itemVariants}
+      >
+        {/* Map Header */}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-6 text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">
+                {hotelName}
               </h3>
-
-              {hotelName && (
-                                 <div className="p-6 rounded-2xl border border-blue-100 mb-6 max-w-2xl mx-auto">
-                  <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                    {hotelName}
-                  </h4>
-                  {address && (
-                    <p className="text-gray-700 text-lg">{address}</p>
-                  )}
-                </div>
-              )}
-
-                             <div className="p-4 rounded-xl border border-gray-200 max-w-md mx-auto">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600 text-left">
-                    <p>
-                      <strong>Latitude:</strong> {lat}
-                    </p>
-                    <p>
-                      <strong>Longitude:</strong> {lng}
-                    </p>
-                  </div>
-                  <motion.button
-                    onClick={handleCopyCoordinates}
-                    className="flex items-center space-x-1 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all text-sm ml-4"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                    <span>{copied ? 'Copied!' : 'Copy'}</span>
-                  </motion.button>
-                </div>
-              </div>
+              <p className="text-blue-100 text-sm sm:text-base break-words">
+                {address}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <motion.button
+                onClick={handleCopyCoordinates}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium hover:bg-white/30 transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {copied ? (
+                  <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+                ) : (
+                  <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {copied ? 'Copied!' : 'Copy Coords'}
+                </span>
+                <span className="sm:hidden">{copied ? 'Copied!' : 'Copy'}</span>
+              </motion.button>
             </div>
           </div>
+        </div>
 
-          {/* Static Map Display */}
-          <div className="p-8">
-                         <motion.div
-               className="relative w-full h-96 rounded-2xl overflow-hidden border border-gray-200"
-               variants={itemVariants}
-               whileHover={{ scale: 1.01 }}
-               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-             >
-                             {/* OpenStreetMap Integration with Fallback */}
-               <div className="relative w-full h-full">
-                 {!iframeError ? (
-                   <iframe
-                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lng}`}
-                     width="100%"
-                     height="100%"
-                     frameBorder="0"
-                     scrolling="no"
-                     marginHeight="0"
-                     marginWidth="0"
-                     title={`OpenStreetMap showing ${hotelName || 'hotel location'}`}
-                     className="w-full h-full rounded-2xl"
-                     onLoad={() => setMapLoaded(true)}
-                     onError={() => setIframeError(true)}
-                   />
-                 ) : (
-                   <div className="w-full h-full flex items-center justify-center rounded-2xl">
-                     <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200 max-w-md">
-                       <MapPin className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                       <h3 className="text-xl font-bold text-gray-900 mb-2">
-                         {hotelName || 'Hotel Location'}
-                       </h3>
-                       <p className="text-gray-600 mb-2">{address}</p>
-                       <p className="text-sm text-gray-500 mb-4">
-                         Coordinates: {lat}, {lng}
-                       </p>
-                       <div className="flex gap-2 justify-center">
-                         <button
-                           onClick={handleViewOnOpenStreetMap}
-                           className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
-                         >
-                           View on OpenStreetMap
-                         </button>
-                         <button
-                           onClick={handleViewOnGoogleMaps}
-                           className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
-                         >
-                           View on Google Maps
-                         </button>
-                       </div>
-                     </div>
-                   </div>
-                 )}
-
-                {/* Map Loading Overlay */}
-                                 {!mapLoaded && (
-                   <div className="absolute inset-0 flex items-center justify-center rounded-2xl">
-                    <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200">
-                      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        Loading Map...
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        Please wait while we load the location
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                                 {/* Info Overlay on Hover */}
-                 <div className="absolute inset-0 flex items-center justify-center rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200">
-                    <MapPin className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {hotelName || 'Hotel Location'}
-                    </h3>
-                    <p className="text-gray-600 mb-2">{address}</p>
-                    <p className="text-sm text-gray-500">
-                      Coordinates: {lat}, {lng}
-                    </p>
-                  </div>
-                </div>
+        {/* Map Content */}
+        <div className="p-4 sm:p-6">
+          {iframeError ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <MapPin className="h-6 w-6 text-gray-400" />
               </div>
-
-              {/* Overlay buttons */}
-              <div className="absolute top-4 right-4 flex space-x-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Map Unavailable
+              </h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Interactive map cannot be displayed at this time.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 <motion.button
                   onClick={handleViewOnGoogleMaps}
-                  className="bg-white/90 backdrop-blur-sm text-gray-700 p-2 rounded-full shadow-lg hover:bg-white hover:shadow-xl transition-all"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  title="View on Google Maps"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <ExternalLink className="h-4 w-4" />
+                  <span className="hidden sm:inline">Google Maps</span>
+                  <span className="sm:hidden">Maps</span>
                 </motion.button>
                 <motion.button
                   onClick={handleViewOnOpenStreetMap}
-                  className="bg-green-500/90 backdrop-blur-sm text-white p-2 rounded-full shadow-lg hover:bg-green-500 hover:shadow-xl transition-all"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  title="View on OpenStreetMap"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <MapPin className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="hidden sm:inline">OpenStreetMap</span>
+                  <span className="sm:hidden">OSM</span>
                 </motion.button>
               </div>
-            </motion.div>
-
-                                                   {/* Map Info */}
-              <div className="text-center mb-6">
-                {iframeError && (
-                  <p className="text-sm text-gray-600">
-                    <span className="block text-blue-600">
-                      🔒 <strong>Note:</strong> Using fallback view due to security restrictions. Click the buttons below to view on external maps.
-                    </span>
-                  </p>
-                )}
-              </div>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-              <motion.button
-                onClick={handleViewOnOpenStreetMap}
-                className="flex items-center justify-center space-x-2 bg-green-500 text-white font-medium py-3 px-4 rounded-xl hover:bg-green-600 transition-all shadow-lg hover:shadow-xl"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <MapPin className="h-4 w-4" />
-                <span>View on OpenStreetMap</span>
-              </motion.button>
-
-              <motion.button
-                onClick={handleViewOnGoogleMaps}
-                className="flex items-center justify-center space-x-2 bg-white border border-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ExternalLink className="h-4 w-4" />
-                <span>View on Google Maps</span>
-              </motion.button>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Quick Info Cards */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-           <motion.div
-             className="p-6 rounded-2xl border border-gray-100 text-center"
-             variants={itemVariants}
-             whileHover={{ y: -5 }}
-           >
-            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin className="h-6 w-6 text-white" />
+          ) : (
+            <div className="relative">
+              <iframe
+                ref={mapRef}
+                src={getMapUrl()}
+                width="100%"
+                height="400"
+                className="rounded-lg border-0"
+                onLoad={() => {
+                  console.log('Map iframe loaded successfully');
+                  setMapLoaded(true);
+                  setIframeError(false);
+                }}
+                onError={(e) => {
+                  console.error('Map iframe failed to load:', e);
+                  handleMapError();
+                }}
+                title={`Map showing location of ${hotelName}`}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              />
+              {!mapLoaded && !iframeError && (
+                <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 sm:w-12 sm:h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      {useFallbackMap
+                        ? 'Loading fallback map...'
+                        : 'Loading map...'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Precise Location
-            </h3>
-            <p className="text-gray-600 text-sm">
-              GPS coordinates provided for accurate navigation
-            </p>
-          </motion.div>
-
-                     <motion.div
-             className="p-6 rounded-2xl border border-gray-100 text-center"
-             variants={itemVariants}
-             whileHover={{ y: -5 }}
-           >
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Interactive Map
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Embedded OpenStreetMap with real-time navigation
-            </p>
-          </motion.div>
+          )}
         </div>
-      </div>
-    </motion.section>
+      </motion.div>
+
+      {/* Action Buttons */}
+      <motion.div
+        className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
+        variants={itemVariants}
+      >
+        <motion.button
+          onClick={handleViewOnGoogleMaps}
+          className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Navigation className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">Get Directions</span>
+          <span className="sm:hidden">Directions</span>
+        </motion.button>
+
+        <motion.button
+          onClick={handleViewOnGoogleMaps}
+          className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">View on Google Maps</span>
+          <span className="sm:hidden">Google Maps</span>
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 };
 

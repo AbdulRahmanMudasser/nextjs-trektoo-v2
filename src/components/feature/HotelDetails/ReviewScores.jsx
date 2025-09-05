@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, Users, TrendingUp } from 'lucide-react';
 
 const ReviewScores = ({
   scoreTotal = 0,
@@ -17,8 +17,8 @@ const ReviewScores = ({
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
       },
     },
   };
@@ -41,97 +41,141 @@ const ReviewScores = ({
   const hasHalfStar = numericScore % 1 >= 0.5;
 
   // Mock scores for reviewStats since API only provides names
-  const reviewStatsWithScores = reviewStats.map(stat => ({
+  const reviewStatsWithScores = reviewStats.map((stat) => ({
     name: stat,
     score: numericScore, // Use overall score as a fallback
   }));
 
   return (
     <motion.div
-      className="relative w-full py-10 px-6 sm:px-8 lg:px-12"
+      className="w-full"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      data-testid="review-scores"
     >
-      <motion.h2
-        className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-8 border-l-4 border-blue-600 pl-4"
+      {/* Header */}
+      <motion.div className="text-center mb-8" variants={itemVariants}>
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          Guest Reviews
+        </h2>
+        <p className="text-lg text-gray-600">
+          See what our guests have to say about their experience
+        </p>
+      </motion.div>
+
+      {/* Main Rating Card */}
+      <motion.div
+        className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 mb-8 border border-blue-100"
         variants={itemVariants}
       >
-        Guest Reviews
-      </motion.h2>
-      <div className="flex flex-col lg:flex-row gap-8">
-        <motion.div className="flex-1 space-y-6" variants={itemVariants}>
-          <div className="p-6 rounded-xl border border-gray-100" data-testid="overall-rating">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Overall Rating</h3>
-            <div className="flex items-center mb-4">
-              <div className="flex">
-                {[...Array(fullStars)].map((_, i) => (
-                  <motion.div key={i} variants={itemVariants}>
-                    <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-                  </motion.div>
-                ))}
-                {hasHalfStar && (
-                  <motion.div variants={itemVariants}>
-                    <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />
-                  </motion.div>
-                )}
-                {[...Array(5 - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
-                  <Star key={i + fullStars + 1} className="w-6 h-6 text-gray-200" />
-                ))}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+          {/* Overall Score */}
+          <div className="text-center lg:text-left">
+            <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
+              <div className="text-5xl font-bold text-blue-600">
+                {numericScore.toFixed(1)}
               </div>
-              <span className="ml-3 text-xl font-semibold text-gray-800">
-                {numericScore.toFixed(1)} - {scoreText} ({totalReviews} reviews)
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, index) => (
+                    <Star
+                      key={index}
+                      className={`h-5 w-5 ${
+                        index < fullStars
+                          ? 'text-yellow-400 fill-current'
+                          : index === fullStars && hasHalfStar
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-600 mt-1">{scoreText}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Users className="h-4 w-4" />
+              <span className="text-sm">
+                Based on {totalReviews}{' '}
+                {totalReviews === 1 ? 'review' : 'reviews'}
               </span>
             </div>
           </div>
-          <div className="p-6 rounded-xl border border-gray-100" data-testid="rating-distribution">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Rating Distribution</h3>
-            {['5', '4', '3', '2', '1'].map((rating) => {
-              const score = rateScores[rating] || { title: '', total: 0, percent: 0 };
-              return (
-                <motion.div key={rating} className="mb-4" variants={itemVariants}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-gray-700">{score.title || `${rating} Star`}</span>
-                    <span className="text-gray-800 font-semibold">{score.total} ({score.percent}%)</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${score.percent}%` }}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+
+          {/* Rating Breakdown */}
+          {Object.keys(rateScores).length > 0 && (
+            <div className="flex-1 max-w-md">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center lg:text-left">
+                Rating Breakdown
+              </h3>
+              <div className="space-y-3">
+                {Object.entries(rateScores).map(([rating, count]) => {
+                  const percentage =
+                    totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                  return (
+                    <div key={rating} className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 w-16">
+                        <span className="text-sm font-medium text-gray-700">
+                          {rating}
+                        </span>
+                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                      </div>
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-600 w-8 text-right">
+                        {count}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Review Categories */}
+      {reviewStatsWithScores.length > 0 && (
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={containerVariants}
+        >
+          {reviewStatsWithScores.map((stat, index) => (
+            <motion.div
+              key={index}
+              className="bg-white rounded-xl p-6 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-300"
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-gray-900">{stat.name}</h4>
+                <div className="flex items-center gap-1">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-600">
+                    {stat.score.toFixed(1)}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, starIndex) => (
+                  <Star
+                    key={starIndex}
+                    className={`h-4 w-4 ${
+                      starIndex < Math.floor(stat.score)
+                        ? 'text-yellow-400 fill-current'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
-        <motion.div className="flex-1" variants={itemVariants}>
-          <div className="p-6 rounded-xl border border-gray-100" data-testid="review-stats">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Review Categories</h3>
-            {reviewStatsWithScores.length > 0 ? (
-              reviewStatsWithScores.map((stat, index) => (
-                <motion.div key={index} className="mb-4" variants={itemVariants}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-gray-700">{stat.name}</span>
-                    <span className="text-gray-800 font-semibold">{stat.score.toFixed(1)}/5</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${(stat.score / 5) * 100}%` }}
-                    />
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <p className="text-gray-700 text-lg" data-testid="no-stats">
-                No review categories available.
-              </p>
-            )}
-          </div>
-        </motion.div>
-      </div>
+      )}
     </motion.div>
   );
 };
@@ -139,7 +183,7 @@ const ReviewScores = ({
 ReviewScores.propTypes = {
   scoreTotal: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   scoreText: PropTypes.string,
-  totalReviews: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  totalReviews: PropTypes.number,
   reviewStats: PropTypes.arrayOf(PropTypes.string),
   rateScores: PropTypes.object,
 };

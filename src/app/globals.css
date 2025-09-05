@@ -10,6 +10,21 @@
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/* Custom breakpoint for extra small screens */
+@layer utilities {
+  .xs\:inline {
+    @media (min-width: 475px) {
+      display: inline;
+    }
+  }
+
+  .xs\:hidden {
+    @media (min-width: 475px) {
+      display: none;
+    }
+  }
+}
+
 body {
   margin: 0;
   background: #000;
@@ -37,7 +52,6 @@ body {
     transform: scale(1.05);
     /* Less zoom on mobile for better performance */
   }
-
 }
 
 /* Shimmer animation for loading skeletons */
@@ -53,7 +67,6 @@ body {
 
 /* Optimized loading animations */
 @keyframes pulse-slow {
-
   0%,
   100% {
     opacity: 1;

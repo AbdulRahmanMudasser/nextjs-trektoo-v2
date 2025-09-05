@@ -1,22 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
 
 export const ProfileHeader = ({ 
   formData, 
   bookings, 
   avatarError, 
   setAvatarError, 
-  itemVariants 
+  itemVariants,
 }) => {
   return (
-    <motion.div
-      variants={itemVariants}
-      className="relative mb-12 group"
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-      <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
-        <div className="flex flex-col lg:flex-row items-center gap-12">
+    <motion.div variants={itemVariants} className="mb-8">
+      <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+        <div className="flex flex-col lg:flex-row items-center gap-8">
+          {/* Avatar Section */}
           <motion.div
             className="relative group/avatar"
             whileHover={{ scale: 1.05 }}
@@ -32,30 +30,18 @@ export const ProfileHeader = ({
                 onError={() => setAvatarError(true)}
               />
             ) : (
-              <div className="relative h-32 w-32 rounded-full border-4 border-blue-500/20 shadow-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                <svg
-                  className="h-16 w-16 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+              <div className="relative h-24 w-24 rounded-full border-4 border-blue-500/20 shadow-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <User className="h-12 w-12 text-white" />
               </div>
             )}
             <motion.button
-              className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-3 shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 ring-4 ring-white"
+              className="absolute -bottom-2 -right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full p-2 shadow-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 ring-4 ring-white"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Edit profile picture"
             >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -70,39 +56,54 @@ export const ProfileHeader = ({
             </motion.button>
           </motion.div>
 
+          {/* Profile Info */}
           <div className="text-center lg:text-left flex-1">
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 bg-clip-text text-transparent mb-4 tracking-tight font-montserrat">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
               {formData.firstName} {formData.lastName}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 font-medium">
-              Premium Member since{' '}
+            <p className="text-lg text-gray-600 mb-6">
+              Welcome back to your account
+            </p>
+
+            {/* Contact Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="flex items-center gap-3 text-gray-600">
+                <Mail className="w-5 h-5 text-blue-500" />
+                <span className="font-medium">{formData.email}</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-600">
+                <Phone className="w-5 h-5 text-blue-500" />
+                <span className="font-medium">
+                  {formData.phone || 'Not provided'}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-600 md:col-span-2">
+                <MapPin className="w-5 h-5 text-blue-500" />
+                <span className="font-medium">
+                  {formData.address || 'Not provided'}
+                </span>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              <div className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-semibold text-gray-700">
+                    {bookings?.length || 0} Bookings
+                  </span>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Member since{' '}
               {formData.created_at
                 ? new Date(formData.created_at).getFullYear()
                 : 'N/A'}
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-2xl text-sm font-semibold shadow-xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                  {formData.status === 'publish' ? 'Premium' : 'Standard'} Member
-                </div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-md text-gray-700 px-8 py-3 rounded-2xl text-sm font-semibold border border-gray-200 shadow-md">
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  {bookings.length} Total Bookings
+                  </span>
                 </div>
               </div>
             </div>

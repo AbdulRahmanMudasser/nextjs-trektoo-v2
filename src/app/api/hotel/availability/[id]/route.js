@@ -7,6 +7,7 @@ import axios from 'axios';
  */
 export async function GET(request, { params }) {
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
 
     if (!id || isNaN(parseInt(id))) {
         return NextResponse.json(
@@ -15,9 +16,32 @@ export async function GET(request, { params }) {
         );
     }
 
+    // Extract query parameters
+    const checkin = searchParams.get('checkin');
+    const checkout = searchParams.get('checkout');
+    const adults = searchParams.get('adults') || '1';
+    const children = searchParams.get('children') || '0';
+
+    // Validate required parameters
+    if (!checkin || !checkout) {
+        return NextResponse.json(
+            { error: 'Check-in and check-out dates are required' },
+            { status: 400 }
+        );
+    }
+
     try {
+        // Build query string for external API
+        const queryParams = new URLSearchParams({
+            checkin: checkin,
+            checkout: checkout,
+            adults: adults,
+            children: children
+        });
+
+        // New API call with date and guest parameters
         const response = await axios.get(
-            `https://staging.trektoo.com/api/hotel/availability/${id}`,
+            `https://staging.trektoo.com/api/hotel/availability/${id}?${queryParams.toString()}`,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,6 +52,20 @@ export async function GET(request, { params }) {
                 next: { revalidate: 3600 },
             }
         );
+
+        // Previous API call (commented out)
+        // const response = await axios.get(
+        //     `https://staging.trektoo.com/api/hotel/availability/${id}`,
+        //     {
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             Authorization: `Basic ${Buffer.from(
+        //                 `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`
+        //             ).toString('base64')}`,
+        //         },
+        //         next: { revalidate: 3600 },
+        //     }
+        // );
 
         if (response.data.status !== 1 || !response.data.rooms) {
             return NextResponse.json(
@@ -56,7 +94,7 @@ export async function GET(request, { params }) {
             })),
         }));
 
-        console.info(`Room availability fetched for hotel ID: ${id}`);
+        console.info(`Room availability fetched for hotel ID: ${id}, checkin: ${checkin}, checkout: ${checkout}, adults: ${adults}, children: ${children}`);
 
         return NextResponse.json(
             { data: rooms },

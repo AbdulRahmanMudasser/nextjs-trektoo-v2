@@ -158,49 +158,53 @@ const PrivacyPolicyPage = () => {
         variants={containerVariants}
         className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[85vw] mx-auto">
           {/* Premium Hero Section */}
           <motion.div
             variants={itemVariants}
-            className="text-center mb-16 relative"
+            className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8 mb-8"
           >
-            <motion.div
-              animate={floatingAnimation}
-              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-2xl mb-8 relative"
-            >
-              <Shield className="h-10 w-10 text-white" />
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
-                <Lock className="h-3 w-3 text-white" />
-              </div>
-            </motion.div>
+            <div className="text-center">
+              <motion.div
+                animate={floatingAnimation}
+                className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-2xl mb-8 relative"
+              >
+                <Shield className="h-10 w-10 text-white" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                  <Lock className="h-3 w-3 text-white" />
+                </div>
+              </motion.div>
 
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 bg-clip-text text-transparent font-montserrat mb-6 leading-tight">
-              Privacy Policy
-            </h1>
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 bg-clip-text text-transparent font-montserrat mb-6 leading-tight">
+                Privacy Policy
+              </h1>
 
-            <motion.p
-              variants={itemVariants}
-              className="text-xl md:text-2xl text-gray-700 font-montserrat max-w-4xl mx-auto leading-relaxed mb-8"
-            >
-              Your privacy is important to us. This Privacy Policy explains how
-              Trektoo collects, uses, and protects your personal information
-              when you use our travel booking services.
-            </motion.p>
+              <motion.p
+                variants={itemVariants}
+                className="text-xl md:text-2xl text-gray-700 font-montserrat max-w-4xl mx-auto leading-relaxed mb-8"
+              >
+                Your privacy is important to us. This Privacy Policy explains
+                how Trektoo collects, uses, and protects your personal
+                information when you use our travel booking services.
+              </motion.p>
 
-            {/* Last Updated Badge */}
-            <motion.div
-              variants={itemVariants}
-              className="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full shadow-xl"
-            >
-              <Clock className="h-5 w-5 mr-2" />
-              <span className="font-semibold">Last Updated: January 2025</span>
-            </motion.div>
+              {/* Last Updated Badge */}
+              <motion.div
+                variants={itemVariants}
+                className="inline-flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full shadow-xl"
+              >
+                <Clock className="h-5 w-5 mr-2" />
+                <span className="font-semibold">
+                  Last Updated: January 2025
+                </span>
+              </motion.div>
+            </div>
           </motion.div>
 
           {/* Company Information */}
           <motion.div variants={itemVariants} className="relative mb-12 group">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
               <div className="flex items-center mb-8">
                 <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-4 rounded-2xl shadow-lg mr-6">
                   <Eye className="h-8 w-8 text-white" />
@@ -240,7 +244,7 @@ const PrivacyPolicyPage = () => {
                 <div
                   className={`absolute inset-0 bg-gradient-to-r ${section.gradient} opacity-5 rounded-3xl blur-xl group-hover:opacity-10 transition-all duration-500`}
                 ></div>
-                <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-8 md:p-10">
+                <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
                   <div className="flex items-start mb-6">
                     <div
                       className={`bg-gradient-to-br ${section.gradient} p-4 rounded-2xl shadow-lg mr-6 flex-shrink-0`}
@@ -264,7 +268,7 @@ const PrivacyPolicyPage = () => {
           {/* Additional Privacy Information */}
           <motion.div variants={itemVariants} className="relative mb-12 group">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-            <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-12">
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
               <div className="flex items-center mb-10">
                 <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-4 rounded-2xl shadow-lg mr-6">
                   <Database className="h-8 w-8 text-white" />
@@ -281,7 +285,7 @@ const PrivacyPolicyPage = () => {
                 {additionalSections.map((section, index) => (
                   <div
                     key={index}
-                    className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                    className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-6 shadow-lg border border-gray-100"
                   >
                     <h4 className="text-xl font-bold text-gray-800 mb-3 font-montserrat">
                       {section.title}
@@ -333,7 +337,7 @@ const PrivacyPolicyPage = () => {
 
           {/* Contact Information */}
           <motion.div variants={itemVariants} className="text-center space-y-6">
-            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8 inline-block">
+            <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 inline-block">
               <h3 className="text-xl font-bold text-gray-900 mb-4 font-montserrat">
                 Questions About Your Privacy?
               </h3>

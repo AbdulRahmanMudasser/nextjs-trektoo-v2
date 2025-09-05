@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
+import { User, Calendar, CreditCard } from 'lucide-react';
 import {
   getUserProfile,
   updateUserProfile,
@@ -39,42 +40,24 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
 
-  // Mock data for payments (no endpoint provided)
-  const payments = [
-    {
-      id: 1,
-      date: '2025-05-10',
-      amount: 1200,
-      method: 'Visa **** 1234',
-      status: 'Completed',
-    },
-    {
-      id: 2,
-      date: '2025-03-15',
-      amount: 1800,
-      method: 'Mastercard **** 5678',
-      status: 'Completed',
-    },
-  ];
+  // Empty payments array - will be populated when payment API is available
+  const payments = [];
 
   const tabs = [
     {
       id: 'personal',
-      label: 'Profile',
-      icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-      gradient: 'from-blue-500 to-cyan-600',
+      name: 'Personal',
+      icon: <User className="w-4 h-4" />,
     },
     {
       id: 'bookings',
-      label: 'Bookings',
-      icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-      gradient: 'from-emerald-500 to-teal-600',
+      name: 'Bookings',
+      icon: <Calendar className="w-4 h-4" />,
     },
     {
       id: 'payments',
-      label: 'Payments',
-      icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
-      gradient: 'from-purple-500 to-violet-600',
+      name: 'Payments',
+      icon: <CreditCard className="w-4 h-4" />,
     },
   ];
 
@@ -264,8 +247,8 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 bg-[url('/pattern.png')] bg-cover bg-fixed relative overflow-hidden">
-      {/* Premium Background Elements */}
+    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-500/10"></div>
       <div className="absolute top-0 left-0 w-full h-full">
         <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/30 rounded-full blur-3xl"></div>
@@ -279,7 +262,7 @@ const ProfilePage = () => {
         variants={containerVariants}
         className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[85vw] mx-auto">
           {/* Profile Header */}
           <ProfileHeader
             formData={formData}
@@ -311,7 +294,7 @@ const ProfilePage = () => {
           />
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 };
 

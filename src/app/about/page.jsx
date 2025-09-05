@@ -57,7 +57,7 @@ const AboutUsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 bg-[url('/pattern.png')] bg-cover bg-fixed relative overflow-hidden">
+    <main className="relative min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Premium Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-500/10"></div>
       <div className="absolute top-0 left-0 w-full h-full">
@@ -454,7 +454,7 @@ const AboutUsPage = () => {
           </motion.div>
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 };
 
