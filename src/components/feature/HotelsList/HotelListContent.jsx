@@ -8,6 +8,7 @@ import { useHotels } from '@/hooks/useHotels';
 import FilterSidebar from './FilterSidebar';
 import TourListSection from './ToursListSection';
 import EmptyState from '@/components/ui/EmptyState';
+import { HotelListSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function HotelListContent() {
   const searchParams = useSearchParams();
@@ -94,11 +95,7 @@ export default function HotelListContent() {
   return (
     <ErrorBoundary>
       {isLoading ? (
-        <EmptyState
-          loading={true}
-          title="Finding Your Hotels"
-          subtitle="Searching for the best accommodations..."
-        />
+        <HotelListSkeleton items={5} />
       ) : (
         <div className="w-full">
           <div className="flex flex-col lg:flex-row gap-8">

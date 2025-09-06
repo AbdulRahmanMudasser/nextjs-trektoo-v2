@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { format, addDays } from 'date-fns';
 
 const RoomAvailability = ({
@@ -144,11 +145,8 @@ const RoomAvailability = ({
           animate={{ opacity: 1 }}
           className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl border border-blue-50"
         >
-          <RefreshCw className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
-          <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
-            Loading Room Availability
-          </h3>
-          <p className="text-gray-600 mt-2">
+          <LoadingSpinner size="xl" message="Loading Room Availability" />
+          <p className="text-gray-600 mt-4">
             Please wait while we fetch available rooms for your selected
             dates...
           </p>

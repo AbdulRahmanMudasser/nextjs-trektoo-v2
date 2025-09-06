@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
+import { SubmitButton } from '@/components/ui/LoadingButton';
+import { AuthPageLoader } from '@/components/ui/PageLoader';
 // Using inline SVG icons instead of Heroicons to avoid dependency issues
 
 function LoginForm() {
@@ -232,20 +234,14 @@ function LoginForm() {
             </div>
 
             {/* Submit Button */}
-            <button
+            <SubmitButton
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+              loading={isLoading}
+              loadingText="Signing In..."
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing In...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
+              Sign In
+            </SubmitButton>
           </form>
 
           {/* Sign Up Link */}
@@ -268,13 +264,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<AuthPageLoader message="Loading login..." />}>
       <LoginForm />
     </Suspense>
   );

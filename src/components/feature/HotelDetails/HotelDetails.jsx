@@ -111,77 +111,79 @@ const HotelDetails = ({ id, description, address, rating, amenities = [] }) => {
       variants={containerVariants}
     >
       <div className="w-full">
-        {/* Header Section */}
-        <motion.div
-          className="text-center mb-8 sm:mb-12"
-          variants={itemVariants}
-        >
-          <motion.div
-            className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-6 shadow-lg"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Award className="h-8 w-8 text-white" />
-          </motion.div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            About This Hotel
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover what makes this hotel special and why guests choose to stay
-            here
-          </p>
-        </motion.div>
-
-        {/* Description Section */}
+        {/* Unified About This Hotel Section */}
         <motion.div className="mb-8 sm:mb-12" variants={itemVariants}>
           <div className="max-w-[85vw] mx-auto">
             <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-blue-600" />
-                  Hotel Description
-                </h3>
-                {shouldTruncate && (
-                  <button
-                    onClick={() => setShowFullDescription(!showFullDescription)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-300"
-                  >
-                    {showFullDescription ? (
-                      <>
-                        <EyeOff className="h-4 w-4" />
-                        Show Less
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        Show More
-                      </>
-                    )}
-                  </button>
+              {/* Header Section */}
+              <div className="text-center mb-8">
+                <motion.div
+                  className="inline-flex items-center justify-center p-3 bg-blue-500 rounded-full mb-6 shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <Award className="h-8 w-8 text-white" />
+                </motion.div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                  About This Hotel
+                </h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Discover what makes this hotel special and why guests choose
+                  to stay here
+                </p>
+              </div>
+
+              {/* Description Section */}
+              <div className="border-t border-gray-100 pt-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-blue-600" />
+                    Hotel Description
+                  </h3>
+                  {shouldTruncate && (
+                    <button
+                      onClick={() =>
+                        setShowFullDescription(!showFullDescription)
+                      }
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-300"
+                    >
+                      {showFullDescription ? (
+                        <>
+                          <EyeOff className="h-4 w-4" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-4 w-4" />
+                          Show More
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                <div className="prose prose-lg max-w-none">
+                  <div
+                    className="text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: showFullDescription
+                        ? description
+                        : truncatedDescription,
+                    }}
+                  />
+                </div>
+
+                {shouldTruncate && !showFullDescription && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <button
+                      onClick={() => setShowFullDescription(true)}
+                      className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
+                    >
+                      Read more
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </div>
                 )}
               </div>
-
-              <div className="prose prose-lg max-w-none">
-                <div
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: showFullDescription
-                      ? description
-                      : truncatedDescription,
-                  }}
-                />
-              </div>
-
-              {shouldTruncate && !showFullDescription && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <button
-                    onClick={() => setShowFullDescription(true)}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
-                  >
-                    Read more
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </motion.div>

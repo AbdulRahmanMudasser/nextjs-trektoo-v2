@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Loader2, RefreshCw, ArrowLeft, Calendar, Users } from 'lucide-react';
+import { PageLoader } from '@/components/ui/PageLoader';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { format, addDays } from 'date-fns';
 import DateInput from '@/components/ui/Custom/DateInput';
 
@@ -226,23 +228,7 @@ const TourDetail = ({ params }) => {
   };
 
   if (isHotelLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl border border-blue-50"
-        >
-          <Loader2 className="h-10 w-10 text-blue-500 animate-spin mx-auto" />
-          <h3 className="text-2xl font-extrabold text-gray-800 mt-4">
-            Loading Hotel Details
-          </h3>
-          <p className="text-gray-600 text-sm mt-2">
-            Fetching the best accommodation details...
-          </p>
-        </motion.div>
-      </div>
-    );
+    return <PageLoader message="Loading hotel details..." />;
   }
 
   if (hotelError || !hotel) {
@@ -326,21 +312,23 @@ const TourDetail = ({ params }) => {
             <ImageGallery images={hotel.gallery || []} />
           </motion.section>
 
-          {/* Hotel Details - Full Width */}
+          {/* Hotel Details - Profile Style Layout */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="w-full py-8 sm:py-12"
           >
-            <HotelDetails
-              id={hotel.id}
-              description={hotel.content}
-              address={hotel.address}
-            />
+            <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
+              <HotelDetails
+                id={hotel.id}
+                description={hotel.content}
+                address={hotel.address}
+              />
+            </div>
           </motion.section>
 
-          {/* Dynamic Date Selection Section */}
+          {/* Dynamic Date Selection Section - Unified Design */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -348,9 +336,10 @@ const TourDetail = ({ params }) => {
             className="w-full py-8 sm:py-12"
           >
             <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Header Section */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8 mb-8">
-                <div className="text-center">
+              {/* Unified Date Selection Card */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+                {/* Header Section */}
+                <div className="text-center mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
                     Select Your Dates
                   </h2>
@@ -359,11 +348,9 @@ const TourDetail = ({ params }) => {
                     rooms and pricing
                   </p>
                 </div>
-              </div>
 
-              {/* Date and Guest Selection */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Date and Guest Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   {/* Check-in Date */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -446,11 +433,9 @@ const TourDetail = ({ params }) => {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Stay Summary */}
-              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
-                <div className="p-4 bg-blue-50 rounded-xl text-center">
+                {/* Stay Summary */}
+                <div className="p-4 bg-blue-50 rounded-xl text-center mb-8">
                   <div className="flex items-center justify-center gap-4 text-sm text-blue-800">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
@@ -482,11 +467,25 @@ const TourDetail = ({ params }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Search Available Rooms Button */}
+                <div className="text-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleRefreshRooms}
+                    disabled={isRoomsLoading}
+                    className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Calendar className="h-5 w-5" />
+                    {isRoomsLoading ? 'Searching...' : 'Search Available Rooms'}
+                  </motion.button>
+                </div>
               </div>
             </div>
           </motion.section>
 
-          {/* Room Availability */}
+          {/* Room Availability - Profile Style */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -494,62 +493,52 @@ const TourDetail = ({ params }) => {
             className="w-full py-8 sm:py-12"
           >
             <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Search Available Rooms Button */}
-              <div className="mb-8 text-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleRefreshRooms}
-                  disabled={isRoomsLoading}
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Calendar className="h-5 w-5" />
-                  {isRoomsLoading ? 'Searching...' : 'Search Available Rooms'}
-                </motion.button>
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+                <RoomAvailability
+                  rooms={availableRooms}
+                  loading={isRoomsLoading}
+                  error={roomsError?.message}
+                  hotelId={id}
+                  hotelData={{
+                    id: hotel.id,
+                    title: hotel.title,
+                    price: hotel.sale_price || hotel.price,
+                    bookingFee: hotel.booking_fee || '0',
+                    policy: hotel.policy || [],
+                  }}
+                  checkin={checkin}
+                  checkout={checkout}
+                  adults={adults}
+                  children={children}
+                  isSearching={isRoomsLoading}
+                  onRefresh={handleRefreshRooms}
+                />
               </div>
-
-              <RoomAvailability
-                rooms={availableRooms}
-                loading={isRoomsLoading}
-                error={roomsError?.message}
-                hotelId={id}
-                hotelData={{
-                  id: hotel.id,
-                  title: hotel.title,
-                  price: hotel.sale_price || hotel.price,
-                  bookingFee: hotel.booking_fee || '0',
-                  policy: hotel.policy || [],
-                }}
-                checkin={checkin}
-                checkout={checkout}
-                adults={adults}
-                children={children}
-                isSearching={isRoomsLoading}
-                onRefresh={handleRefreshRooms}
-              />
             </div>
           </motion.section>
 
-          {/* Tour Information */}
-          <motion.section
+          {/* Tour Information - Profile Style */}
+          {/* <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             className="w-full py-8 sm:py-12"
           >
             <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
-              <TourInformation
-                facilities={hotel.terms?.['6']?.child || []}
-                services={hotel.terms?.['7']?.child || []}
-                extraPrices={hotel.extra_price || []}
-                policies={hotel.policy || []}
-                checkInTime={hotel.check_in_time || 'Not specified'}
-                checkOutTime={hotel.check_out_time || 'Not specified'}
-              />
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+                <TourInformation
+                  facilities={hotel.terms?.['6']?.child || []}
+                  services={hotel.terms?.['7']?.child || []}
+                  extraPrices={hotel.extra_price || []}
+                  policies={hotel.policy || []}
+                  checkInTime={hotel.check_in_time || 'Not specified'}
+                  checkOutTime={hotel.check_out_time || 'Not specified'}
+                />
+              </div>
             </div>
-          </motion.section>
+          </motion.section> */}
 
-          {/* Map */}
+          {/* Map - Profile Style */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -557,17 +546,19 @@ const TourDetail = ({ params }) => {
             className="w-full py-8 sm:py-12"
           >
             <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
-              <Map
-                lat={hotel.map_lat}
-                lng={hotel.map_lng}
-                zoom={hotel.map_zoom}
-                address={hotel.address}
-                hotelName={hotel.title}
-              />
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+                <Map
+                  lat={hotel.map_lat}
+                  lng={hotel.map_lng}
+                  zoom={hotel.map_zoom}
+                  address={hotel.address}
+                  hotelName={hotel.title}
+                />
+              </div>
             </div>
           </motion.section>
 
-          {/* Review Scores */}
+          {/* Review Scores - Profile Style */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -575,17 +566,19 @@ const TourDetail = ({ params }) => {
             className="w-full py-8 sm:py-12"
           >
             <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
-              <ReviewScores
-                scoreTotal={hotel.review_score?.score_total || 0}
-                scoreText={hotel.review_score?.score_text || 'No rating'}
-                totalReviews={hotel.review_score?.total_review || 0}
-                reviewStats={hotel.review_score?.review_stats || []}
-                rateScores={hotel.review_score?.rate_score || {}}
-              />
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+                <ReviewScores
+                  scoreTotal={hotel.review_score?.score_total || 0}
+                  scoreText={hotel.review_score?.score_text || 'No rating'}
+                  totalReviews={hotel.review_score?.total_review || 0}
+                  reviewStats={hotel.review_score?.review_stats || []}
+                  rateScores={hotel.review_score?.rate_score || {}}
+                />
+              </div>
             </div>
           </motion.section>
 
-          {/* Review List */}
+          {/* Review List - Profile Style */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -593,35 +586,37 @@ const TourDetail = ({ params }) => {
             className="w-full py-8 sm:py-12"
           >
             <div className="max-w-[85vw] mx-auto px-4 sm:px-6 lg:px-8">
-              {isReviewsLoading ? (
-                <div className="w-full py-12 sm:py-16 text-center px-4">
-                  <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
-                  <p className="text-gray-600 text-sm mt-2">
-                    Loading reviews...
-                  </p>
-                </div>
-              ) : reviewsError ? (
-                <div className="w-full py-12 sm:py-16 text-center px-4">
-                  <p className="text-gray-600 text-sm">
-                    Failed to load reviews. Please try again later.
-                  </p>
-                </div>
-              ) : (
-                <ReviewList
-                  reviews={reviewsData?.data || []}
-                  pagination={{
-                    current_page: reviewsData?.current_page || 1,
-                    total_pages: reviewsData?.last_page || 1,
-                    total: reviewsData?.total || 0,
-                  }}
-                  onPageChange={handlePageChange}
-                  itemsPerPage={itemsPerPage}
-                  setItemsPerPage={(value) => {
-                    setItemsPerPage(value);
-                    setCurrentPage(1);
-                  }}
-                />
-              )}
+              <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 p-6 sm:p-8">
+                {isReviewsLoading ? (
+                  <div className="w-full py-12 sm:py-16 text-center px-4">
+                    <Loader2 className="h-8 w-8 text-blue-500 animate-spin mx-auto" />
+                    <p className="text-gray-600 text-sm mt-2">
+                      Loading reviews...
+                    </p>
+                  </div>
+                ) : reviewsError ? (
+                  <div className="w-full py-12 sm:py-16 text-center px-4">
+                    <p className="text-gray-600 text-sm">
+                      Failed to load reviews. Please try again later.
+                    </p>
+                  </div>
+                ) : (
+                  <ReviewList
+                    reviews={reviewsData?.data || []}
+                    pagination={{
+                      current_page: reviewsData?.current_page || 1,
+                      total_pages: reviewsData?.last_page || 1,
+                      total: reviewsData?.total || 0,
+                    }}
+                    onPageChange={handlePageChange}
+                    itemsPerPage={itemsPerPage}
+                    setItemsPerPage={(value) => {
+                      setItemsPerPage(value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                )}
+              </div>
             </div>
           </motion.section>
         </div>

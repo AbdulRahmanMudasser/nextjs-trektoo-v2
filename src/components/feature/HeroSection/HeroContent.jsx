@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 import toast, { Toaster } from 'react-hot-toast';
+import { SearchButton } from '@/components/ui/LoadingButton';
 import {
   Search,
   X,
@@ -22,7 +23,6 @@ import {
 } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
 import { useLocations } from '@/hooks/useHotels';
-
 
 // Utility function to add days to a date
 const addDays = (date, days) => {
@@ -112,8 +112,6 @@ function HeroContent() {
     rootMargin: '-50px',
   });
 
-
-
   // Filter locations case-insensitively for additional client-side matching
   const filteredLocations = locations.filter((location) =>
     location.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -124,7 +122,7 @@ function HeroContent() {
     const handleClickOutside = (event) => {
       const isOutside = (ref) =>
         ref.current && !ref.current.contains(event.target);
-      
+
       if (isOutside(dateFromPickerRef)) setSelectedDateFrom((prev) => prev);
       if (isOutside(dateToPickerRef)) setSelectedDateTo((prev) => prev);
       if (isOutside(guestsDropdownRef)) setIsGuestsDropdownOpen(false);
@@ -134,7 +132,7 @@ function HeroContent() {
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
@@ -142,47 +140,50 @@ function HeroContent() {
   }, []);
 
   // Enhanced service selection with better feedback
-  const handleServiceSelect = useCallback((serviceId) => {
-    const service = serviceOptions.find((s) => s.id === serviceId);
-    
-    if (!service.available) {
-      toast.error('Coming Soon!', {
-        duration: 3000,
-        position: 'top-center',
-      });
-      return;
-    }
-    
-    // If it's hotels, use the existing hotel search functionality
-    if (serviceId === 'hotels') {
+  const handleServiceSelect = useCallback(
+    (serviceId) => {
+      const service = serviceOptions.find((s) => s.id === serviceId);
+
+      if (!service.available) {
+        toast.error('Coming Soon!', {
+          duration: 3000,
+          position: 'top-center',
+        });
+        return;
+      }
+
+      // If it's hotels, use the existing hotel search functionality
+      if (serviceId === 'hotels') {
+        setSelectedService(serviceId);
+        toast.success(`Selected ${service.label}`, {
+          duration: 2000,
+          position: 'top-center',
+        });
+        return;
+      }
+
+      // For other services, navigate to their dedicated pages
+      if (service.route) {
+        toast.loading(`Redirecting to ${service.label}...`, {
+          duration: 1000,
+          position: 'top-center',
+        });
+        setTimeout(() => {
+          router.push(service.route);
+        }, 1000);
+        return;
+      }
+
       setSelectedService(serviceId);
-      toast.success(`Selected ${service.label}`, {
-        duration: 2000,
-        position: 'top-center',
-      });
-      return;
-    }
-    
-    // For other services, navigate to their dedicated pages
-    if (service.route) {
-      toast.loading(`Redirecting to ${service.label}...`, {
-        duration: 1000,
-        position: 'top-center',
-      });
-      setTimeout(() => {
-      router.push(service.route);
-      }, 1000);
-      return;
-    }
-    
-    setSelectedService(serviceId);
-  }, [router]);
+    },
+    [router]
+  );
 
   // Enhanced guest management with validation
   const handleGuestChange = useCallback((category, increment) => {
     setGuests((prev) => {
       const newValue = Math.max(0, prev[category] + (increment ? 1 : -1));
-      
+
       // Ensure at least one adult
       if (category === 'adult' && newValue === 0) {
         toast.error('At least one adult is required', {
@@ -191,11 +192,11 @@ function HeroContent() {
         });
         return prev;
       }
-      
+
       return {
-      ...prev,
+        ...prev,
         [category]: newValue,
-  };
+      };
     });
   }, []);
 
@@ -212,7 +213,7 @@ function HeroContent() {
   const handleSearch = useCallback(async () => {
     // Clear previous errors
     setSearchError(null);
-    
+
     // Validation with better user feedback
     if (!selectedCity) {
       setSearchError('Please select a destination city');
@@ -222,7 +223,7 @@ function HeroContent() {
       });
       return;
     }
-    
+
     if (!selectedDateFrom) {
       setSearchError('Please select a check-in date');
       toast.error('Please select a check-in date', {
@@ -231,7 +232,7 @@ function HeroContent() {
       });
       return;
     }
-    
+
     if (!selectedDateTo) {
       setSearchError('Please select a check-out date');
       toast.error('Please select a check-out date', {
@@ -240,7 +241,7 @@ function HeroContent() {
       });
       return;
     }
-    
+
     if (totalGuests === 0) {
       setSearchError('Please select at least one guest');
       toast.error('Please select at least one guest', {
@@ -261,15 +262,15 @@ function HeroContent() {
     }
 
     setIsSearching(true);
-    
+
     try {
-    const queryParams = new URLSearchParams({
-      location_id: selectedCity.id,
-      checkin: formatDateToApi(selectedDateFrom),
-      checkout: formatDateToApi(selectedDateTo),
-      adults: String(guests.adult),
-      children: String(guests.children),
-    }).toString();
+      const queryParams = new URLSearchParams({
+        location_id: selectedCity.id,
+        checkin: formatDateToApi(selectedDateFrom),
+        checkout: formatDateToApi(selectedDateTo),
+        adults: String(guests.adult),
+        children: String(guests.children),
+      }).toString();
 
       toast.success('Searching for hotels...', {
         duration: 2000,
@@ -277,9 +278,9 @@ function HeroContent() {
       });
 
       // Simulate search delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-    router.push(`/hotels-list?${queryParams}`);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      router.push(`/hotels-list?${queryParams}`);
     } catch (error) {
       setSearchError('An error occurred while searching. Please try again.');
       toast.error('Search failed. Please try again.', {
@@ -289,7 +290,14 @@ function HeroContent() {
     } finally {
       setIsSearching(false);
     }
-  }, [selectedCity, selectedDateFrom, selectedDateTo, guests, formatDateToApi, router]);
+  }, [
+    selectedCity,
+    selectedDateFrom,
+    selectedDateTo,
+    guests,
+    formatDateToApi,
+    router,
+  ]);
 
   // Enhanced city selection with better UX
   const handleCitySelect = useCallback((location) => {
@@ -297,7 +305,7 @@ function HeroContent() {
     setSearchQuery(location.title);
     setIsSearchDropdownOpen(false);
     setSearchError(null);
-    
+
     toast.success(`Selected ${location.title}`, {
       duration: 2000,
       position: 'top-center',
@@ -310,9 +318,9 @@ function HeroContent() {
     setSearchQuery(value);
     setSelectedCity(null);
     setSearchError(null);
-    
+
     if (value.length >= 3) {
-    setIsSearchDropdownOpen(true);
+      setIsSearchDropdownOpen(true);
     } else {
       setIsSearchDropdownOpen(false);
     }
@@ -324,7 +332,7 @@ function HeroContent() {
     setSelectedCity(null);
     setIsSearchDropdownOpen(false);
     setSearchError(null);
-    
+
     toast.success('Search cleared', {
       duration: 2000,
       position: 'top-center',
@@ -363,7 +371,10 @@ function HeroContent() {
   };
 
   return (
-    <div ref={contentRef} className="w-full max-w-7xl mx-auto px-4 sm:px-6 text-center">
+    <div
+      ref={contentRef}
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 text-center"
+    >
       {/* Enhanced Typography with Better Hierarchy */}
       <motion.div
         variants={containerVariants}
@@ -371,8 +382,6 @@ function HeroContent() {
         animate={inView ? 'visible' : 'hidden'}
         className="mb-8 sm:mb-12"
       >
-
-
         {/* Enhanced Main Title */}
         <motion.h1
           variants={itemVariants}
@@ -383,9 +392,9 @@ function HeroContent() {
           }}
         >
           Where Would You Like
-                     <span className="block bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 bg-clip-text text-transparent">
-             To Go?
-           </span>
+          <span className="block bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 bg-clip-text text-transparent">
+            To Go?
+          </span>
         </motion.h1>
 
         {/* Enhanced Subtitle */}
@@ -393,10 +402,9 @@ function HeroContent() {
           variants={itemVariants}
           className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed font-light"
         >
-          Discover breathtaking destinations and create unforgettable memories with our curated travel experiences
+          Discover breathtaking destinations and create unforgettable memories
+          with our curated travel experiences
         </motion.p>
-
-
       </motion.div>
 
       {/* Enhanced Service Selection Tabs */}
@@ -424,8 +432,8 @@ function HeroContent() {
                       isSelected && isAvailable
                         ? `bg-gradient-to-r ${service.color} text-white shadow-lg transform scale-105`
                         : !isAvailable
-                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed opacity-60'
-                        : 'text-gray-700 hover:bg-gray-100/80 hover:scale-105'
+                          ? 'text-gray-400 bg-gray-100 cursor-not-allowed opacity-60'
+                          : 'text-gray-700 hover:bg-gray-100/80 hover:scale-105'
                     }
                     active:scale-95
                   `}
@@ -440,7 +448,7 @@ function HeroContent() {
                   <span className="sm:hidden">
                     {service.label.split(' ')[0]}
                   </span>
-                  
+
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-[9999]">
                     {service.description}
@@ -461,7 +469,6 @@ function HeroContent() {
         className="w-full"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/30">
-          
           {/* Enhanced City Search */}
           <div className="lg:col-span-1 relative" ref={searchInputRef}>
             <div className="relative">
@@ -471,12 +478,16 @@ function HeroContent() {
                 onChange={handleInputChange}
                 placeholder="Search for a city"
                 className={`w-full h-12 sm:h-14 px-4 text-base rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  searchError && !selectedCity ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
+                  searchError && !selectedCity
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-gray-200 bg-white'
                 }`}
-                onFocus={() => searchQuery.length >= 3 && setIsSearchDropdownOpen(true)}
+                onFocus={() =>
+                  searchQuery.length >= 3 && setIsSearchDropdownOpen(true)
+                }
                 aria-label="Search for a city"
               />
-              
+
               {searchQuery && (
                 <button
                   type="button"
@@ -487,11 +498,11 @@ function HeroContent() {
                   <X className="h-5 w-5" />
                 </button>
               )}
-              
-                             {selectedCity && (
-                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                   <CheckCircle className="h-5 w-5 text-blue-500" />
-                 </div>
+
+              {selectedCity && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <CheckCircle className="h-5 w-5 text-blue-500" />
+                </div>
               )}
             </div>
 
@@ -504,41 +515,41 @@ function HeroContent() {
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 z-[9999] shadow-2xl max-h-60 overflow-y-auto"
-                ref={searchDropdownRef}
-                aria-label="City search results"
-              >
-                {isLoading ? (
+                  ref={searchDropdownRef}
+                  aria-label="City search results"
+                >
+                  {isLoading ? (
                     <div className="p-4 text-gray-500 text-base flex items-center gap-3">
                       <Loader2 className="animate-spin h-5 w-5 text-blue-500" />
                       <span>Searching cities...</span>
-                  </div>
-                ) : errorMessage ? (
+                    </div>
+                  ) : errorMessage ? (
                     <div className="p-4 text-red-500 text-base flex items-center gap-3">
                       <AlertCircle className="h-5 w-5" />
                       <span>{errorMessage}</span>
-                  </div>
-                ) : filteredLocations.length > 0 ? (
-                  filteredLocations.map((location) => (
+                    </div>
+                  ) : filteredLocations.length > 0 ? (
+                    filteredLocations.map((location) => (
                       <motion.div
-                      key={location.id}
-                      onClick={() => handleCitySelect(location)}
+                        key={location.id}
+                        onClick={() => handleCitySelect(location)}
                         className="p-4 flex items-center hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
-                      role="option"
-                      aria-selected={selectedCity?.id === location.id}
+                        role="option"
+                        aria-selected={selectedCity?.id === location.id}
                         whileHover={{ backgroundColor: '#f9fafb' }}
-                    >
+                      >
                         <span className="text-gray-900 text-base font-medium">
-                        {location.title}
-                      </span>
+                          {location.title}
+                        </span>
                       </motion.div>
-                  ))
-                ) : (
+                    ))
+                  ) : (
                     <div className="p-4 text-gray-500 text-base">
-                    No cities found
-                  </div>
-                )}
+                      No cities found
+                    </div>
+                  )}
                 </motion.div>
-            )}
+              )}
             </AnimatePresence>
           </div>
 
@@ -550,7 +561,9 @@ function HeroContent() {
               placeholder="Check-in"
               minDate={today}
               className={`h-12 sm:h-14 text-base ${
-                searchError && !selectedDateFrom ? 'border-red-500 bg-red-50' : ''
+                searchError && !selectedDateFrom
+                  ? 'border-red-500 bg-red-50'
+                  : ''
               }`}
               aria-label="Select check-in date"
             />
@@ -576,12 +589,16 @@ function HeroContent() {
               type="button"
               onClick={() => setIsGuestsDropdownOpen(!isGuestsDropdownOpen)}
               className={`w-full h-12 sm:h-14 px-4 text-base rounded-xl border transition-all duration-300 text-left flex items-center gap-3 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                searchError && totalGuests === 0 ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-white'
+                searchError && totalGuests === 0
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-200 bg-white'
               }`}
               aria-label="Select number of guests"
             >
               <Users className="h-5 w-5 text-gray-400 flex-shrink-0" />
-              <span className={`truncate ${totalGuests > 0 ? 'text-gray-900' : 'text-gray-500'}`}>
+              <span
+                className={`truncate ${totalGuests > 0 ? 'text-gray-900' : 'text-gray-500'}`}
+              >
                 {totalGuests > 0
                   ? `${totalGuests} Guest${totalGuests > 1 ? 's' : ''}`
                   : 'Guests'}
@@ -605,7 +622,7 @@ function HeroContent() {
 
             {/* Enhanced Guests Dropdown */}
             <AnimatePresence>
-            {isGuestsDropdownOpen && (
+              {isGuestsDropdownOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: -10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -614,38 +631,44 @@ function HeroContent() {
                   className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 z-[9999] shadow-2xl"
                 >
                   <div className="p-4 space-y-4">
-                  {['adult', 'children'].map((category) => (
-                      <div key={category} className="flex items-center justify-between">
+                    {['adult', 'children'].map((category) => (
+                      <div
+                        key={category}
+                        className="flex items-center justify-between"
+                      >
                         <span className="text-gray-700 capitalize font-medium text-base">
-                        {category === 'adult' ? 'Adults' : 'Children'}
-                      </span>
-                        <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => handleGuestChange(category, false)}
-                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
-                            disabled={guests[category] === 0 || (category === 'adult' && guests[category] === 1)}
-                          aria-label={`Decrease number of ${category}`}
-                        >
-                          -
-                        </button>
-                          <span className="w-6 text-center font-medium text-gray-900 text-base">
-                          {guests[category]}
+                          {category === 'adult' ? 'Adults' : 'Children'}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => handleGuestChange(category, true)}
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleGuestChange(category, false)}
+                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            disabled={
+                              guests[category] === 0 ||
+                              (category === 'adult' && guests[category] === 1)
+                            }
+                            aria-label={`Decrease number of ${category}`}
+                          >
+                            -
+                          </button>
+                          <span className="w-6 text-center font-medium text-gray-900 text-base">
+                            {guests[category]}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleGuestChange(category, true)}
                             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors text-base"
-                          aria-label={`Increase number of ${category}`}
-                        >
-                          +
-                        </button>
+                            aria-label={`Increase number of ${category}`}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
                 </motion.div>
-            )}
+              )}
             </AnimatePresence>
           </div>
 
@@ -655,28 +678,24 @@ function HeroContent() {
               type="button"
               onClick={handleSearch}
               disabled={isSearching}
-                             className={`w-full h-12 sm:h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl font-semibold flex items-center justify-center gap-3 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg disabled:cursor-not-allowed ${
-                 isSearching ? 'cursor-wait' : 'hover:shadow-xl hover:scale-105'
-               }`}
-              whileHover={!isSearching ? { y: -2 } : {}}
+              className="w-full min-w-[200px] h-12 sm:h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl font-semibold gap-3 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl hover:scale-105 flex flex-row items-center justify-center disabled:cursor-not-allowed"
+              whileHover={!isSearching ? { scale: 1.02 } : {}}
               whileTap={!isSearching ? { scale: 0.98 } : {}}
-              aria-label="Search for hotels"
             >
               {isSearching ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Searching...</span>
+                  <Loader2 className="h-5 w-5 animate-spin flex-shrink-0" />
+                  <span className="whitespace-nowrap">Searching...</span>
                 </>
               ) : (
                 <>
-                  <Search className="h-5 w-5" />
-                  <span>Search</span>
-                  <ArrowRight className="h-5 w-5" />
+                  <Search className="h-5 w-5 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Search</span>
                 </>
               )}
             </motion.button>
+          </div>
         </div>
-      </div>
 
         {/* Enhanced Error Display */}
         {searchError && (
@@ -690,8 +709,6 @@ function HeroContent() {
           </motion.div>
         )}
       </motion.div>
-
-
 
       {/* Toast Notifications */}
       <Toaster
