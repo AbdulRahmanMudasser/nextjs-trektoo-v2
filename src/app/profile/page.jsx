@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { User, Calendar, CreditCard } from 'lucide-react';
+import { DashboardPageLoader } from '@/components/ui/PageLoader';
 import {
   getUserProfile,
   updateUserProfile,
@@ -227,23 +228,7 @@ const ProfilePage = () => {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 bg-[url('/pattern.png')] bg-cover bg-fixed relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-blue-500/10"></div>
-        <div className="relative z-10 flex items-center justify-center min-h-screen pt-24 pb-16 px-4">
-          <motion.div className="text-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full mx-auto mb-6"
-            />
-            <p className="text-blue-600 text-xl font-medium">
-              Loading your dashboard...
-            </p>
-          </motion.div>
-        </div>
-      </div>
-    );
+    return <DashboardPageLoader message="Loading your dashboard..." />;
   }
 
   return (
