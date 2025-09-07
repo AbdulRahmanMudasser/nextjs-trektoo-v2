@@ -81,13 +81,10 @@ export async function GET(request, { params }) {
             beds_html: sanitize(room.beds_html || ''),
             adults_html: sanitize(room.adults_html || ''),
             children_html: sanitize(room.children_html || ''),
-            price_html: sanitize(room.price_html || ''),
             price_text: sanitize(room.price_text || ''),
             image: sanitize(room.image || ''),
-            gallery: (room.gallery || []).map(img => ({
-                large: sanitize(img.large || ''),
-                thumb: sanitize(img.thumb || ''),
-            })),
+            images: (room.images || []).map(img => sanitize(img)),
+            gallery: (room.gallery || []).map(img => sanitize(img)),
             term_features: (room.term_features || []).map(feature => ({
                 icon: sanitize(feature.icon || ''),
                 title: sanitize(feature.title || ''),

@@ -299,6 +299,10 @@ const TourDetail = ({ params }) => {
                 hotel.discount_percent ? `${hotel.discount_percent}%` : ''
               }
               image={hotel.banner_image || hotel.image}
+              // Add new props
+              isFeatured={hotel.is_featured === 1}
+              objectModel={hotel.object_model || 'hotel'}
+              reviewScore={hotel.review_score}
             />
           </motion.section>
 
