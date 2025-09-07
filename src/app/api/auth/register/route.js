@@ -21,6 +21,32 @@ export async function POST(request) {
                 timeout: 10000, // 10-second timeout
             }
         );
+
+        // Check if the response contains an error (new API format)
+        if (response.data.status === 0 || response.data.status === false) {
+            // Handle API error response format
+            const errorCode = response.data.code;
+            const errorMessage = response.data.message;
+
+            // Map error codes to user-friendly messages
+            const errorCodeMap = {
+                'email_already_exists': 'An account with this email already exists. Please use a different email or try logging in.',
+                'weak_password': 'Password is too weak. Please choose a stronger password.',
+                'invalid_email': 'Please enter a valid email address.',
+                'terms_not_accepted': 'You must accept the terms and conditions to continue.',
+                'invalid_name': 'Please enter a valid name.',
+                'server_error': 'Something went wrong on our server. Please try again later.'
+            };
+
+            const userFriendlyMessage = errorCodeMap[errorCode] || errorMessage || 'Registration failed. Please try again.';
+
+            return NextResponse.json(
+                { error: userFriendlyMessage },
+                { status: 400 } // Return 400 for client errors
+            );
+        }
+
+        // Return successful response
         return NextResponse.json(response.data);
     } catch (error) {
         console.error('Register proxy error:', {
