@@ -11,6 +11,35 @@ const handleAuthError = (error, operation) => {
         const { status, data } = error.response;
         console.log(`HTTP ${status} error:`, data);
 
+        // Handle API-specific error codes first (new format)
+        if (data.code) {
+            const errorCodeMap = {
+                'invalid_credentials': 'Invalid email or password. Please check your credentials and try again.',
+                'user_not_found': 'No account found with this email address. Please check your email or sign up.',
+                'account_locked': 'Account temporarily locked due to multiple failed attempts. Please try again later.',
+                'email_already_exists': 'An account with this email already exists. Please use a different email or try logging in.',
+                'weak_password': 'Password is too weak. Please choose a stronger password.',
+                'invalid_email': 'Please enter a valid email address.',
+                'terms_not_accepted': 'You must accept the terms and conditions to continue.',
+                'session_expired': 'Your session has expired. Please log in again.',
+                'rate_limit_exceeded': 'Too many attempts. Please wait a moment before trying again.',
+                'server_error': 'Something went wrong on our server. Please try again later.'
+            };
+
+            // Return specific error message based on code
+            if (errorCodeMap[data.code]) {
+                return errorCodeMap[data.code];
+            }
+
+            // Fallback to message if code is not recognized
+            return data.message || 'An error occurred. Please try again.';
+        }
+
+        // Handle API error status (status: 0) - legacy format
+        if (data.status === 0 || data.status === false) {
+            return data.message || 'An error occurred. Please try again.';
+        }
+
         switch (status) {
             case 401:
                 return 'Invalid email or password. Please check your credentials and try again.';
@@ -93,8 +122,15 @@ export const login = async (credentials) => {
             throw new Error(errorMessages.join(', '));
         }
 
-        // Check for API error status
+        // Check for API error status (new format with code field)
         if (response.data.status === 0 || response.data.status === false) {
+            // If there's a specific error code, use it for better error handling
+            if (response.data.code) {
+                const error = new Error(response.data.message || 'Login failed');
+                error.code = response.data.code;
+                error.status = response.data.status;
+                throw error;
+            }
             throw new Error(response.data.message || 'Login failed');
         }
 
@@ -161,8 +197,16 @@ export const register = async (userData) => {
             throw new Error('No response received from server');
         }
 
-        // Check for API error status first
+        // Check for API error status first (new format with code field)
         if (response.data.status === 0 || response.data.status === false) {
+            // If there's a specific error code, use it for better error handling
+            if (response.data.code) {
+                const error = new Error(response.data.message || 'Registration failed');
+                error.code = response.data.code;
+                error.status = response.data.status;
+                throw error;
+            }
+
             // Handle validation errors in message field
             if (response.data.message && typeof response.data.message === 'object') {
                 const errorMessages = Object.values(response.data.message).flat();

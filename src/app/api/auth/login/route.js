@@ -21,6 +21,34 @@ export async function POST(request) {
                 timeout: 10000, // 10-second timeout
             }
         );
+
+        // Check if the response contains an error (new API format)
+        if (response.data.status === 0 || response.data.status === false) {
+            // Handle API error response format
+            const errorCode = response.data.code;
+            const errorMessage = response.data.message;
+
+            // Map error codes to user-friendly messages
+            const errorCodeMap = {
+                'invalid_credentials': 'Invalid email or password. Please check your credentials and try again.',
+                'user_not_found': 'No account found with this email address. Please check your email or sign up.',
+                'account_locked': 'Account temporarily locked due to multiple failed attempts. Please try again later.',
+                'weak_password': 'Password is too weak. Please choose a stronger password.',
+                'invalid_email': 'Please enter a valid email address.',
+                'session_expired': 'Your session has expired. Please log in again.',
+                'rate_limit_exceeded': 'Too many attempts. Please wait a moment before trying again.',
+                'server_error': 'Something went wrong on our server. Please try again later.'
+            };
+
+            const userFriendlyMessage = errorCodeMap[errorCode] || errorMessage || 'Login failed. Please try again.';
+
+            return NextResponse.json(
+                { error: userFriendlyMessage },
+                { status: 400 } // Return 400 for client errors
+            );
+        }
+
+        // Return successful response
         return NextResponse.json(response.data);
     } catch (error) {
         console.error('Login proxy error:', {

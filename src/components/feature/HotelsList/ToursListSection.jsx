@@ -324,32 +324,100 @@ const TourListSection = ({
                     className="object-cover transition-transform duration-700 hover:scale-105"
                   />
                   {hotel.discount_percent && (
-                    <div className="absolute top-4 left-4 bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                      {hotel.discount_percent}% Off
+                    <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                      {hotel.discount_percent}% OFF
+                    </div>
+                  )}
+                  {hotel.is_featured === 1 && (
+                    <div className="absolute top-4 right-4 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                      FEATURED
                     </div>
                   )}
                 </div>
                 <div className="p-6 flex flex-col justify-between w-full md:w-1/2">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 truncate mb-2">
-                      {hotel.title}
-                    </h3>
-                    <div className="flex items-center text-gray-600 text-sm font-medium mb-2">
-                      <span className="mr-2">📍</span> {hotel.address}
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 truncate pr-2">
+                        {hotel.title}
+                      </h3>
+                      {hotel.is_featured === 1 && (
+                        <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full flex-shrink-0">
+                          Featured
+                        </span>
+                      )}
                     </div>
+
+                    <div className="flex items-center text-gray-600 text-sm font-medium mb-2">
+                      <span className="mr-2">📍</span>
+                      {hotel.location?.name || 'Location Not Available'}
+                    </div>
+
+                    {/* Review Score */}
+                    {hotel.review_score &&
+                      hotel.review_score.total_review > 0 && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={`text-sm ${
+                                  i < Math.floor(hotel.review_score.score_total)
+                                    ? 'text-yellow-400'
+                                    : 'text-gray-300'
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">
+                            {hotel.review_score.score_total.toFixed(1)}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            ({hotel.review_score.total_review} reviews)
+                          </span>
+                        </div>
+                      )}
+
                     <p
                       className="text-sm text-gray-600 leading-relaxed mb-4"
                       dangerouslySetInnerHTML={{
-                        __html: hotel.content.substring(0, 100) + '...',
+                        __html: hotel.content
+                          ? hotel.content.substring(0, 150) + '...'
+                          : 'No description available.',
                       }}
                     />
+
                     <div className="flex items-baseline gap-2 mb-2">
+                      {hotel.discount_percent && (
+                        <span className="text-lg text-gray-400 line-through">
+                          ${hotel.price}
+                        </span>
+                      )}
                       <span className="text-2xl font-bold text-gray-900">
                         ${hotel.sale_price || hotel.price}
                       </span>
                       <span className="text-sm text-gray-600 font-medium">
                         /night
                       </span>
+                      {hotel.discount_percent && (
+                        <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full ml-2">
+                          {hotel.discount_percent}% OFF
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Object Model Badge */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                        {hotel.object_model?.toUpperCase() || 'HOTEL'}
+                      </span>
+                      {hotel.review_score &&
+                        hotel.review_score.total_review === 0 && (
+                          <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded-full">
+                            {hotel.review_score.review_text || 'Not Rated'}
+                          </span>
+                        )}
                     </div>
                   </div>
                   <Link
