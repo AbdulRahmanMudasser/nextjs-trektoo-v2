@@ -83,6 +83,7 @@ export const fetchHotels = async (searchParams) => {
             total_pages: response.data.total_pages || 1,
             current_page: response.data.current_page || 1,
             per_page: response.data.per_page || 15,
+            status: response.data.status || 1
         };
     } catch (error) {
         logError('Hotel API', error);
