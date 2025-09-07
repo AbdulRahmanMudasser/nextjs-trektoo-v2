@@ -55,6 +55,22 @@ export async function GET(request, { params }) {
             banner_image: sanitize(hotel.banner_image || ''),
             gallery: (hotel.gallery || []).map((url) => sanitize(url)),
             policy: (hotel.policy || []).map((p) => sanitize(p)),
+            // Add new fields from the API response
+            object_model: hotel.object_model || 'hotel',
+            discount_percent: hotel.discount_percent || null,
+            location: hotel.location || { id: null, name: 'Unknown Location' },
+            is_featured: hotel.is_featured || 0,
+            map_lat: hotel.map_lat || null,
+            map_lng: hotel.map_lng || null,
+            map_zoom: hotel.map_zoom || 10,
+            video: hotel.video || null,
+            enable_extra_price: hotel.enable_extra_price || 0,
+            extra_price: hotel.extra_price || null,
+            review_score: hotel.review_score || {
+                score_total: 0,
+                total_review: 0,
+                review_text: 'Not rated'
+            }
         };
 
         // Log successful request for monitoring
