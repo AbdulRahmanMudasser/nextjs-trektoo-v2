@@ -201,7 +201,7 @@ const TourDetail = ({ params }) => {
   // Handle guest count changes
   const handleGuestChange = (type, value) => {
     if (type === 'adults') {
-      const newAdults = Math.max(1, Math.min(10, value));
+      const newAdults = Math.max(1, Math.min(7, value)); // Limit to 7 adults
       setAdults(newAdults);
       updateURL(checkin, checkout, newAdults, children);
     } else if (type === 'children') {
@@ -388,21 +388,23 @@ const TourDetail = ({ params }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Adults
                     </label>
-                    <div className="flex items-center border border-gray-200 rounded-xl h-12 sm:h-14">
+                    <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl h-12 sm:h-14 px-4">
                       <button
                         onClick={() => handleGuestChange('adults', adults - 1)}
                         disabled={adults <= 1}
-                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-gray-700 hover:bg-white/20 hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                        aria-label="Decrease adults"
                       >
                         -
                       </button>
-                      <span className="flex-1 text-center py-3 font-medium text-base">
+                      <span className="text-center font-semibold text-gray-900 text-base">
                         {adults}
                       </span>
                       <button
                         onClick={() => handleGuestChange('adults', adults + 1)}
-                        disabled={adults >= 10}
-                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                        disabled={adults >= 7}
+                        className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-gray-700 hover:bg-white/20 hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                        aria-label="Increase adults"
                       >
                         +
                       </button>
@@ -414,17 +416,18 @@ const TourDetail = ({ params }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Children
                     </label>
-                    <div className="flex items-center border border-gray-200 rounded-xl h-12 sm:h-14">
+                    <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl h-12 sm:h-14 px-4">
                       <button
                         onClick={() =>
                           handleGuestChange('children', children - 1)
                         }
                         disabled={children <= 0}
-                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-gray-700 hover:bg-white/20 hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                        aria-label="Decrease children"
                       >
                         -
                       </button>
-                      <span className="flex-1 text-center py-3 font-medium text-base">
+                      <span className="text-center font-semibold text-gray-900 text-base">
                         {children}
                       </span>
                       <button
@@ -432,7 +435,8 @@ const TourDetail = ({ params }) => {
                           handleGuestChange('children', children + 1)
                         }
                         disabled={children >= 10}
-                        className="px-4 py-3 text-blue-500 hover:text-blue-700 disabled:opacity-50 disabled:text-gray-400 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-gray-700 hover:bg-white/20 hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                        aria-label="Increase children"
                       >
                         +
                       </button>

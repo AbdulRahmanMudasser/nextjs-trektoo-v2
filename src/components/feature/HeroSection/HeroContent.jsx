@@ -193,6 +193,15 @@ function HeroContent() {
         return prev;
       }
 
+      // Limit adults to maximum 7
+      if (category === 'adult' && newValue > 7) {
+        toast.error('Maximum 7 adults allowed', {
+          duration: 3000,
+          position: 'top-center',
+        });
+        return prev;
+      }
+
       return {
         ...prev,
         [category]: newValue,

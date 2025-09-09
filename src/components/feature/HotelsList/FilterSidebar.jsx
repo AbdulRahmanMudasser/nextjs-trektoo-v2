@@ -15,18 +15,22 @@ const GuestSelector = ({ adults, setAdults, children, setChildren }) => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">Adults</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setAdults((prev) => Math.max(1, prev - 1))}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
+            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+            disabled={adults <= 1}
             aria-label="Decrease adults"
           >
             <Minus className="h-4 w-4" />
           </button>
-          <span className="text-sm font-medium text-gray-900">{adults}</span>
+          <span className="w-6 text-center font-semibold text-gray-900 text-sm">
+            {adults}
+          </span>
           <button
-            onClick={() => setAdults((prev) => Math.min(10, prev + 1))}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
+            onClick={() => setAdults((prev) => Math.min(7, prev + 1))}
+            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+            disabled={adults >= 7}
             aria-label="Increase adults"
           >
             <Plus className="h-4 w-4" />
@@ -35,18 +39,22 @@ const GuestSelector = ({ adults, setAdults, children, setChildren }) => (
       </div>
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-700">Children</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setChildren((prev) => Math.max(0, prev - 1))}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
+            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+            disabled={children <= 0}
             aria-label="Decrease children"
           >
             <Minus className="h-4 w-4" />
           </button>
-          <span className="text-sm font-medium text-gray-900">{children}</span>
+          <span className="w-6 text-center font-semibold text-gray-900 text-sm">
+            {children}
+          </span>
           <button
             onClick={() => setChildren((prev) => Math.min(10, prev + 1))}
-            className="p-1.5 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 transition-colors"
+            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+            disabled={children >= 10}
             aria-label="Increase children"
           >
             <Plus className="h-4 w-4" />
