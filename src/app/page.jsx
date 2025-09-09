@@ -25,74 +25,77 @@ import StatsSection from '@/components/feature/StatsSection/StatsSection';
 // import TravelTips from '@/components/feature/TravelTips/TravelTips';
 // import MobileAppSection from '@/components/feature/MobileAppSection/MobileAppSection';
 
+// Palestine Banner
+import PalestineBanner from '@/components/ui/PalestineBanner';
 
 export default function HomePage() {
   return (
     <main className="relative overflow-hidden">
+      {/* Palestine Banner */}
+      <PalestineBanner />
+
       {/* Hero Section - Already Enhanced */}
       <HeroSection />
-      
+
       {/* Stats Section - Social Proof */}
       {/* <StatsSection /> */}
-      
+
       {/* Browse Types - Service Categories */}
       {/* <BrowseTypes /> */}
-      
+
       {/* Featured Destinations - Trending Places */}
       {/* <FeaturedDestinations /> */}
-      
+
       {/* Go Wild Section - Adventure Activities */}
       {/* <GoWildSection /> */}
-      
+
       {/* Adventure Tours - Curated Experiences */}
       {/* <AdventureTours /> */}
-      
+
       {/* Trending Deals - Special Offers */}
       {/* <TrendingDeals /> */}
-      
+
       {/* Adventure Video Section */}
       <AdventureVideoSection />
-      
+
       {/* Why Choose Us - Trust & Benefits */}
       <WhyChooseUs />
-      
+
       {/* Testimonials - Customer Reviews */}
       <TestimonialsSection />
-      
+
       {/* Travel Gallery - Visual Inspiration */}
       {/* <TravelGallerySection /> */}
-      
+
       {/* Who We Are - Company Story */}
       {/* <WhoWeAreSection /> */}
-      
+
       {/* Transport Section - Getting Around */}
       {/* <TransportSection /> */}
-      
+
       {/* Car Rentals - Freedom to Explore */}
       {/* <CarRentalsSection /> */}
-      
+
       {/* Attractions - Must-See Places */}
       {/* <AttractionsSection /> */}
-      
+
       {/* Tour Section - Guided Experiences */}
       {/* <Tour /> */}
-      
+
       {/* Travel Tips - Expert Advice */}
       {/* <TravelTips /> */}
-      
+
       {/* FAQ Section - Common Questions */}
       <FAQ />
-      
+
       {/* Partners Section - Trusted Brands */}
       {/* <PartnersSection /> */}
-      
+
       {/* Mobile App Section - Download CTA */}
       {/* <MobileAppSection /> */}
-      
+
       {/* Newsletter Section - Stay Updated */}
       {/* <NewsletterSection /> */}
-      
-      
     </main>
   );
 }
