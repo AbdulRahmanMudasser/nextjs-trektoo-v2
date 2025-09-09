@@ -20,11 +20,7 @@ import CalendarPrice from '@/components/feature/HotelDetails/CalendarPrice';
 import ReviewScores from '@/components/feature/HotelDetails/ReviewScores';
 import ReviewList from '@/components/feature/HotelDetails/ReviewList';
 import ErrorBoundary from '@/components/security/ErrorBoundary';
-import {
-  useHotelDetails,
-  useHotelReviews,
-  useHotelAvailability,
-} from '@/hooks/useHotels';
+import { useHotelDetails, useHotelReviews } from '@/hooks/useHotels';
 
 const TourDetail = ({ params }) => {
   const { id } = React.use(params); // Unwrap params with React.use()
@@ -38,8 +34,6 @@ const TourDetail = ({ params }) => {
   // Room search state
   const [searchRooms, setSearchRooms] = useState(false);
   const [searchedRooms, setSearchedRooms] = useState(null);
-  const [shouldLoadRooms, setShouldLoadRooms] = useState(false); // Control when to load rooms
-  const [apiDates, setApiDates] = useState({ checkin: null, checkout: null }); // Store dates for API call
 
   // Date state management
   const [checkin, setCheckin] = useState(() => {
@@ -66,11 +60,30 @@ const TourDetail = ({ params }) => {
     parseInt(searchParams.get('children') || '0', 10)
   );
 
+  // State to track if we should include date parameters in API call
+  const [includeDateParams, setIncludeDateParams] = useState(false);
+  const [isRoomsRefreshing, setIsRoomsRefreshing] = useState(false);
+
+  // Initial hotel details without date parameters
   const {
     data: hotel,
     isLoading: isHotelLoading,
     error: hotelError,
   } = useHotelDetails(id);
+
+  // Room availability with date parameters (only when searching)
+  const {
+    data: roomData,
+    isLoading: isRoomDataLoading,
+    error: roomDataError,
+    refetch: refetchRoomData,
+  } = useHotelDetails(
+    id,
+    includeDateParams && checkin ? format(checkin, 'yyyy-MM-dd') : null,
+    includeDateParams && checkout ? format(checkout, 'yyyy-MM-dd') : null,
+    adults,
+    children
+  );
 
   const {
     data: reviewsData,
@@ -78,81 +91,70 @@ const TourDetail = ({ params }) => {
     error: reviewsError,
   } = useHotelReviews(id, currentPage, itemsPerPage);
 
-  // Room availability query - only fetch when user clicks search
-  const {
-    data: roomAvailabilityData,
-    isLoading: isRoomsLoading,
-    error: roomsError,
-    refetch: refetchRooms,
-  } = useHotelAvailability(
-    shouldLoadRooms ? hotel?.id || id : null, // Only fetch when shouldLoadRooms is true
-    shouldLoadRooms && apiDates.checkin
-      ? format(apiDates.checkin, 'yyyy-MM-dd')
-      : null,
-    shouldLoadRooms && apiDates.checkout
-      ? format(apiDates.checkout, 'yyyy-MM-dd')
-      : null,
-    adults,
-    children
+  // Use room data from availability search if available, otherwise use hotel rooms
+  const availableRooms =
+    includeDateParams && roomData?.rooms ? roomData.rooms : hotel?.rooms || [];
+  const isRoomsLoading = isRoomDataLoading || isRoomsRefreshing;
+  const roomsError = roomDataError;
+
+  // Debug logging
+  console.log('🔍 Hotel Details Debug:');
+  console.log('🔍 Hotel ID:', hotel?.id || id);
+  console.log('🔍 Checkin:', checkin ? format(checkin, 'yyyy-MM-dd') : 'null');
+  console.log(
+    '🔍 Checkout:',
+    checkout ? format(checkout, 'yyyy-MM-dd') : 'null'
   );
+  console.log('🔍 Adults:', adults);
+  console.log('🔍 Children:', children);
+  console.log('🔍 Include Date Params:', includeDateParams);
+  console.log('🔍 Hotel Data:', hotel);
+  console.log('🔍 Room Data:', roomData);
+  console.log('🔍 Available Rooms:', availableRooms);
+  console.log('🔍 Rooms Length:', availableRooms?.length);
+  console.log('🔍 Is Rooms Loading:', isRoomsLoading);
+  console.log('🔍 Is Rooms Refreshing:', isRoomsRefreshing);
+  console.log('🔍 Rooms Error:', roomsError);
 
-  // Use only room availability data (not hotel rooms)
-  const availableRooms = roomAvailabilityData || [];
-
-  // Update searched rooms when room availability data is fetched (for backward compatibility)
+  // Update searched rooms when hotel or room data is fetched (for backward compatibility)
   useEffect(() => {
-    if (roomAvailabilityData) {
-      setSearchedRooms(roomAvailabilityData);
+    if (includeDateParams && roomData?.rooms) {
+      setSearchedRooms(roomData.rooms);
+    } else if (hotel?.rooms) {
+      setSearchedRooms(hotel.rooms);
     }
-  }, [roomAvailabilityData]);
+  }, [hotel?.rooms, roomData?.rooms, includeDateParams]);
 
-  // Load rooms automatically when hotel is loaded (only once)
-  useEffect(() => {
-    if (hotel?.id && !shouldLoadRooms) {
-      setApiDates({ checkin, checkout }); // Set initial dates
-      setShouldLoadRooms(true);
-    }
-  }, [hotel?.id, shouldLoadRooms, checkin, checkout]);
-
-  // Function to refresh room availability
-  const handleRefreshRooms = async () => {
-    setApiDates({ checkin, checkout }); // Update API dates with current dates
-    setShouldLoadRooms(true); // Enable API call
+  // Function to search available rooms with date parameters
+  const handleSearchAvailableRooms = async () => {
     try {
-      await refetchRooms();
+      setIsRoomsRefreshing(true);
+      setIncludeDateParams(true);
+      await refetchRoomData();
     } catch (error) {
-      console.error('Error refreshing rooms:', error);
+      console.error('Error searching available rooms:', error);
+    } finally {
+      setIsRoomsRefreshing(false);
     }
   };
 
-  // Debug: Log the hotel and rooms data
-  console.log('Hotel detail page - URL ID:', id, 'Type:', typeof id);
-  console.log(
-    'Hotel detail page - Hotel ID:',
-    hotel?.id,
-    'Type:',
-    typeof hotel?.id
-  );
-  console.log(
-    'Hotel detail page - Using ID:',
-    hotel?.id || id,
-    'Type:',
-    typeof (hotel?.id || id)
-  );
-  console.log('Hotel detail page - Hotel loaded:', !!hotel);
-  console.log('Hotel detail page - checkin:', format(checkin, 'yyyy-MM-dd'));
-  console.log('Hotel detail page - checkout:', format(checkout, 'yyyy-MM-dd'));
-  console.log('Hotel detail page - adults:', adults, 'children:', children);
-  console.log('Hotel detail page - shouldLoadRooms:', shouldLoadRooms);
-  console.log('Hotel detail page - apiDates:', apiDates);
-  console.log('Hotel detail page - isRoomsLoading:', isRoomsLoading);
-  console.log('Hotel detail page - roomsError:', roomsError);
-  console.log(
-    'Hotel detail page - roomAvailabilityData:',
-    roomAvailabilityData
-  );
-  console.log('Hotel detail page - availableRooms:', availableRooms);
-  console.log('Hotel detail page - rooms length:', availableRooms?.length);
+  // Function to refresh room availability only
+  const handleRefreshRooms = async () => {
+    try {
+      setIsRoomsRefreshing(true);
+      if (includeDateParams) {
+        // If we're in search mode, refresh with current date parameters
+        await refetchRoomData();
+      } else {
+        // If we're in initial mode, refresh the basic hotel data
+        await refetchRoomData();
+      }
+    } catch (error) {
+      console.error('Error refreshing rooms:', error);
+    } finally {
+      setIsRoomsRefreshing(false);
+    }
+  };
 
   // Update URL when dates change
   const updateURL = (newCheckin, newCheckout, newAdults, newChildren) => {
@@ -477,7 +479,7 @@ const TourDetail = ({ params }) => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handleRefreshRooms}
+                    onClick={handleSearchAvailableRooms}
                     disabled={isRoomsLoading}
                     className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   >
