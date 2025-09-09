@@ -11,7 +11,7 @@ export async function POST(request) {
             );
         }
         const response = await axios.post(
-            'https://staging.trektoo.com/api/auth/login',
+            'https://api.trektoo.com/api/auth/login',
             credentials,
             {
                 headers: {
@@ -23,7 +23,7 @@ export async function POST(request) {
         );
 
         // Check if the response contains an error (new API format)
-        if (response.data.status === 0 || response.data.status === false) {
+        if (response.data.success === false || response.data.isAllowed === false) {
             // Handle API error response format
             const errorCode = response.data.code;
             const errorMessage = response.data.message;
@@ -48,8 +48,15 @@ export async function POST(request) {
             );
         }
 
-        // Return successful response
-        return NextResponse.json(response.data);
+        // Transform response to match expected format
+        const transformedResponse = {
+            status: 1,
+            access_token: response.data.token,
+            user: response.data.user,
+            message: response.data.message
+        };
+
+        return NextResponse.json(transformedResponse);
     } catch (error) {
         console.error('Login proxy error:', {
             message: error.message,

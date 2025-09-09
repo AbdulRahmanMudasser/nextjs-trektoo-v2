@@ -35,7 +35,7 @@ export async function GET(request) {
         }
         const { searchParams } = new URL(request.url);
         const page = searchParams.get('page') || '1';
-        const response = await axios.get(`https://staging.trektoo.com/api/user/booking-history?page=${page}`, {
+        const response = await axios.get(`https://api.trektoo.com/api/user/booking-history?page=${page}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json',

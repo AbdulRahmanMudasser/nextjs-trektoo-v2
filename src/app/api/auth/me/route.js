@@ -33,7 +33,7 @@ export async function GET(request) {
         if (!token) {
             return NextResponse.json({ error: 'Authentication token required' }, { status: 401 });
         }
-        const response = await axios.get('https://staging.trektoo.com/api/auth/me', {
+        const response = await axios.get('https://api.trektoo.com/api/auth/me', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json',
@@ -67,7 +67,7 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        const response = await axios.post('https://staging.trektoo.com/api/auth/me', userData, {
+        const response = await axios.post('https://api.trektoo.com/api/auth/me', userData, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json',

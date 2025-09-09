@@ -29,7 +29,7 @@ export async function POST(request) {
         }
 
         const response = await axios.post(
-            'https://staging.trektoo.com/api/booking/addToCart',
+            'https://api.trektoo.com/api/booking/addToCart',
             bookingData,
             {
                 headers: {

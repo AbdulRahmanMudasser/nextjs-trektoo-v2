@@ -40,8 +40,8 @@ export async function GET(request, { params }) {
         }
 
         const apiUrl = queryParams.toString()
-            ? `https://staging.trektoo.com/api/hotel/detail/${id}?${queryParams.toString()}`
-            : `https://staging.trektoo.com/api/hotel/detail/${id}`;
+            ? `https://api.trektoo.com/api/hotel/detail/${id}?${queryParams.toString()}`
+            : `https://api.trektoo.com/api/hotel/detail/${id}`;
 
         console.log('🔍 Hotel Details API Call - URL:', apiUrl);
 

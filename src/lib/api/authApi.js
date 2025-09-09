@@ -35,6 +35,11 @@ const handleAuthError = (error, operation) => {
             return data.message || 'An error occurred. Please try again.';
         }
 
+        // Handle API error status (success: false or isAllowed: false) - new format
+        if (data.success === false || data.isAllowed === false) {
+            return data.message || 'An error occurred. Please try again.';
+        }
+
         // Handle API error status (status: 0) - legacy format
         if (data.status === 0 || data.status === false) {
             return data.message || 'An error occurred. Please try again.';
@@ -122,7 +127,19 @@ export const login = async (credentials) => {
             throw new Error(errorMessages.join(', '));
         }
 
-        // Check for API error status (new format with code field)
+        // Check for API error status (new format with success/isAllowed fields)
+        if (response.data.success === false || response.data.isAllowed === false) {
+            // If there's a specific error code, use it for better error handling
+            if (response.data.code) {
+                const error = new Error(response.data.message || 'Login failed');
+                error.code = response.data.code;
+                error.status = response.data.status;
+                throw error;
+            }
+            throw new Error(response.data.message || 'Login failed');
+        }
+
+        // Check for API error status (legacy format with code field)
         if (response.data.status === 0 || response.data.status === false) {
             // If there's a specific error code, use it for better error handling
             if (response.data.code) {
@@ -134,7 +151,18 @@ export const login = async (credentials) => {
             throw new Error(response.data.message || 'Login failed');
         }
 
-        // Validate response structure
+        // Validate response structure for new format
+        if (response.data.success === true && response.data.isAllowed === true) {
+            // Transform new response format to expected format
+            return {
+                status: 1,
+                access_token: response.data.token,
+                user: response.data.user,
+                message: response.data.message
+            };
+        }
+
+        // Validate response structure for legacy format
         if (!response.data.access_token || !response.data.user) {
             throw new Error('Invalid response format from server');
         }
@@ -197,7 +225,26 @@ export const register = async (userData) => {
             throw new Error('No response received from server');
         }
 
-        // Check for API error status first (new format with code field)
+        // Check for API error status first (new format with success/isAllowed fields)
+        if (response.data.success === false || response.data.isAllowed === false) {
+            // If there's a specific error code, use it for better error handling
+            if (response.data.code) {
+                const error = new Error(response.data.message || 'Registration failed');
+                error.code = response.data.code;
+                error.status = response.data.status;
+                throw error;
+            }
+
+            // Handle validation errors in message field
+            if (response.data.message && typeof response.data.message === 'object') {
+                const errorMessages = Object.values(response.data.message).flat();
+                throw new Error(errorMessages.join(', '));
+            }
+            // Handle simple error message
+            throw new Error(response.data.message || 'Registration failed');
+        }
+
+        // Check for API error status (legacy format with code field)
         if (response.data.status === 0 || response.data.status === false) {
             // If there's a specific error code, use it for better error handling
             if (response.data.code) {
@@ -220,6 +267,14 @@ export const register = async (userData) => {
         if (response.data.errors) {
             const errorMessages = Object.values(response.data.errors).flat();
             throw new Error(errorMessages.join(', '));
+        }
+
+        // Handle new response format (success: true, isAllowed: true)
+        if (response.data.success === true && response.data.isAllowed === true) {
+            return {
+                status: true,
+                message: response.data.message || 'Registration successful'
+            };
         }
 
         return response.data;

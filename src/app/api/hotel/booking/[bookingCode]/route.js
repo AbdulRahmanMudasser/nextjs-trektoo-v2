@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
         }
 
         const response = await axios.get(
-            `https://staging.trektoo.com/api/booking/${bookingCode}`,
+            `https://api.trektoo.com/api/booking/${bookingCode}`,
             {
                 headers,
                 next: { revalidate: 3600 },

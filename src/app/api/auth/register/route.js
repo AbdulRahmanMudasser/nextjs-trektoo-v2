@@ -4,14 +4,14 @@ import axios from 'axios';
 export async function POST(request) {
     try {
         const userData = await request.json();
-        if (!userData.email || !userData.password || !userData.name) {
+        if (!userData.email || !userData.password || !userData.first_name || !userData.last_name) {
             return NextResponse.json(
-                { error: 'Please provide name, email, and password' },
+                { error: 'Please provide first name, last name, email, and password' },
                 { status: 400 }
             );
         }
         const response = await axios.post(
-            'https://staging.trektoo.com/api/auth/register',
+            'https://api.trektoo.com/api/auth/register',
             userData,
             {
                 headers: {
@@ -23,7 +23,7 @@ export async function POST(request) {
         );
 
         // Check if the response contains an error (new API format)
-        if (response.data.status === 0 || response.data.status === false) {
+        if (response.data.success === false || response.data.isAllowed === false) {
             // Handle API error response format
             const errorCode = response.data.code;
             const errorMessage = response.data.message;
@@ -46,8 +46,13 @@ export async function POST(request) {
             );
         }
 
-        // Return successful response
-        return NextResponse.json(response.data);
+        // Transform response to match expected format
+        const transformedResponse = {
+            status: true,
+            message: response.data.message || 'Registration successful'
+        };
+
+        return NextResponse.json(transformedResponse);
     } catch (error) {
         console.error('Register proxy error:', {
             message: error.message,

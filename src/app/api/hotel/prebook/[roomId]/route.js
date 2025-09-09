@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
       children,
     });
 
-    const apiUrl = `https://staging.trektoo.com/api/hotel/prebook/${roomId}?${queryParams.toString()}`;
+    const apiUrl = `https://api.trektoo.com/api/hotel/prebook/${roomId}?${queryParams.toString()}`;
 
     console.log('🔍 Hotel Prebook API Call - URL:', apiUrl);
     console.log('🔍 Hotel Prebook API Call - Params:', { roomId, checkin, checkout, adults, children });
