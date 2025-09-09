@@ -19,6 +19,7 @@ import {
 import EmptyState from '@/components/ui/EmptyState';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { format, addDays } from 'date-fns';
+import { usePrebookHotel } from '@/hooks/useHotels';
 
 const RoomAvailability = ({
   rooms = [],
@@ -42,6 +43,54 @@ const RoomAvailability = ({
   const checkoutDate =
     typeof checkout === 'string' ? new Date(checkout) : checkout;
 
+  // Transform room data to match component expectations
+  const transformedRooms = rooms.map((room) => ({
+    ...room,
+    // Format price display - handle empty string and null values
+    price_text:
+      room.price && room.price !== '' && room.price !== '0.00'
+        ? `$${parseFloat(room.price).toFixed(2)}`
+        : 'Price on request',
+    // Format capacity display
+    adults_html:
+      room.adults && room.adults > 0
+        ? `${room.adults} Adult${room.adults > 1 ? 's' : ''}`
+        : 'Not specified',
+    children_html:
+      room.children && room.children !== '' && room.children > 0
+        ? `${room.children} Child${room.children > 1 ? 'ren' : ''}`
+        : 'Not specified',
+    beds_html:
+      room.beds && room.beds > 0
+        ? `${room.beds} Bed${room.beds > 1 ? 's' : ''}`
+        : 'Not specified',
+    size_html:
+      room.size && room.size !== '' ? `${room.size} m²` : 'Not specified',
+    // Add default amenities if none exist
+    term_features: room.term_features || [
+      { title: 'Wi-Fi', icon: 'fas fa-wifi' },
+      { title: 'Air Conditioning', icon: 'fas fa-snowflake' },
+      { title: 'Private Bathroom', icon: 'fas fa-bath' },
+      { title: 'TV', icon: 'fas fa-tv' },
+    ],
+    // Add gallery fallback
+    gallery:
+      room.gallery && room.gallery !== ''
+        ? Array.isArray(room.gallery)
+          ? room.gallery
+          : [room.gallery]
+        : [],
+    // Add image fallback
+    image:
+      room.image && room.image !== ''
+        ? room.image
+        : room.gallery && room.gallery !== ''
+          ? Array.isArray(room.gallery)
+            ? room.gallery[0]
+            : room.gallery
+          : null,
+  }));
+
   const hasValidPricing = (room) => {
     const price = room.price_text || room.price;
     return (
@@ -49,10 +98,14 @@ const RoomAvailability = ({
       price !== 'Price on request' &&
       price !== '0.00' &&
       price !== '0' &&
+      price !== '' &&
       price !== 'Contact for Pricing' &&
-      price.trim() !== ''
+      price.trim() !== '' &&
+      !price.includes('NaN')
     );
   };
+
+  const prebookMutation = usePrebookHotel();
 
   const handleBookNow = async (room) => {
     try {
@@ -83,22 +136,84 @@ const RoomAvailability = ({
         }
 
         // Redirect to login with return URL
+        const query = new URLSearchParams({
+          checkin: format(checkinDate, 'yyyy-MM-dd'),
+          checkout: format(checkoutDate, 'yyyy-MM-dd'),
+          adults: adults.toString(),
+          children: children.toString(),
+          roomId: room.id,
+        }).toString();
+
         router.push(
-          `/login?returnUrl=${encodeURIComponent(`/hotel/${hotelId}/checkout?${query}`)}`
+          `/login?returnUrl=${encodeURIComponent(`/hotel/${hotelId}?${query}`)}`
         );
         return;
       }
 
-      // If authenticated, proceed to checkout
-      const query = new URLSearchParams({
+      // If authenticated, call prebook API
+      const prebookData = {
+        roomId: room.id,
         checkin: format(checkinDate, 'yyyy-MM-dd'),
         checkout: format(checkoutDate, 'yyyy-MM-dd'),
-        adults: adults.toString(),
-        children: children.toString(),
-        roomId: room.id,
-      }).toString();
+        adults,
+        children,
+      };
 
-      router.push(`/hotel/${hotelId}/checkout?${query}`);
+      console.log('🔍 Calling prebook API with:', prebookData);
+
+      const prebookResponse = await prebookMutation.mutateAsync(prebookData);
+
+      console.log('🔍 Prebook response:', prebookResponse);
+
+      // Check if prices changed
+      if (
+        prebookResponse &&
+        prebookResponse['0'] &&
+        prebookResponse['0'].changes
+      ) {
+        const priceChanged = prebookResponse['0'].changes.price_changed;
+
+        if (priceChanged) {
+          // Show error message that prices changed
+          setBookingError(
+            'Room prices have changed. Please select a room again to see updated pricing.'
+          );
+          return;
+        }
+      }
+
+      // If prices didn't change, proceed to checkout
+      if (
+        prebookResponse &&
+        prebookResponse.success &&
+        prebookResponse.isAllowed
+      ) {
+        // Store prebook data for checkout
+        try {
+          sessionStorage.setItem(
+            'prebookData',
+            JSON.stringify(prebookResponse)
+          );
+        } catch (error) {
+          console.warn('Could not store prebook data:', error);
+        }
+
+        // Redirect to checkout
+        const query = new URLSearchParams({
+          checkin: format(checkinDate, 'yyyy-MM-dd'),
+          checkout: format(checkoutDate, 'yyyy-MM-dd'),
+          adults: adults.toString(),
+          children: children.toString(),
+          roomId: room.id,
+        }).toString();
+
+        router.push(`/hotel/${hotelId}/checkout?${query}`);
+      } else {
+        setBookingError(
+          prebookResponse?.message ||
+            'Unable to proceed with booking. Please try again.'
+        );
+      }
     } catch (error) {
       console.error('Booking error:', error);
       setBookingError(
@@ -139,18 +254,21 @@ const RoomAvailability = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="max-w-2xl mx-auto p-8 text-center bg-white/95 rounded-3xl shadow-xl border border-blue-50"
-        >
-          <LoadingSpinner size="xl" message="Loading Room Availability" />
-          <p className="text-gray-600 mt-4">
+      <div className="w-full">
+        <div className="text-center space-y-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Loading Available Rooms...
+          </h2>
+          <p className="text-gray-600">
             Please wait while we fetch available rooms for your selected
             dates...
           </p>
-        </motion.div>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-8">
+          <div className="flex items-center justify-center">
+            <LoadingSpinner size="lg" message="Loading Room Availability" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -166,7 +284,7 @@ const RoomAvailability = ({
     );
   }
 
-  if (!rooms || rooms.length === 0) {
+  if (!transformedRooms || transformedRooms.length === 0) {
     return (
       <EmptyState
         icon={Bed}
@@ -178,44 +296,50 @@ const RoomAvailability = ({
 
   return (
     <div className="w-full">
-      {/* Enhanced Header Section */}
-      <div className="text-center space-y-6 mb-8">
-        <div className="space-y-4">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-            {isSearching ? 'Searching Available Rooms...' : 'Available Rooms'}
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            {isSearching
-              ? 'Finding the best available rooms for your selected dates...'
-              : 'Choose from our selection of comfortable and well-appointed rooms for your stay'}
-          </p>
+      {/* Simple Header Section */}
+      <div className="text-center space-y-4 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">
+          {isSearching ? 'Searching Available Rooms...' : 'Available Rooms'}
+        </h2>
+        <p className="text-gray-600">
+          {isSearching
+            ? 'Finding the best available rooms for your selected dates...'
+            : 'Choose from our selection of comfortable and well-appointed rooms for your stay'}
+        </p>
 
-          {/* Enhanced Room Summary Information */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="flex items-center justify-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
+        {/* Room Summary Information - Matching Room Availability Style */}
+        <div className="bg-white rounded-lg p-6 border border-gray-200">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-500" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-600">Check-in</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-gray-600 font-medium">Check-in</p>
+                  <p className="font-bold text-gray-900 text-lg">
                     {format(checkinDate, 'MMM d, yyyy')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-500" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-600">Check-out</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-gray-600 font-medium">Check-out</p>
+                  <p className="font-bold text-gray-900 text-lg">
                     {format(checkoutDate, 'MMM d, yyyy')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-500" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-600">Guests</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-gray-600 font-medium">Guests</p>
+                  <p className="font-bold text-gray-900 text-lg">
                     {adults} adult{adults !== 1 ? 's' : ''}
                     {children > 0 &&
                       `, ${children} child${children !== 1 ? 'ren' : ''}`}
@@ -223,51 +347,53 @@ const RoomAvailability = ({
                 </div>
               </div>
             </div>
+
+            {/* Refresh Button - Matching Search Available Rooms Style */}
+            {onRefresh && (
+              <div className="flex justify-center lg:justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onRefresh}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw
+                    className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`}
+                  />
+                  {loading ? 'Refreshing...' : 'Refresh Rooms'}
+                </motion.button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Refresh Button */}
-      {onRefresh && (
-        <div className="flex justify-center mb-6">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onRefresh}
-            disabled={loading}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh Rooms
-          </motion.button>
-        </div>
-      )}
-
-      {/* Rooms Table */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-blue-50 overflow-hidden">
+      {/* Rooms Table - Matching Room Availability Style */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">
+            <thead className="bg-blue-50">
+              <tr className="border-b border-blue-200">
+                <th className="text-left py-6 px-6 font-bold text-gray-900 text-lg">
                   Room Type
                 </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">
+                <th className="text-left py-6 px-6 font-bold text-gray-900 text-lg">
                   Capacity
                 </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">
+                <th className="text-left py-6 px-6 font-bold text-gray-900 text-lg">
                   Amenities
                 </th>
-                <th className="text-left py-4 px-6 font-semibold text-gray-900">
+                <th className="text-left py-6 px-6 font-bold text-gray-900 text-lg">
                   Price
                 </th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-900">
+                <th className="text-center py-6 px-6 font-bold text-gray-900 text-lg">
                   Action
                 </th>
               </tr>
             </thead>
             <tbody>
-              {rooms.map((room, index) => {
+              {transformedRooms.map((room, index) => {
                 const safeRoom = room || {};
                 const roomHasValidPricing = hasValidPricing(safeRoom);
 
@@ -290,17 +416,22 @@ const RoomAvailability = ({
                 return (
                   <tr
                     key={safeRoom.id}
-                    className="hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
+                    className="hover:bg-blue-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
                   >
                     {/* Room Details */}
                     <td className="py-6 px-6">
-                      <div className="space-y-2">
-                        <h3 className="font-semibold text-gray-900 text-lg">
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-gray-900">
                           {safeRoom.title || 'Standard Room'}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {safeRoom.size_html || 'Size not specified'}
+                          {safeRoom.size_html || 'Room size not specified'}
                         </p>
+                        {safeRoom.content && safeRoom.content.trim() !== '' && (
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {safeRoom.content.substring(0, 100)}...
+                          </p>
+                        )}
                       </div>
                     </td>
 
@@ -309,43 +440,58 @@ const RoomAvailability = ({
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm text-gray-700">
                           <Users className="h-4 w-4 text-blue-500" />
-                          <span>{safeRoom.adults_html || 'Not specified'}</span>
+                          <span>
+                            {safeRoom.adults_html || 'Occupancy not specified'}
+                          </span>
                         </div>
-                        {safeRoom.children_html && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Users className="h-4 w-4 text-green-500" />
-                            <span>{safeRoom.children_html}</span>
-                          </div>
-                        )}
+                        {safeRoom.children_html &&
+                          safeRoom.children_html !== 'Not specified' && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Users className="h-4 w-4 text-blue-500" />
+                              <span>{safeRoom.children_html}</span>
+                            </div>
+                          )}
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Bed className="h-4 w-4 text-purple-500" />
-                          <span>{safeRoom.beds_html || 'Not specified'}</span>
+                          <Bed className="h-4 w-4 text-blue-500" />
+                          <span>
+                            {safeRoom.beds_html ||
+                              'Bed configuration not specified'}
+                          </span>
                         </div>
                       </div>
                     </td>
 
                     {/* Amenities */}
                     <td className="py-6 px-6">
-                      <div className="flex flex-wrap gap-2">
-                        {(safeRoom.term_features || [])
-                          .slice(0, 3)
-                          .map((amenity, amenityIndex) => {
-                            const Icon = getAmenityIcon(amenity);
-                            return (
-                              <div
-                                key={amenityIndex}
-                                className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs"
-                              >
-                                <Icon className="h-3 w-3" />
-                                <span>
-                                  {amenity.title || amenity.name || amenity}
-                                </span>
+                      <div className="flex flex-wrap gap-1">
+                        {(safeRoom.term_features || []).length > 0 ? (
+                          <>
+                            {(safeRoom.term_features || [])
+                              .slice(0, 3)
+                              .map((amenity, amenityIndex) => {
+                                const Icon = getAmenityIcon(amenity);
+                                return (
+                                  <div
+                                    key={amenityIndex}
+                                    className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs"
+                                  >
+                                    <Icon className="h-3 w-3" />
+                                    <span>
+                                      {amenity.title || amenity.name || amenity}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            {(safeRoom.term_features || []).length > 3 && (
+                              <div className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                +{(safeRoom.term_features || []).length - 3}{' '}
+                                more
                               </div>
-                            );
-                          })}
-                        {(safeRoom.term_features || []).length > 3 && (
-                          <div className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                            +{(safeRoom.term_features || []).length - 3} more
+                            )}
+                          </>
+                        ) : (
+                          <div className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                            Standard amenities included
                           </div>
                         )}
                       </div>
@@ -354,13 +500,15 @@ const RoomAvailability = ({
                     {/* Price */}
                     <td className="py-6 px-6">
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-gray-900">
-                          {roomHasValidPricing ? totalPrice : 'NaN'}
+                        <div className="text-xl font-bold text-gray-900">
+                          {roomHasValidPricing
+                            ? totalPrice
+                            : 'Contact for Pricing'}
                         </div>
                         <div className="text-sm text-gray-600">
                           {roomHasValidPricing
                             ? `for ${nights} night${nights !== 1 ? 's' : ''}`
-                            : 'No pricing available'}
+                            : 'Pricing available on request'}
                         </div>
                       </div>
                     </td>
@@ -368,19 +516,35 @@ const RoomAvailability = ({
                     {/* Action */}
                     <td className="py-6 px-6 text-center">
                       <motion.button
-                        whileHover={{ scale: roomHasValidPricing ? 1.05 : 1 }}
-                        whileTap={{ scale: roomHasValidPricing ? 0.95 : 1 }}
-                        onClick={() =>
-                          roomHasValidPricing && handleBookNow(safeRoom)
+                        whileHover={
+                          roomHasValidPricing && !prebookMutation.isPending
+                            ? { scale: 1.05 }
+                            : {}
                         }
-                        disabled={!roomHasValidPricing}
+                        whileTap={
+                          roomHasValidPricing && !prebookMutation.isPending
+                            ? { scale: 0.95 }
+                            : {}
+                        }
+                        onClick={() =>
+                          roomHasValidPricing &&
+                          !prebookMutation.isPending &&
+                          handleBookNow(safeRoom)
+                        }
+                        disabled={
+                          !roomHasValidPricing || prebookMutation.isPending
+                        }
                         className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                          roomHasValidPricing
-                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          roomHasValidPricing && !prebookMutation.isPending
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white cursor-pointer'
+                            : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed opacity-60'
                         }`}
                       >
-                        Book Now
+                        {prebookMutation.isPending
+                          ? 'Processing...'
+                          : roomHasValidPricing
+                            ? 'Book Now'
+                            : 'Contact for Pricing'}
                       </motion.button>
                     </td>
                   </tr>
