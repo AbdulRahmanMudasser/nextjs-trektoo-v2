@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchHotels, fetchHotelDetails, fetchHotelReviews, fetchHotelAvailability, addToCart, doCheckout, fetchLocations, fetchBookingDetails } from '@/lib/api/hotelApi';
+import { fetchHotels, fetchHotelDetails, fetchHotelReviews, addToCart, doCheckout, fetchLocations, fetchBookingDetails, prebookHotel } from '@/lib/api/hotelApi';
 import { useDebounce } from 'use-debounce';
 
 /**
@@ -86,12 +86,16 @@ export const useHotels = (searchParams) => {
 /**
  * Custom hook to fetch hotel details by ID with React Query
  * @param {string} id - Hotel ID
+ * @param {string} checkin - Check-in date (YYYY-MM-DD format)
+ * @param {string} checkout - Check-out date (YYYY-MM-DD format)
+ * @param {number} adults - Number of adults
+ * @param {number} children - Number of children
  * @returns {Object} Query result with hotel details, loading state, and error
  */
-export const useHotelDetails = (id) => {
+export const useHotelDetails = (id, checkin = null, checkout = null, adults = 1, children = 0) => {
     return useQuery({
-        queryKey: ['hotel', id],
-        queryFn: () => fetchHotelDetails(id),
+        queryKey: ['hotel', id, checkin, checkout, adults, children],
+        queryFn: () => fetchHotelDetails(id, checkin, checkout, adults, children),
         enabled: !!id,
         onError: (error) => {
             // Error is already logged by the API layer
@@ -120,34 +124,6 @@ export const useHotelReviews = (id, page = 1, perPage = 5) => {
     });
 };
 
-/**
- * Custom hook to fetch hotel room availability by ID with React Query
- * @param {string} id - Hotel ID
- * @param {string} checkin - Check-in date (YYYY-MM-DD format)
- * @param {string} checkout - Check-out date (YYYY-MM-DD format)
- * @param {number} adults - Number of adults
- * @param {number} children - Number of children
- * @returns {Object} Query result with room availability, loading state, and error
- */
-export const useHotelAvailability = (id, checkin, checkout, adults = 1, children = 0) => {
-    return useQuery({
-        queryKey: ['hotelAvailability', id, checkin, checkout, adults, children],
-        queryFn: () => {
-            if (!id || id === 'null' || id === 'undefined') {
-                throw new Error('Invalid hotel ID provided');
-            }
-            if (!checkin || !checkout) {
-                throw new Error('Check-in and check-out dates are required');
-            }
-            return fetchHotelAvailability(id, checkin, checkout, adults, children);
-        },
-        enabled: !!id && id !== 'null' && id !== 'undefined' && !!checkin && !!checkout,
-        onError: (error) => {
-            // Error is already logged by the API layer
-            // Additional hook-specific error handling can be added here
-        },
-    });
-};
 
 /**
  * Custom hook to fetch locations with React Query and debouncing
@@ -169,6 +145,26 @@ export const useLocations = (query) => {
             // Error is already logged by the API layer
             // Additional hook-specific error handling can be added here
             return { data: [], errorMessage: error.message };
+        },
+    });
+};
+
+/**
+ * Custom hook to prebook a hotel room with React Query
+ * @param {string} roomId - Room ID
+ * @param {string} checkin - Check-in date (YYYY-MM-DD)
+ * @param {string} checkout - Check-out date (YYYY-MM-DD)
+ * @param {number} adults - Number of adults
+ * @param {number} children - Number of children
+ * @returns {Object} Mutation result with mutate function, loading state, and error
+ */
+export const usePrebookHotel = () => {
+    return useMutation({
+        mutationFn: ({ roomId, checkin, checkout, adults, children }) => 
+            prebookHotel(roomId, checkin, checkout, adults, children),
+        onError: (error) => {
+            // Error is already logged by the API layer
+            // Additional hook-specific error handling can be added here
         },
     });
 };

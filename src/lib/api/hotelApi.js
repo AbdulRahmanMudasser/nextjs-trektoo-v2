@@ -92,13 +92,33 @@ export const fetchHotels = async (searchParams) => {
 };
 
 /**
- * Fetch hotel details by ID
+ * Fetch hotel details by ID with optional room availability parameters
  * @param {string} id - Hotel ID
+ * @param {string} checkin - Check-in date (YYYY-MM-DD format)
+ * @param {string} checkout - Check-out date (YYYY-MM-DD format)
+ * @param {number} adults - Number of adults
+ * @param {number} children - Number of children
  * @returns {Promise<Object>} Hotel data with proper structure
  */
-export const fetchHotelDetails = async (id) => {
+export const fetchHotelDetails = async (id, checkin = null, checkout = null, adults = 1, children = 0) => {
     try {
-        const response = await secureApiClient.get(`/hotel/detail/${id}`);
+        // Build query parameters if dates are provided
+        const queryParams = new URLSearchParams();
+        if (checkin && checkout) {
+            queryParams.append('checkin', checkin);
+            queryParams.append('checkout', checkout);
+            queryParams.append('adults', adults.toString());
+            queryParams.append('children', children.toString());
+        }
+
+        const apiUrl = queryParams.toString()
+            ? `/hotel/detail/${id}?${queryParams.toString()}`
+            : `/hotel/detail/${id}`;
+
+        console.log('🔍 fetchHotelDetails called with:', { id, checkin, checkout, adults, children });
+        console.log('🔍 fetchHotelDetails - API URL:', apiUrl);
+
+        const response = await secureApiClient.get(apiUrl);
         const hotelData = response.data.data || {};
 
         // Transform and clean hotel data
@@ -161,70 +181,6 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
     }
 };
 
-/**
- * Fetch hotel room availability by ID with checkin/checkout dates
- * @param {string} id - Hotel ID
- * @param {string} checkin - Check-in date (YYYY-MM-DD format)
- * @param {string} checkout - Check-out date (YYYY-MM-DD format)
- * @param {number} adults - Number of adults
- * @param {number} children - Number of children
- * @returns {Promise<Array>} Array of room data with formatted properties
- */
-export const fetchHotelAvailability = async (id, checkin, checkout, adults = 1, children = 0) => {
-    try {
-        // Validate ID before making API call
-        if (!id || id === 'null' || id === 'undefined') {
-            throw new Error('Invalid hotel ID provided for availability check');
-        }
-
-        // Validate required parameters
-        if (!checkin || !checkout) {
-            throw new Error('Check-in and check-out dates are required for room availability');
-        }
-
-        // Build query parameters
-        const queryParams = new URLSearchParams({
-            checkin: checkin,
-            checkout: checkout,
-            adults: adults.toString(),
-            children: children.toString()
-        });
-
-        // New API call with date and guest parameters
-        const response = await secureApiClient.get(`/hotel/availability/${id}?${queryParams.toString()}`);
-        const rooms = response.data.rooms || [];
-
-        // Previous API call (commented out)
-        // const response = await secureApiClient.get(`/hotel/availability/${id}`);
-        // const rooms = response.data.rooms || [];
-
-        // Transform room data to match component expectations
-        return rooms.map(room => ({
-            ...room,
-            // Format price display
-            price_text: room.price ? `$${parseFloat(room.price).toFixed(2)}` : 'Price on request',
-            // Format capacity display
-            adults_html: room.adults ? `${room.adults} Adult${room.adults > 1 ? 's' : ''}` : 'Not specified',
-            children_html: room.children ? `${room.children} Child${room.children > 1 ? 'ren' : ''}` : 'Not specified',
-            beds_html: room.beds ? `${room.beds} Bed${room.beds > 1 ? 's' : ''}` : 'Not specified',
-            size_html: room.size ? `${room.size} m²` : 'Not specified',
-            // Add default amenities if none exist
-            term_features: room.term_features || [
-                { title: 'Wi-Fi', icon: 'fas fa-wifi' },
-                { title: 'Air Conditioning', icon: 'fas fa-snowflake' },
-                { title: 'Private Bathroom', icon: 'fas fa-bath' },
-                { title: 'TV', icon: 'fas fa-tv' }
-            ],
-            // Add gallery fallback
-            gallery: room.gallery || [],
-            // Add image fallback
-            image: room.image || room.gallery?.[0] || null
-        }));
-    } catch (error) {
-        logError('Hotel Availability API', error);
-        throw new Error(getUserFriendlyError(error));
-    }
-};
 
 /**
  * Fetch locations based on search query
@@ -247,6 +203,38 @@ export const fetchLocations = async (query) => {
         }));
     } catch (error) {
         logError('Locations API', error);
+        throw new Error(getUserFriendlyError(error));
+    }
+};
+
+/**
+ * Prebook a hotel room to check availability and pricing
+ * @param {string} roomId - Room ID (e.g., "h-6dec05cb-b45f-5455-bcb0-9eff03011e1d")
+ * @param {string} checkin - Check-in date (YYYY-MM-DD)
+ * @param {string} checkout - Check-out date (YYYY-MM-DD)
+ * @param {number} adults - Number of adults
+ * @param {number} children - Number of children
+ * @returns {Promise<Object>} Prebook response with pricing and availability
+ */
+export const prebookHotel = async (roomId, checkin, checkout, adults = 1, children = 0) => {
+    try {
+        const queryParams = new URLSearchParams({
+            checkin,
+            checkout,
+            adults: adults.toString(),
+            children: children.toString(),
+        });
+
+        const apiUrl = `/hotel/prebook/${roomId}?${queryParams.toString()}`;
+        
+        console.log('🔍 Prebook API Call - URL:', apiUrl);
+        console.log('🔍 Prebook API Call - Params:', { roomId, checkin, checkout, adults, children });
+
+        const response = await secureApiClient.get(apiUrl);
+        console.log('🔍 Prebook API Response:', response.data);
+        return response.data;
+    } catch (error) {
+        logError('Prebook API', error);
         throw new Error(getUserFriendlyError(error));
     }
 };
