@@ -111,9 +111,7 @@ function SignupForm() {
       last_name: formData.last_name,
       email: formData.email,
       password: formData.password,
-      password_confirmation: formData.password,
-      terms: formData.terms,
-      device_name: 'web',
+      term: formData.terms, // API expects 'term' not 'terms'
     };
 
     try {
