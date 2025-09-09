@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+} from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 import HeroContent from './HeroContent';
@@ -12,11 +17,11 @@ function HeroSection() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
-  
-  const { ref, inView } = useInView({ 
-    triggerOnce: true, 
+
+  const { ref, inView } = useInView({
+    triggerOnce: true,
     threshold: 0.1,
-    rootMargin: '-50px'
+    rootMargin: '-50px',
   });
 
   const images = [
@@ -46,20 +51,21 @@ function HeroSection() {
   }, [images.length, isTransitioning]);
 
   // Mouse parallax effect
-  const handleMouseMove = useCallback((e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    
-    mouseX.set(x);
-    mouseY.set(y);
-    setMousePosition({ x, y });
-  }, [mouseX, mouseY]);
+  const handleMouseMove = useCallback(
+    (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+
+      mouseX.set(x);
+      mouseY.set(y);
+      setMousePosition({ x, y });
+    },
+    [mouseX, mouseY]
+  );
 
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-
-
 
   // Floating particles animation
   const floatingParticles = Array.from({ length: 20 }, (_, i) => ({
@@ -74,7 +80,7 @@ function HeroSection() {
   return (
     <section
       ref={ref}
-      className="relative w-full min-h-screen pt-12 z-0 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"
+      className="relative w-full min-h-screen pt-12 pb-8 sm:pb-12 z-0 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"
       aria-label="Hero section"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -124,7 +130,7 @@ function HeroSection() {
 
       {/* Enhanced Overlay with Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-blue-900/50 z-10" />
-      
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0 z-5 pointer-events-none">
         {/* Floating Particles */}
@@ -165,7 +171,7 @@ function HeroSection() {
             ease: 'linear',
           }}
         />
-        
+
         <motion.div
           className="absolute bottom-20 right-20 w-24 h-24 border border-indigo-400/20 rotate-45"
           animate={{
@@ -194,31 +200,35 @@ function HeroSection() {
         <HeroContent />
       </motion.div>
 
-
-
       {/* Performance Optimized CSS */}
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+          }
         }
-        
+
         @keyframes pulse-glow {
-          0%, 100% { 
+          0%,
+          100% {
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
             transform: scale(1);
           }
-          50% { 
+          50% {
             box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
             transform: scale(1.05);
           }
         }
-        
+
         .hero-section {
           will-change: transform;
           contain: layout style paint;
         }
-        
+
         .hero-image {
           will-change: transform, opacity;
           contain: layout style paint;
@@ -229,4 +239,3 @@ function HeroSection() {
 }
 
 export default HeroSection;
-
