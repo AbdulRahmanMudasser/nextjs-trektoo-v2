@@ -1,16 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  MapPin,
-  ThumbsUp,
-  Clock,
-  Leaf,
-  Share2,
-  MessageCircle,
-  Heart,
-  Percent,
-} from 'lucide-react';
+import { MapPin, ThumbsUp, Clock, Percent } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ImageWithFallback = ({ src, alt, ...props }) => {
@@ -117,11 +108,31 @@ const HotelHeader = ({
   photoCount = 0,
   discount = '',
   image = '/default-hotel.jpg',
+  // Add new props for additional information
+  isFeatured = false,
+  objectModel = 'hotel',
+  reviewScore = null,
 }) => {
   const numericRating = parseFloat(rating) || 0;
   const numericPhotoCount = parseInt(photoCount) || 0;
   const fullStars = Math.floor(numericRating);
   const hasHalfStar = numericRating % 1 >= 0.5;
+
+  // Add featured badge and object model display
+  const displayInfo = [
+    { icon: Clock, label: 'Duration', value: duration },
+    // {
+    //   icon: Leaf,
+    //   label: 'Hotel Type',
+    //   value: objectModel === 'hotel' ? 'Hotel' : objectModel,
+    // },
+    ...(discount
+      ? [{ icon: Percent, label: 'Discount', value: discount }]
+      : []),
+    ...(isFeatured
+      ? [{ icon: ThumbsUp, label: 'Featured', value: 'Yes' }]
+      : []),
+  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -162,6 +173,20 @@ const HotelHeader = ({
           className="w-full h-full object-cover transform transition-transform duration-1000 hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/50" />
+
+        {/* Featured Badge */}
+        {isFeatured && (
+          <div className="absolute top-4 right-4 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            FEATURED
+          </div>
+        )}
+
+        {/* Discount Badge */}
+        {discount && (
+          <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            {discount} OFF
+          </div>
+        )}
       </div>
 
       {/* Main Content Section */}
@@ -189,13 +214,7 @@ const HotelHeader = ({
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-4 lg:mt-0"
               variants={containerVariants}
             >
-              {[
-                { icon: Clock, label: 'Duration', value: duration },
-                { icon: Leaf, label: 'Hotel Type', value: 'Luxury' },
-                ...(discount
-                  ? [{ icon: Percent, label: 'Discount', value: discount }]
-                  : []),
-              ].map((item, index) => (
+              {displayInfo.map((item, index) => (
                 <motion.div
                   key={index}
                   className="flex items-center group"
@@ -220,8 +239,8 @@ const HotelHeader = ({
         </div>
       </motion.div>
 
-      {/* Footer Actions Section */}
-      <motion.div
+      {/* Footer Actions Section - Hidden */}
+      {/* <motion.div
         className="bg-white border-t border-gray-100 py-4 sm:py-6 px-3 sm:px-4 md:px-6 lg:px-8"
         variants={itemVariants}
       >
@@ -303,7 +322,7 @@ const HotelHeader = ({
             </motion.div>
           </div>
         </div>
-      </motion.div>
+      </motion.div> */}
     </motion.div>
   );
 };
@@ -318,6 +337,10 @@ HotelHeader.propTypes = {
   photoCount: PropTypes.number,
   discount: PropTypes.string,
   image: PropTypes.string,
+  // Add new prop types
+  isFeatured: PropTypes.bool,
+  objectModel: PropTypes.string,
+  reviewScore: PropTypes.object,
 };
 
 export default HotelHeader;
