@@ -857,22 +857,22 @@ function HeroContent() {
                           transition={{ duration: 0.2 }}
                           className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-2xl mt-2 z-[9999] shadow-2xl"
                         >
-                          <div className="p-4 space-y-4">
+                          <div className="p-4 space-y-4 w-full max-w-xs">
                             {['adult', 'children'].map((category) => (
                               <div
                                 key={category}
-                                className="flex items-center justify-between"
+                                className="flex items-center justify-between w-full"
                               >
                                 <span className="text-gray-700 capitalize font-medium text-sm">
                                   {category === 'adult' ? 'Adults' : 'Children'}
                                 </span>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center justify-center gap-1">
                                   <motion.button
                                     type="button"
                                     onClick={() =>
                                       handleGuestChange(category, false)
                                     }
-                                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                                    className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold"
                                     disabled={
                                       guests[category] === 0 ||
                                       (category === 'adult' &&
@@ -884,7 +884,7 @@ function HeroContent() {
                                   >
                                     -
                                   </motion.button>
-                                  <span className="w-6 text-center font-semibold text-gray-900 text-sm">
+                                  <span className="w-4 text-center font-semibold text-gray-900 text-xs">
                                     {guests[category]}
                                   </span>
                                   <motion.button
@@ -892,7 +892,13 @@ function HeroContent() {
                                     onClick={() =>
                                       handleGuestChange(category, true)
                                     }
-                                    className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 text-sm font-semibold"
+                                    className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold"
+                                    disabled={
+                                      (category === 'adult' &&
+                                        guests[category] >= 7) ||
+                                      (category === 'children' &&
+                                        guests[category] >= 10)
+                                    }
                                     aria-label={`Increase number of ${category}`}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
