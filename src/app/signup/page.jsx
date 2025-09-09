@@ -168,14 +168,14 @@ function SignupForm() {
                     type="text"
                     value={formData.first_name}
                     onChange={handleInputChange}
-                    className={`w-full px-6 py-4 pl-14 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
+                    className={`w-full px-4 py-4 pl-12 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
                       errors.first_name
                         ? 'border-red-300 bg-red-50'
                         : 'border-gray-200'
                     }`}
                     placeholder="First name"
                   />
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg
                       className="w-5 h-5 text-gray-400"
                       fill="none"
@@ -209,14 +209,14 @@ function SignupForm() {
                     type="text"
                     value={formData.last_name}
                     onChange={handleInputChange}
-                    className={`w-full px-6 py-4 pl-14 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
+                    className={`w-full px-4 py-4 pl-12 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
                       errors.last_name
                         ? 'border-red-300 bg-red-50'
                         : 'border-gray-200'
                     }`}
                     placeholder="Last name"
                   />
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg
                       className="w-5 h-5 text-gray-400"
                       fill="none"
@@ -290,7 +290,7 @@ function SignupForm() {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-6 py-4 pl-14 pr-14 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
+                  className={`w-full px-4 py-4 pl-12 pr-12 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
                     errors.password
                       ? 'border-red-300 bg-red-50'
                       : 'border-gray-200'
@@ -315,7 +315,7 @@ function SignupForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-5 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center"
                 >
                   {showPassword ? (
                     <svg
