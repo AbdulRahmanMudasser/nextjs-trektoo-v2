@@ -48,13 +48,37 @@ export default function RootLayout({ children }) {
         />
         <meta property="twitter:image" content="/og-image.jpg" />
 
-        {/* Fonts */}
+        {/* Fonts - Optimized loading */}
         <link
           href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
 
         <title>TREKTOO - Authentic Travel Experiences</title>
+
+        {/* Performance optimizations */}
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="color-scheme" content="light" />
+
+        {/* Preload critical resources */}
+        <link
+          rel="preload"
+          href="/images/hero-bg-1.jpg"
+          as="image"
+          type="image/jpeg"
+        />
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
       </head>
       <body>
         <ClientWrapper>{children}</ClientWrapper>
