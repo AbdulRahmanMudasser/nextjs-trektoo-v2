@@ -19,7 +19,6 @@ import {
   AlertCircle,
   CheckCircle,
   Users,
-  ArrowRight,
 } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
 import { useLocations } from '@/hooks/useHotels';
@@ -381,77 +380,11 @@ function HeroContent() {
           animate={inView ? 'visible' : 'hidden'}
           className="text-left space-y-16 relative"
         >
-          {/* Floating Background Elements */}
+          {/* Simplified Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Animated Gradient Orbs */}
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{
-                  opacity: 0,
-                  scale: 0,
-                  x: Math.random() * 200 - 100,
-                  y: Math.random() * 200 - 100,
-                }}
-                animate={{
-                  opacity: [0, 0.3, 0],
-                  scale: [0, 1, 0],
-                  x: [null, Math.random() * 400 - 200],
-                  y: [null, Math.random() * 400 - 200],
-                  rotate: [0, 360],
-                }}
-                transition={{
-                  duration: 8 + i * 2,
-                  repeat: Infinity,
-                  delay: i * 1.5,
-                  ease: 'easeInOut',
-                }}
-                className="absolute w-32 h-32 rounded-full blur-xl"
-                style={{
-                  background:
-                    i % 3 === 0
-                      ? 'linear-gradient(45deg, #3b82f6, #60a5fa)'
-                      : i % 3 === 1
-                        ? 'linear-gradient(45deg, #1e40af, #3b82f6)'
-                        : 'linear-gradient(45deg, #dbeafe, #bfdbfe)',
-                }}
-              />
-            ))}
-
-            {/* Floating Icons */}
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={`icon-${i}`}
-                initial={{ opacity: 0, y: 20, x: Math.random() * 300 }}
-                animate={{
-                  opacity: [0, 0.6, 0],
-                  y: [-20, -40, -60],
-                  x: [null, Math.random() * 200 - 100],
-                  rotate: [0, 180, 360],
-                }}
-                transition={{
-                  duration: 6 + i,
-                  repeat: Infinity,
-                  delay: i * 0.8,
-                  ease: 'easeOut',
-                }}
-                className="absolute text-blue-400/30"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-              >
-                {i % 4 === 0 ? (
-                  <Compass className="w-6 h-6" />
-                ) : i % 4 === 1 ? (
-                  <MapPin className="w-6 h-6" />
-                ) : i % 4 === 2 ? (
-                  <Ticket className="w-6 h-6" />
-                ) : (
-                  <Hotel className="w-6 h-6" />
-                )}
-              </motion.div>
-            ))}
+            {/* Single subtle gradient circle */}
+            <div className="absolute top-10 right-10 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-blue-600/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-10 left-10 w-24 h-24 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl" />
           </div>
 
           {/* Enhanced Main Title with Advanced Effects */}
@@ -468,66 +401,21 @@ function HeroContent() {
                 letterSpacing: '-0.02em',
               }}
             >
-              <motion.span
-                initial={{ opacity: 0, y: 50, rotateX: -90 }}
-                animate={inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
-                transition={{
-                  delay: 0.2,
-                  duration: 1,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                className="block text-white"
-              >
-                Discover Your Next
-              </motion.span>
-              <motion.span
-                initial={{ opacity: 0, y: 50, rotateX: -90 }}
-                animate={inView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
-                transition={{
-                  delay: 0.4,
-                  duration: 1,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                className="block relative"
-              >
+              <span className="block text-white">Discover Your Next</span>
+              <span className="block relative">
                 <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent">
                   Adventure
                 </span>
-              </motion.span>
+              </span>
             </motion.h1>
           </motion.div>
 
-          {/* Enhanced Subtitle with Typewriter Effect */}
+          {/* Simplified Subtitle */}
           <motion.div variants={itemVariants} className="relative">
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.8, duration: 0.8 }}
-              className="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed font-normal max-w-lg relative"
-              style={{
-                fontFamily:
-                  "'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
-                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
-                letterSpacing: '-0.01em',
-                lineHeight: '1.6',
-              }}
-            >
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={inView ? { opacity: 1 } : {}}
-                transition={{ delay: 1.2, duration: 0.6 }}
-              >
-                From exotic beaches to bustling cities, find your perfect escape
-              </motion.span>
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={inView ? { opacity: 1 } : {}}
-                transition={{ delay: 1.4, duration: 0.6 }}
-                className="block mt-2"
-              >
-                and create memories that last a lifetime
-              </motion.span>
-            </motion.p>
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed font-normal max-w-lg relative">
+              From exotic beaches to bustling cities, find your perfect escape
+              and create memories that last a lifetime
+            </p>
           </motion.div>
         </motion.div>
 
@@ -538,31 +426,10 @@ function HeroContent() {
           animate={inView ? 'visible' : 'hidden'}
           className="space-y-8 relative"
         >
-          {/* Floating Particles Background */}
+          {/* Simplified Background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(12)].map((_, i) => (
-              <motion.div
-                key={`particle-${i}`}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{
-                  opacity: [0, 0.4, 0],
-                  scale: [0, 1, 0],
-                  y: [0, -100, -200],
-                  x: [0, Math.random() * 100 - 50],
-                }}
-                transition={{
-                  duration: 4 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: i * 0.3,
-                  ease: 'easeOut',
-                }}
-                className="absolute w-2 h-2 bg-blue-400/30 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-              />
-            ))}
+            <div className="absolute top-4 right-4 w-16 h-16 bg-blue-400/10 rounded-full blur-2xl" />
+            <div className="absolute bottom-4 left-4 w-12 h-12 bg-indigo-400/10 rounded-full blur-2xl" />
           </div>
 
           {/* Service Selection Tabs with Enhanced Glassmorphism */}
@@ -846,24 +713,33 @@ function HeroContent() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -10, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 right-0 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl mt-2 z-[9999] shadow-2xl"
+                          className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-2xl border border-white/20 rounded-2xl mt-2 z-[9999] shadow-2xl"
                         >
-                          <div className="p-4 space-y-4">
+                          <div className="p-6 space-y-5">
                             {['adult', 'children'].map((category) => (
                               <div
                                 key={category}
-                                className="flex items-center justify-between"
+                                className="flex items-center justify-between py-2"
                               >
-                                <span className="text-white capitalize font-medium text-sm">
-                                  {category === 'adult' ? 'Adults' : 'Children'}
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-gray-700 font-semibold text-base">
+                                    {category === 'adult'
+                                      ? 'Adults'
+                                      : 'Children'}
+                                  </span>
+                                  <span className="text-gray-500 text-sm">
+                                    {category === 'adult'
+                                      ? 'Ages 18+'
+                                      : 'Ages 0-17'}
+                                  </span>
+                                </div>
                                 <div className="flex items-center gap-3">
                                   <motion.button
                                     type="button"
                                     onClick={() =>
                                       handleGuestChange(category, false)
                                     }
-                                    className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-sm"
                                     disabled={
                                       guests[category] === 0 ||
                                       (category === 'adult' &&
@@ -873,9 +749,9 @@ function HeroContent() {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                   >
-                                    -
+                                    −
                                   </motion.button>
-                                  <span className="w-6 text-center font-semibold text-white text-sm">
+                                  <span className="w-8 text-center font-bold text-gray-900 text-lg min-w-[2rem]">
                                     {guests[category]}
                                   </span>
                                   <motion.button
@@ -883,7 +759,7 @@ function HeroContent() {
                                     onClick={() =>
                                       handleGuestChange(category, true)
                                     }
-                                    className="w-8 h-8 flex items-center justify-center border border-white/30 rounded-full text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 text-sm font-semibold"
+                                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 text-lg font-bold shadow-sm"
                                     aria-label={`Increase number of ${category}`}
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
@@ -893,6 +769,19 @@ function HeroContent() {
                                 </div>
                               </div>
                             ))}
+
+                            {/* Total Guests Display */}
+                            <div className="pt-3 border-t border-gray-200">
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-700 font-bold text-base">
+                                  Total Guests
+                                </span>
+                                <span className="text-blue-600 font-bold text-lg">
+                                  {totalGuests}{' '}
+                                  {totalGuests === 1 ? 'Guest' : 'Guests'}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </motion.div>
                       )}
@@ -949,14 +838,6 @@ function HeroContent() {
                         <span className="whitespace-nowrap text-lg relative z-10">
                           Search Hotels
                         </span>
-                        <motion.div
-                          initial={{ x: 0 }}
-                          whileHover={{ x: 5 }}
-                          transition={{ duration: 0.3 }}
-                          className="relative z-10"
-                        >
-                          <ArrowRight className="h-5 w-5" />
-                        </motion.div>
                       </>
                     )}
                   </motion.button>
