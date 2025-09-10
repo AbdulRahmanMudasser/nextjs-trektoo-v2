@@ -27,17 +27,25 @@ export async function GET(request) {
     }
 
     try {
+        // Build query parameters for the new API
+        const queryParams = new URLSearchParams({
+            adults: adults.toString(),
+            children: children.toString(),
+            checkin: checkin,
+            checkout: checkout,
+            location_id: locationId,
+            limit: searchParams.get('limit') || '15',
+            page: searchParams.get('page') || '1'
+        });
+
         const response = await axios.get(
-            `https://staging.trektoo.com/api/hotel/search?location_id=5`,
+            `http://api.trektoo.com/api/hotel/search?${queryParams.toString()}`,
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Basic ${Buffer.from(
-                        `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`
-                    ).toString('base64')}`,
+                    'Accept': 'application/json',
                 },
-                // Equivalent to Next.js fetch revalidate for caching
-                next: { revalidate: 3600 }, // Cache for 1 hour
+                timeout: 30000, // 30 second timeout
             }
         );
 
@@ -56,7 +64,7 @@ export async function GET(request) {
         // );
 
         // Check if the response contains an error (new API format)
-        if (response.data.status === 0 || response.data.status === false) {
+        if (!response.data.success || response.data.success === false) {
             return NextResponse.json(
                 { error: response.data.message || 'Failed to fetch hotels' },
                 { status: 400 }
@@ -69,16 +77,12 @@ export async function GET(request) {
             title: sanitize(hotel.title?.trim() || 'Hotel Name Not Available'),
             content: sanitize(hotel.content || ''),
             image: sanitize(hotel.image || ''),
-            // Add additional fields from the new API response
-            object_model: hotel.object_model || 'hotel',
-            discount_percent: hotel.discount_percent || null,
-            location: hotel.location || { id: 0, name: 'Location Not Available' },
-            is_featured: hotel.is_featured || 0,
-            review_score: hotel.review_score || {
-                score_total: 0,
-                total_review: 0,
-                review_text: 'Not rated'
-            }
+            // Map fields from the new API response format
+            id: hotel.id,
+            price: hotel.price || '0.00',
+            sale_price: hotel.sale_price || hotel.price || '0.00',
+            location: hotel.location || '',
+            is_featured: hotel.is_featured || 0
         }));
 
         // Calculate pagination info since current_page and per_page are not provided
@@ -93,12 +97,14 @@ export async function GET(request) {
 
         return NextResponse.json(
             {
+                success: response.data.success || true,
+                isAllowed: response.data.isAllowed || true,
+                message: response.data.message || '',
                 total: total,
                 total_pages: totalPages,
                 current_page: currentPage,
                 per_page: limit,
-                data: sanitizedData,
-                status: response.data.status || 1
+                data: sanitizedData
             },
             {
                 headers: {
