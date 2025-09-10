@@ -75,6 +75,9 @@ export const useHotels = (searchParams) => {
             totalPages: response.total_pages || 1,
             currentPage: response.current_page || 1,
             perPage: response.per_page || 15,
+            success: response.success || false,
+            isAllowed: response.isAllowed || true,
+            message: response.message || ''
         }),
         onError: (error) => {
             // Error is already logged by the API layer
@@ -160,7 +163,7 @@ export const useLocations = (query) => {
  */
 export const usePrebookHotel = () => {
     return useMutation({
-        mutationFn: ({ roomId, checkin, checkout, adults, children }) => 
+        mutationFn: ({ roomId, checkin, checkout, adults, children }) =>
             prebookHotel(roomId, checkin, checkout, adults, children),
         onError: (error) => {
             // Error is already logged by the API layer

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import secureApiClient from './secureApiClient';
 import { logError, getUserFriendlyError } from '@/lib/services/errorHandler';
 
@@ -83,7 +84,9 @@ export const fetchHotels = async (searchParams) => {
             total_pages: response.data.total_pages || 1,
             current_page: response.data.current_page || 1,
             per_page: response.data.per_page || 15,
-            status: response.data.status || 1
+            success: response.data.success || false,
+            isAllowed: response.data.isAllowed || true,
+            message: response.data.message || ''
         };
     } catch (error) {
         logError('Hotel API', error);
@@ -102,61 +105,68 @@ export const fetchHotels = async (searchParams) => {
  */
 export const fetchHotelDetails = async (id, checkin = null, checkout = null, adults = 1, children = 0) => {
     try {
-        // Build query parameters if dates are provided
+        // Build query parameters - API requires these parameters
         const queryParams = new URLSearchParams();
-        if (checkin && checkout) {
-            queryParams.append('checkin', checkin);
-            queryParams.append('checkout', checkout);
-            queryParams.append('adults', adults.toString());
-            queryParams.append('children', children.toString());
+        queryParams.append('adults', adults.toString());
+        queryParams.append('children', children.toString());
+
+        // Use provided dates or default values
+        const checkinDate = checkin || '2025-12-12';
+        const checkoutDate = checkout || '2025-12-14';
+
+        queryParams.append('checkin', checkinDate);
+        queryParams.append('checkout', checkoutDate);
+
+        const query = queryParams.toString();
+        console.log('🔍 fetchHotelDetails called with:', { id, checkin, checkout, adults, children });
+        console.log('🔍 fetchHotelDetails - Query Params:', query);
+
+        // Use secureApiClient like hotel search does - this goes through the API route
+        const response = await secureApiClient.get(`/hotel/detail/${id}?${query}`);
+        console.log('Hotel Details API response:', response.data);
+        const hotelData = response.data;
+
+        // Check if the response contains an error (new API format)
+        if (!hotelData.success || hotelData.success === false) {
+            throw new Error(hotelData.message || 'Hotel not found');
         }
 
-        const apiUrl = queryParams.toString()
-            ? `/hotel/detail/${id}?${queryParams.toString()}`
-            : `/hotel/detail/${id}`;
-
-        console.log('🔍 fetchHotelDetails called with:', { id, checkin, checkout, adults, children });
-        console.log('🔍 fetchHotelDetails - API URL:', apiUrl);
-
-        const response = await secureApiClient.get(apiUrl);
-        const hotelData = response.data.data || {};
-
-        // Transform and clean hotel data
+        // Transform and clean hotel data - handle new response format
         return {
-            ...hotelData,
-            // Ensure ID is set
-            id: id,
-            // Clean title (remove extra whitespace)
+            // Map fields from the new API response format
+            id: hotelData.id || id,
             title: hotelData.title?.trim() || 'Hotel Name Not Available',
-            // Ensure proper price handling
             price: hotelData.price || '0.00',
             sale_price: hotelData.sale_price || hotelData.price || '0.00',
-            // Ensure proper address
-            address: hotelData.address || 'Address not available',
-            // Ensure proper content
+            image: hotelData.image || '',
             content: hotelData.content || '<p>No description available.</p>',
-            // Ensure proper gallery
+            location: hotelData.location || '',
+            is_featured: hotelData.is_featured || 0,
+            // Transform rooms object to array for frontend compatibility
+            rooms: hotelData.rooms && hotelData.rooms.rates ? hotelData.rooms.rates : [],
+            // Add additional fields for compatibility
+            address: hotelData.address || 'Address not available',
             gallery: hotelData.gallery || [hotelData.image].filter(Boolean),
-            // Ensure proper banner image
             banner_image: hotelData.banner_image || hotelData.image,
-            // Ensure proper location
-            location: hotelData.location || { name: 'Location not available' },
-            // Ensure proper review score
+            map_lat: hotelData.map_lat || '0',
+            map_lng: hotelData.map_lng || '0',
+            map_zoom: hotelData.map_zoom || 10,
             review_score: hotelData.review_score || {
                 score_total: 0,
                 total_review: 0,
                 score_text: 'Not rated'
             },
-            // Ensure proper map coordinates
-            map_lat: hotelData.map_lat || '0',
-            map_lng: hotelData.map_lng || '0',
-            map_zoom: hotelData.map_zoom || 10,
-            // Ensure proper rooms array
-            rooms: hotelData.rooms || [],
-            // Ensure proper terms structure
             terms: hotelData.terms || {},
-            // Ensure proper policy array
-            policy: hotelData.policy || []
+            policy: hotelData.policy || [],
+            object_model: hotelData.object_model || 'hotel',
+            discount_percent: hotelData.discount_percent || null,
+            video: hotelData.video || null,
+            enable_extra_price: hotelData.enable_extra_price || 0,
+            extra_price: hotelData.extra_price || null,
+            // Add new response fields
+            success: hotelData.success || true,
+            isAllowed: hotelData.isAllowed || true,
+            message: hotelData.message || ''
         };
     } catch (error) {
         logError('Hotel Details API', error);
@@ -189,7 +199,17 @@ export const fetchHotelReviews = async (id, page = 1, perPage = 5) => {
  */
 export const fetchLocations = async (query) => {
     try {
-        const response = await secureApiClient.get(`/locations?service_name=${encodeURIComponent(query)}`);
+        // Create axios instance for staging API
+        const stagingClient = axios.create({
+            baseURL: 'https://staging.trektoo.com/api/',
+            timeout: 30000,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+        });
+
+        const response = await stagingClient.get(`locations?service_name=${encodeURIComponent(query)}`);
         console.log('Locations API response:', { total: response.data.total, data: response.data.data });
 
         // Transform location data to match frontend expectations
@@ -218,20 +238,27 @@ export const fetchLocations = async (query) => {
  */
 export const prebookHotel = async (roomId, checkin, checkout, adults = 1, children = 0) => {
     try {
-        const queryParams = new URLSearchParams({
-            checkin,
-            checkout,
-            adults: adults.toString(),
-            children: children.toString(),
-        });
+        // Prebook API only takes the book_hash, no query parameters
+        const apiUrl = `/hotel/prebook/${roomId}`;
 
-        const apiUrl = `/hotel/prebook/${roomId}?${queryParams.toString()}`;
-        
         console.log('🔍 Prebook API Call - URL:', apiUrl);
         console.log('🔍 Prebook API Call - Params:', { roomId, checkin, checkout, adults, children });
 
         const response = await secureApiClient.get(apiUrl);
         console.log('🔍 Prebook API Response:', response.data);
+
+        // Check for errors in response
+        if (!response.data.success || response.data.success === false) {
+            console.log('🔍 Prebook API Error Response:', response.data);
+            throw new Error(response.data.message || 'Prebook failed');
+        }
+
+        // Check for price changes
+        if (response.data.changes && response.data.changes.price_changed === true) {
+            throw new Error('Price has changed. Please refresh and try again.');
+        }
+
+        console.log('🔍 Prebook API Success Response:', response.data);
         return response.data;
     } catch (error) {
         logError('Prebook API', error);
