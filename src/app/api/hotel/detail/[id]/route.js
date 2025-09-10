@@ -30,66 +30,64 @@ export async function GET(request, { params }) {
     const children = searchParams.get('children') || '0';
 
     try {
-        // Build query string for external API
-        const queryParams = new URLSearchParams();
-        if (checkin && checkout) {
-            queryParams.append('checkin', checkin);
-            queryParams.append('checkout', checkout);
-            queryParams.append('adults', adults);
-            queryParams.append('children', children);
-        }
-
-        const apiUrl = queryParams.toString()
-            ? `https://staging.trektoo.com/api/hotel/detail/${id}?${queryParams.toString()}`
-            : `https://staging.trektoo.com/api/hotel/detail/${id}`;
-
-        console.log('🔍 Hotel Details API Call - URL:', apiUrl);
-
-        const response = await axios.get(apiUrl, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Basic ${Buffer.from(
-                    `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`
-                ).toString('base64')}`,
-            },
-            // Equivalent to Next.js fetch revalidate for caching
-            next: { revalidate: 3600 }, // Cache for 1 hour
+        // Build query parameters for the new API - following hotel search pattern
+        const queryParams = new URLSearchParams({
+            adults: adults,
+            children: children,
+            checkin: checkin || '2025-12-12',
+            checkout: checkout || '2025-12-14'
         });
 
-        if (response.data.status !== 1 || !response.data.data) {
+        const response = await axios.get(
+            `http://api.trektoo.com/api/hotel/detail/${id}?${queryParams.toString()}`,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                timeout: 30000, // 30 second timeout
+            }
+        );
+
+        // Check if the response contains an error (new API format)
+        if (!response.data.success || response.data.success === false) {
             return NextResponse.json(
-                { error: 'Hotel not found' },
+                { error: response.data.message || 'Hotel not found' },
                 { status: 404 }
             );
         }
 
-        // Sanitize API response data
-        const hotel = response.data.data;
+        // Sanitize API response data - handle new response format
+        const hotel = response.data;
         const sanitizedData = {
-            ...hotel,
+            id: hotel.id,
             title: sanitize(hotel.title || ''),
-            content: sanitize(hotel.content || ''),
-            address: sanitize(hotel.address || ''),
+            price: hotel.price || '0.00',
+            sale_price: hotel.sale_price || hotel.price || '0.00',
             image: sanitize(hotel.image || ''),
-            banner_image: sanitize(hotel.banner_image || ''),
-            gallery: (hotel.gallery || []).map((url) => sanitize(url)),
-            policy: (hotel.policy || []).map((p) => sanitize(p)),
-            // Add new fields from the API response
-            object_model: hotel.object_model || 'hotel',
-            discount_percent: hotel.discount_percent || null,
-            location: hotel.location || { id: null, name: 'Unknown Location' },
+            content: sanitize(hotel.content || ''),
+            location: hotel.location || '',
             is_featured: hotel.is_featured || 0,
-            map_lat: hotel.map_lat || null,
-            map_lng: hotel.map_lng || null,
+            rooms: hotel.rooms || null,
+            // Add additional fields for compatibility
+            address: hotel.address || '',
+            banner_image: hotel.banner_image || hotel.image,
+            gallery: hotel.gallery || [hotel.image].filter(Boolean),
+            policy: hotel.policy || [],
+            map_lat: hotel.map_lat || '0',
+            map_lng: hotel.map_lng || '0',
             map_zoom: hotel.map_zoom || 10,
-            video: hotel.video || null,
-            enable_extra_price: hotel.enable_extra_price || 0,
-            extra_price: hotel.extra_price || null,
             review_score: hotel.review_score || {
                 score_total: 0,
                 total_review: 0,
-                review_text: 'Not rated'
-            }
+                score_text: 'Not rated'
+            },
+            terms: hotel.terms || {},
+            object_model: hotel.object_model || 'hotel',
+            discount_percent: hotel.discount_percent || null,
+            video: hotel.video || null,
+            enable_extra_price: hotel.enable_extra_price || 0,
+            extra_price: hotel.extra_price || null
         };
 
         // Log successful request for monitoring
