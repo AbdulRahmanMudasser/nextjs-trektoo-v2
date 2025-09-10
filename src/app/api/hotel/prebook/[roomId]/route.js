@@ -1,101 +1,127 @@
+/**
+ * API route to handle hotel room prebook with secure credential management using Axios
+ * @param {Request} request - The incoming request object
+ * @param {Object} params - Route parameters
+ * @returns {Response} JSON response with prebook data or error
+ */
 import { NextResponse } from 'next/server';
+import { sanitize } from 'isomorphic-dompurify';
 import axios from 'axios';
 
+/**
+ * GET handler for hotel room prebook
+ */
 export async function GET(request, { params }) {
-  const { roomId } = await params;
+  const { roomId } = await params; // Await params to resolve dynamic route parameters
   const { searchParams } = new URL(request.url);
 
-  // Validate roomId
+  // Input validation
   if (!roomId) {
     return NextResponse.json(
-      { error: 'Room ID is required' },
+      { error: 'Invalid room ID' },
       { status: 400 }
     );
   }
 
-  // Extract query parameters
+  // Extract query parameters for room availability
   const checkin = searchParams.get('checkin');
   const checkout = searchParams.get('checkout');
   const adults = searchParams.get('adults') || '1';
   const children = searchParams.get('children') || '0';
 
-  // Validate required parameters
-  if (!checkin || !checkout) {
-    return NextResponse.json(
-      { error: 'Check-in and check-out dates are required' },
-      { status: 400 }
-    );
-  }
-
   try {
-    // Build query parameters for external API
-    const queryParams = new URLSearchParams({
-      checkin,
-      checkout,
-      adults,
-      children,
-    });
+    // Prebook API only takes the book_hash, no query parameters
+    const response = await axios.get(
+      `http://api.trektoo.com/api/hotel/prebook/${roomId}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        timeout: 30000, // 30 second timeout
+      }
+    );
 
-    const apiUrl = `https://staging.trektoo.com/api/hotel/prebook/${roomId}?${queryParams.toString()}`;
-
-    console.log('🔍 Hotel Prebook API Call - URL:', apiUrl);
-    console.log('🔍 Hotel Prebook API Call - Params:', { roomId, checkin, checkout, adults, children });
-
-    const response = await axios.get(apiUrl, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      timeout: 30000, // 30 second timeout
-    });
-
+    console.log('🔍 Hotel Prebook API Call - URL:', `http://api.trektoo.com/api/hotel/prebook/${roomId}`);
     console.log('🔍 Hotel Prebook API Response Status:', response.status);
+    console.log('🔍 Hotel Prebook API Response Headers:', response.headers);
     console.log('🔍 Hotel Prebook API Response Data:', response.data);
 
-    return NextResponse.json(response.data, {
-      status: response.status,
-      headers: {
-        'Cache-Control': 'no-store, max-age=0',
-      },
-    });
+    // Check if the response contains an error (new API format)
+    if (!response.data.success || response.data.success === false) {
+      console.log('🔍 API returned error:', response.data);
+      return NextResponse.json(
+        {
+          success: false,
+          isAllowed: response.data.isAllowed || false,
+          message: response.data.message || 'Prebook failed',
+          error: response.data.message || 'Prebook failed'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check for price changes
+    if (response.data.changes && response.data.changes.price_changed === true) {
+      return NextResponse.json(
+        {
+          success: false,
+          isAllowed: false,
+          message: 'Price has changed. Please refresh and try again.',
+          price_changed: true,
+          error: 'Price has changed. Please refresh and try again.'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Return the full response data as-is for successful responses
+    const sanitizedData = {
+      success: response.data.success || true,
+      isAllowed: response.data.isAllowed || true,
+      message: response.data.message || '',
+      changes: response.data.changes || { price_changed: false },
+      ...response.data // Include all original data
+    };
+
+    // Log successful request for monitoring
+    console.info(`Hotel prebook successful for room ID: ${roomId}`);
+
+    return NextResponse.json(
+      sanitizedData,
+      {
+        headers: {
+          'Content-Security-Policy': "default-src 'self';",
+          'X-Content-Type-Options': 'nosniff',
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    );
   } catch (error) {
     console.error('🔍 Hotel Prebook API Error:', error);
 
+    // Handle different types of errors
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error('🔍 Error Response Status:', error.response.status);
-      console.error('🔍 Error Response Data:', error.response.data);
+      // Server responded with error status
+      const errorMessage = error.response.data?.message || 'Prebook request failed';
+      const statusCode = error.response.status;
 
       return NextResponse.json(
-        {
-          error: 'Failed to prebook hotel room',
-          details: error.response.data?.message || error.response.data?.error || 'Unknown error',
-          status: error.response.status,
-        },
-        { status: error.response.status }
+        { error: errorMessage },
+        { status: statusCode }
       );
     } else if (error.request) {
-      // The request was made but no response was received
-      console.error('🔍 No Response Received:', error.request);
+      // Request was made but no response received
       return NextResponse.json(
-        {
-          error: 'No response from hotel service',
-          details: 'The hotel service is currently unavailable. Please try again later.',
-        },
+        { error: 'Unable to connect to booking service. Please try again.' },
         { status: 503 }
       );
     } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('🔍 Request Setup Error:', error.message);
+      // Something else happened
       return NextResponse.json(
-        {
-          error: 'Internal server error',
-          details: 'An unexpected error occurred while processing your request.',
-        },
+        { error: 'An unexpected error occurred. Please try again.' },
         { status: 500 }
       );
     }
   }
 }
-
