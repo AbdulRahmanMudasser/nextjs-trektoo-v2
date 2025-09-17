@@ -6,19 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 import toast, { Toaster } from 'react-hot-toast';
-import { SearchButton } from '@/components/ui/LoadingButton';
 import {
   Search,
-  X,
-  Hotel,
-  MapPin,
-  Ticket,
-  Car,
-  Compass,
   Loader2,
   AlertCircle,
-  CheckCircle,
+  Calendar,
+  MapPin,
   Users,
+  Car,
+  Building,
+  Ticket,
 } from 'lucide-react';
 import DateInput from '@/components/ui/Custom/DateInput';
 import { useLocations } from '@/hooks/useHotels';
@@ -30,52 +27,34 @@ const addDays = (date, days) => {
   return result;
 };
 
-// Enhanced service options with better visual hierarchy
+// Service options with new design system
 const serviceOptions = [
   {
     id: 'hotels',
     label: 'Hotels',
-    icon: Hotel,
+    icon: Building,
     available: true,
     route: '/hotels-list',
     color: 'from-blue-500 to-blue-600',
     description: 'Find the perfect stay',
   },
   {
-    id: 'tours',
-    label: 'Tours & Experiences',
-    icon: Compass,
-    available: false,
-    route: '/tours',
-    color: 'from-blue-500 to-blue-600',
-    description: 'Coming Soon',
-  },
-  {
-    id: 'attractions',
-    label: 'Attraction Tickets',
-    icon: Ticket,
-    available: false,
-    route: '/attractions',
-    color: 'from-blue-500 to-blue-600',
-    description: 'Coming Soon',
-  },
-  {
-    id: 'transport',
-    label: 'Transport',
-    icon: MapPin,
-    available: false,
-    route: '/transport',
-    color: 'from-blue-500 to-blue-600',
-    description: 'Coming Soon',
-  },
-  {
     id: 'cars',
     label: 'Car Rentals',
     icon: Car,
-    available: false,
+    available: true,
     route: '/car-rentals',
     color: 'from-blue-500 to-blue-600',
-    description: 'Coming Soon',
+    description: 'Rent your perfect ride',
+  },
+  {
+    id: 'activities',
+    label: 'Activities',
+    icon: Ticket,
+    available: true,
+    route: '/activities',
+    color: 'from-blue-500 to-blue-600',
+    description: 'Discover amazing activities',
   },
 ];
 
@@ -161,7 +140,7 @@ function HeroContent() {
         return;
       }
 
-      // For other services, navigate to their dedicated pages
+      // For cars and experiences, navigate to their dedicated pages
       if (service.route) {
         toast.loading(`Redirecting to ${service.label}...`, {
           duration: 1000,
@@ -370,239 +349,160 @@ function HeroContent() {
   };
 
   return (
-    <div ref={contentRef} className="w-full max-w-7xl mx-auto px-4 sm:px-6">
-      {/* New Left-Right Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center min-h-[70vh]">
-        {/* Left Side - Text Content with Magic Effects */}
+    <div ref={contentRef} className="w-full mx-auto px-4 sm:px-6">
+      {/* Centered Layout with New Design System */}
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-12">
+        {/* Main Heading with New Color Palette */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="text-left space-y-16 relative"
+          className="space-y-8 text-center"
         >
-          {/* Simplified Background Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Single subtle gradient circle */}
-            <div className="absolute top-10 right-10 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-blue-600/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-10 left-10 w-24 h-24 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl" />
-          </div>
-
-          {/* Enhanced Main Title with Advanced Effects */}
-          <motion.div variants={itemVariants} className="relative">
-            <motion.h1
-              variants={itemVariants}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight relative"
+          {/* Primary Headline */}
+          <motion.div variants={itemVariants} className="space-y-6">
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-800 leading-tight"
               style={{
                 fontFamily:
                   "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
-                textShadow:
-                  '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(59, 130, 246, 0.3)',
-                willChange: 'transform',
                 letterSpacing: '-0.02em',
               }}
             >
-              <span className="block text-white">Discover Your Next</span>
-              <span className="block relative">
-                <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent">
-                  Adventure
-                </span>
+              Life's an{' '}
+              <span className="text-blue-500 relative">
+                adventure
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-3"
+                  viewBox="0 0 200 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2 10C50 2 100 2 198 10"
+                    stroke="#E0C097"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </span>
-            </motion.h1>
+              , live it!
+            </h1>
           </motion.div>
 
-          {/* Simplified Subtitle */}
-          <motion.div variants={itemVariants} className="relative">
-            <p className="text-lg sm:text-xl md:text-2xl text-white/90 leading-relaxed font-normal max-w-lg relative">
-              From exotic beaches to bustling cities, find your perfect escape
-              and create memories that last a lifetime
+          {/* Subheading with New Typography */}
+          <motion.div
+            variants={itemVariants}
+            className="space-y-4 max-w-4xl mx-auto"
+          >
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-medium">
+              Discover amazing destinations, book unforgettable experiences, and
+              create memories that last a lifetime.
             </p>
           </motion.div>
         </motion.div>
 
-        {/* Right Side - Search Form with Advanced Glassmorphism */}
+        {/* Compact Search Form with Integrated Service Tabs */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="space-y-8 relative"
+          className="relative w-full max-w-5xl mx-auto"
         >
-          {/* Simplified Background */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-4 right-4 w-16 h-16 bg-blue-400/10 rounded-full blur-2xl" />
-            <div className="absolute bottom-4 left-4 w-12 h-12 bg-indigo-400/10 rounded-full blur-2xl" />
-          </div>
-
-          {/* Service Selection Tabs with Enhanced Glassmorphism */}
-          <motion.div variants={itemVariants} className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-3xl blur-xl"></div>
-            <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl border border-white/20">
-              <motion.h3
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-white font-semibold text-lg mb-4 text-center"
-              >
-                Choose Your Experience
-              </motion.h3>
-              <div className="flex flex-wrap gap-3 justify-center">
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-visible">
+            {/* Service Tabs - Top of the search form */}
+            <div className="bg-gray-50 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b border-gray-100">
+              <div className="flex flex-wrap justify-center gap-2">
                 {serviceOptions.map((service, index) => {
                   const IconComponent = service.icon;
                   const isSelected = selectedService === service.id;
-                  const isAvailable = service.available;
 
                   return (
                     <motion.button
                       key={service.id}
                       initial={{ opacity: 0, y: 20, scale: 0.8 }}
                       animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                      transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                      transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
                       onClick={() => handleServiceSelect(service.id)}
-                      className={`
-                        group relative flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 backdrop-blur-sm
-                    ${
-                      isSelected && isAvailable
-                        ? `bg-gradient-to-r ${service.color} text-white shadow-xl transform scale-105 border border-white/30`
-                        : !isAvailable
-                          ? 'text-gray-300 bg-white/5 cursor-not-allowed opacity-60 border border-white/10'
-                          : 'text-white/90 bg-white/10 hover:bg-white/20 hover:scale-105 border border-white/20 hover:border-white/40'
-                    }
-                    active:scale-95
-                  `}
-                      whileHover={
-                        isAvailable
-                          ? {
-                              y: -3,
-                              boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)',
-                            }
-                          : {}
-                      }
-                      whileTap={isAvailable ? { scale: 0.95 } : {}}
-                      aria-label={`Select ${service.label}`}
+                      className={`flex items-center gap-2 px-4 py-3 rounded-xl transition-all duration-300 font-semibold text-sm ${
+                        isSelected
+                          ? 'bg-blue-500 text-white shadow-md'
+                          : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
+                      }`}
                     >
-                      <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <IconComponent className="h-4 w-4 flex-shrink-0" />
-                      </motion.div>
-                      <span className="whitespace-nowrap">{service.label}</span>
-
-                      {/* Enhanced Tooltip */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                        whileHover={{ opacity: 1, y: 0, scale: 1 }}
-                        className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 px-4 py-2 bg-gray-900/95 backdrop-blur-sm text-white text-xs rounded-xl opacity-0 pointer-events-none whitespace-nowrap z-[9999] border border-white/20"
-                      >
-                        {service.description}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900/95"></div>
-                      </motion.div>
+                      <IconComponent className="w-4 h-4" />
+                      {service.label}
                     </motion.button>
                   );
                 })}
               </div>
             </div>
-          </motion.div>
 
-          {/* Search Form with Advanced Glassmorphism */}
-          <motion.div variants={itemVariants} className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-blue-700/10 rounded-3xl blur-2xl"></div>
-            <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/20">
-              <motion.h3
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="text-white font-semibold text-xl mb-6 text-center"
-              >
-                Plan Your Perfect Trip
-              </motion.h3>
-              <div className="space-y-8">
-                {/* Enhanced City Search */}
-                <div className="relative" ref={searchInputRef}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 1, duration: 0.6 }}
-                    className="relative"
-                  >
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={handleInputChange}
-                      placeholder="Search for a city"
-                      className={`w-full h-14 px-6 text-base rounded-2xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent backdrop-blur-sm ${
-                        searchError && !selectedCity
-                          ? 'border-red-400/50 bg-red-500/10 text-white placeholder-red-200'
-                          : 'border-white/30 bg-white/10 text-white placeholder-white/60 hover:bg-white/15 focus:bg-white/20'
-                      }`}
-                      onFocus={() =>
-                        searchQuery.length >= 3 && setIsSearchDropdownOpen(true)
-                      }
-                      aria-label="Search for a city"
-                    />
+            {/* Compact Search Fields */}
+            <div className="p-4 sm:p-6 overflow-visible">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-4 mb-6">
+                {/* Location Input - 3 Columns */}
+                <div
+                  className="sm:col-span-2 lg:col-span-3 relative"
+                  ref={searchInputRef}
+                >
+                  <label className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-blue-500" />
+                    Destination
+                  </label>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    placeholder="Where to?"
+                    className={`w-full h-12 sm:h-14 px-4 text-base justify-start text-left font-normal border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition rounded-xl ${
+                      searchError
+                        ? 'border-red-300'
+                        : 'border-gray-200 focus:border-blue-500'
+                    } focus:outline-none bg-gray-50`}
+                    onFocus={() =>
+                      searchQuery.length >= 3 && setIsSearchDropdownOpen(true)
+                    }
+                    aria-label="Search for a city"
+                  />
+                  {searchError && (
+                    <p className="text-red-500 text-xs mt-1">{searchError}</p>
+                  )}
 
-                    {searchQuery && (
-                      <motion.button
-                        type="button"
-                        onClick={handleClearSearch}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-                        aria-label="Clear search"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <X className="h-5 w-5" />
-                      </motion.button>
-                    )}
-
-                    {selectedCity && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2"
-                      >
-                        <CheckCircle className="h-5 w-5 text-blue-400" />
-                      </motion.div>
-                    )}
-                  </motion.div>
-
-                  {/* Enhanced Search Dropdown */}
+                  {/* Location Dropdown */}
                   <AnimatePresence>
-                    {isSearchDropdownOpen && searchQuery.length >= 3 && (
+                    {isSearchDropdownOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 z-[9999] shadow-2xl max-h-60 overflow-y-auto"
-                        ref={searchDropdownRef}
-                        aria-label="City search results"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-[60] w-full bg-white border border-gray-200 rounded-lg mt-1 shadow-xl max-h-48 overflow-y-auto"
                       >
                         {isLoading ? (
-                          <div className="p-4 text-gray-500 text-base flex items-center gap-3">
-                            <Loader2 className="animate-spin h-5 w-5 text-blue-500" />
+                          <div className="p-3 text-gray-500 text-sm flex items-center gap-2">
+                            <Loader2 className="animate-spin h-4 w-4 text-blue-500" />
                             <span>Searching cities...</span>
                           </div>
                         ) : errorMessage ? (
-                          <div className="p-4 text-red-500 text-base flex items-center gap-3">
-                            <AlertCircle className="h-5 w-5" />
+                          <div className="p-3 text-red-500 text-sm flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4" />
                             <span>{errorMessage}</span>
                           </div>
                         ) : filteredLocations.length > 0 ? (
                           filteredLocations.map((location) => (
-                            <motion.div
+                            <button
                               key={location.id}
                               onClick={() => handleCitySelect(location)}
-                              className="p-4 flex items-center hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
-                              role="option"
-                              aria-selected={selectedCity?.id === location.id}
-                              whileHover={{ backgroundColor: '#f9fafb' }}
+                              className="w-full p-3 text-left hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0 text-sm"
                             >
-                              <span className="text-gray-900 text-base font-medium">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-3 h-3 text-gray-400" />
                                 {location.title}
-                              </span>
-                            </motion.div>
+                              </div>
+                            </button>
                           ))
                         ) : (
-                          <div className="p-4 text-gray-500 text-base">
+                          <div className="p-3 text-gray-500 text-sm">
                             No cities found
                           </div>
                         )}
@@ -611,248 +511,198 @@ function HeroContent() {
                   </AnimatePresence>
                 </div>
 
-                {/* Date and Guest Selection Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {/* Check-in Date */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 1.2, duration: 0.6 }}
-                    ref={dateFromPickerRef}
-                  >
-                    <DateInput
-                      selectedDate={selectedDateFrom}
-                      onChange={setSelectedDateFrom}
-                      placeholder="Check-in"
-                      minDate={today}
-                      className={`h-14 text-base rounded-2xl border-white/30 bg-white/10 text-white placeholder-white/60 hover:bg-white/15 focus:bg-white/20 backdrop-blur-sm ${
-                        searchError && !selectedDateFrom
-                          ? 'border-red-400/50 bg-red-500/10'
-                          : ''
-                      }`}
-                      aria-label="Select check-in date"
-                    />
-                  </motion.div>
-
-                  {/* Check-out Date */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 1.4, duration: 0.6 }}
-                    ref={dateToPickerRef}
-                  >
-                    <DateInput
-                      selectedDate={selectedDateTo}
-                      onChange={setSelectedDateTo}
-                      placeholder="Check-out"
-                      minDate={
-                        selectedDateFrom ? addDays(selectedDateFrom, 1) : today
-                      }
-                      disabled={!selectedDateFrom}
-                      className={`h-14 text-base rounded-2xl border-white/30 bg-white/10 text-white placeholder-white/60 hover:bg-white/15 focus:bg-white/20 backdrop-blur-sm ${
-                        searchError && !selectedDateTo
-                          ? 'border-red-400/50 bg-red-500/10'
-                          : ''
-                      }`}
-                      aria-label="Select check-out date"
-                    />
-                  </motion.div>
-
-                  {/* Guests Selection */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 1.6, duration: 0.6 }}
-                    className="relative"
-                    ref={guestsDropdownRef}
-                  >
-                    <motion.button
-                      type="button"
-                      onClick={() =>
-                        setIsGuestsDropdownOpen(!isGuestsDropdownOpen)
-                      }
-                      className={`w-full h-14 px-6 text-base rounded-2xl border transition-all duration-300 text-left flex items-center gap-3 hover:border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent backdrop-blur-sm ${
-                        searchError && totalGuests === 0
-                          ? 'border-red-400/50 bg-red-500/10 text-white placeholder-red-200'
-                          : 'border-white/30 bg-white/10 text-white placeholder-white/60 hover:bg-white/15 focus:bg-white/20'
-                      }`}
-                      aria-label="Select number of guests"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Users className="h-5 w-5 text-white/60 flex-shrink-0" />
-                      <span
-                        className={`truncate ${totalGuests > 0 ? 'text-white' : 'text-white/60'}`}
-                      >
-                        {totalGuests > 0
-                          ? `${totalGuests} Guest${totalGuests > 1 ? 's' : ''}`
-                          : 'Guests'}
-                      </span>
-                      <motion.svg
-                        animate={{ rotate: isGuestsDropdownOpen ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="ml-auto h-5 w-5 text-white/60"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M6 8l4 4 4-4"
-                        />
-                      </motion.svg>
-                    </motion.button>
-
-                    {/* Enhanced Guests Dropdown */}
-                    <AnimatePresence>
-                      {isGuestsDropdownOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-2xl border border-white/20 rounded-2xl mt-2 z-[9999] shadow-2xl"
-                        >
-                          <div className="p-6 space-y-5">
-                            {['adult', 'children'].map((category) => (
-                              <div
-                                key={category}
-                                className="flex items-center justify-between py-2"
-                              >
-                                <div className="flex flex-col">
-                                  <span className="text-gray-700 font-semibold text-base">
-                                    {category === 'adult'
-                                      ? 'Adults'
-                                      : 'Children'}
-                                  </span>
-                                  <span className="text-gray-500 text-sm">
-                                    {category === 'adult'
-                                      ? 'Ages 18+'
-                                      : 'Ages 0-17'}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <motion.button
-                                    type="button"
-                                    onClick={() =>
-                                      handleGuestChange(category, false)
-                                    }
-                                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-sm"
-                                    disabled={
-                                      guests[category] === 0 ||
-                                      (category === 'adult' &&
-                                        guests[category] === 1)
-                                    }
-                                    aria-label={`Decrease number of ${category}`}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                  >
-                                    −
-                                  </motion.button>
-                                  <span className="w-8 text-center font-bold text-gray-900 text-lg min-w-[2rem]">
-                                    {guests[category]}
-                                  </span>
-                                  <motion.button
-                                    type="button"
-                                    onClick={() =>
-                                      handleGuestChange(category, true)
-                                    }
-                                    className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all duration-300 text-lg font-bold shadow-sm"
-                                    aria-label={`Increase number of ${category}`}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                  >
-                                    +
-                                  </motion.button>
-                                </div>
-                              </div>
-                            ))}
-
-                            {/* Total Guests Display */}
-                            <div className="pt-3 border-t border-gray-200">
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-700 font-bold text-base">
-                                  Total Guests
-                                </span>
-                                <span className="text-blue-600 font-bold text-lg">
-                                  {totalGuests}{' '}
-                                  {totalGuests === 1 ? 'Guest' : 'Guests'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
+                {/* Check-in Date Field */}
+                <div className="sm:col-span-1 lg:col-span-2">
+                  <label className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-blue-500" />
+                    Check-in
+                  </label>
+                  <DateInput
+                    selectedDate={selectedDateFrom}
+                    onChange={setSelectedDateFrom}
+                    placeholder="Check-in"
+                    minDate={today}
+                    className="w-full"
+                  />
+                  {searchError && (
+                    <p className="text-red-500 text-xs mt-1">{searchError}</p>
+                  )}
                 </div>
 
-                {/* Enhanced Search Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ delay: 1.8, duration: 0.6 }}
-                  className="relative"
-                >
-                  <motion.button
-                    type="button"
-                    onClick={handleSearch}
-                    disabled={isSearching}
-                    className="w-full h-16 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-2xl font-bold gap-4 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 shadow-2xl flex flex-row items-center justify-center disabled:cursor-not-allowed relative overflow-hidden group"
-                    whileHover={
-                      !isSearching
-                        ? {
-                            scale: 1.05,
-                            boxShadow: '0 20px 40px rgba(59, 130, 246, 0.4)',
-                          }
-                        : {}
-                    }
-                    whileTap={!isSearching ? { scale: 0.95 } : {}}
-                  >
-                    {/* Animated background gradient */}
-                    <motion.div
-                      initial={{ x: '-100%' }}
-                      whileHover={{ x: '100%' }}
-                      transition={{ duration: 0.6 }}
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    />
-
-                    {isSearching ? (
-                      <>
-                        <Loader2 className="h-6 w-6 animate-spin flex-shrink-0 relative z-10" />
-                        <span className="whitespace-nowrap text-lg relative z-10">
-                          Searching...
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <motion.div
-                          whileHover={{ rotate: 360 }}
-                          transition={{ duration: 0.5 }}
-                          className="relative z-10"
-                        >
-                          <Search className="h-6 w-6 flex-shrink-0" />
-                        </motion.div>
-                        <span className="whitespace-nowrap text-lg relative z-10">
-                          Search Hotels
-                        </span>
-                      </>
-                    )}
-                  </motion.button>
-
-                  {/* Glow effect */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 0.3, scale: 1 }}
-                    transition={{ delay: 2, duration: 1 }}
-                    className="absolute inset-0 bg-gradient-to-r from-blue-500/30 to-blue-600/30 blur-xl -z-10"
+                {/* Check-out Date Field */}
+                <div className="sm:col-span-1 lg:col-span-2">
+                  <label className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-blue-500" />
+                    Check-out
+                  </label>
+                  <DateInput
+                    selectedDate={selectedDateTo}
+                    onChange={setSelectedDateTo}
+                    placeholder="Check-out"
+                    minDate={selectedDateFrom || today}
+                    className="w-full"
                   />
-                </motion.div>
+                  {searchError && (
+                    <p className="text-red-500 text-xs mt-1">{searchError}</p>
+                  )}
+                </div>
+
+                {/* Guests - 3 Columns */}
+                <div
+                  className="sm:col-span-2 lg:col-span-3 relative"
+                  ref={guestsDropdownRef}
+                >
+                  <label className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1">
+                    <Users className="w-3 h-3 text-blue-500" />
+                    Guests
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setIsGuestsDropdownOpen(!isGuestsDropdownOpen)
+                    }
+                    className={`w-full h-12 sm:h-14 px-4 text-base justify-start text-left font-normal border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition rounded-xl ${
+                      searchError
+                        ? 'border-red-300'
+                        : 'border-gray-200 focus:border-blue-500'
+                    } focus:outline-none bg-gray-50 flex items-center justify-between ${
+                      totalGuests === 0 ? 'text-gray-500' : 'text-gray-900'
+                    }`}
+                  >
+                    <span className="truncate">
+                      {totalGuests > 0
+                        ? `${totalGuests} guest${totalGuests !== 1 ? 's' : ''}`
+                        : 'Select guests'}
+                    </span>
+                    <svg
+                      className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isGuestsDropdownOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {searchError && (
+                    <p className="text-red-500 text-xs mt-1">{searchError}</p>
+                  )}
+
+                  {/* Compact Guest Dropdown with Higher Z-Index */}
+                  <AnimatePresence>
+                    {isGuestsDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg mt-2 shadow-2xl p-4"
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: '0',
+                          right: '0',
+                          zIndex: 9999,
+                          minWidth: '300px',
+                        }}
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex flex-col items-center text-center">
+                            <div className="mb-3">
+                              <h4 className="font-semibold text-gray-800 text-sm">
+                                Adults
+                              </h4>
+                              <p className="text-xs text-gray-500">Ages 13+</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() =>
+                                  handleGuestChange('adult', false)
+                                }
+                                disabled={guests.adult <= 1}
+                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-500 disabled:opacity-50 text-sm font-semibold transition-all duration-200"
+                              >
+                                -
+                              </button>
+                              <span className="w-8 text-center font-bold text-gray-900 text-base">
+                                {guests.adult}
+                              </span>
+                              <button
+                                onClick={() => handleGuestChange('adult', true)}
+                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-500 text-sm font-semibold transition-all duration-200"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-center text-center">
+                            <div className="mb-3">
+                              <h4 className="font-semibold text-gray-800 text-sm">
+                                Children
+                              </h4>
+                              <p className="text-xs text-gray-500">Ages 2-12</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() =>
+                                  handleGuestChange('children', false)
+                                }
+                                disabled={guests.children <= 0}
+                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-500 disabled:opacity-50 text-sm font-semibold transition-all duration-200"
+                              >
+                                -
+                              </button>
+                              <span className="w-8 text-center font-bold text-gray-900 text-base">
+                                {guests.children}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleGuestChange('children', true)
+                                }
+                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-500 text-sm font-semibold transition-all duration-200"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
+
+              {/* Compact Search Button */}
+              <motion.button
+                onClick={handleSearch}
+                disabled={isSearching}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSearching ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-5 h-5" />
+                    Search{' '}
+                    {selectedService === 'hotels'
+                      ? 'Hotels'
+                      : selectedService === 'cars'
+                        ? 'Cars'
+                        : 'Activities'}
+                  </>
+                )}
+              </motion.button>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 
