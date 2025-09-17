@@ -1,16 +1,20 @@
 import React, { Suspense, lazy } from 'react';
-import { motion } from 'framer-motion';
+import HeroSection from '@/components/feature/HeroSection';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 // Lazy load components for better performance
-const HeroSection = lazy(
-  () => import('@/components/feature/HeroSection/HeroSection')
-);
 const AdventureVideoSection = lazy(
   () => import('@/components/feature/QASection/QA')
 );
 const FAQ = lazy(() => import('@/components/feature/FAQSection/FAQ'));
 const WhyChooseUs = lazy(
   () => import('@/components/feature/WhyChooseUsSection/WhyChooseUs')
+);
+const FeaturedDestinations = lazy(
+  () =>
+    import(
+      '@/components/feature/FeaturedDestinationsSection/FeaturedDestinations'
+    )
 );
 const TestimonialsSection = lazy(
   () => import('@/components/feature/TestimonialsSection/TestimonialsSection')
@@ -25,31 +29,36 @@ const ComponentLoader = ({ children }) => (
 
 export default function HomePage() {
   return (
-    <main className="relative overflow-hidden">
-      {/* Hero Section - Critical above the fold */}
-      <Suspense fallback={<ComponentLoader />}>
+    <ErrorBoundary>
+      <main className="relative overflow-hidden">
+        {/* Hero Section - Critical above the fold */}
         <HeroSection />
-      </Suspense>
 
-      {/* Adventure Video Section */}
-      <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
-        <AdventureVideoSection />
-      </Suspense>
+        {/* Adventure Video Section */}
+        {/* <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
+          <AdventureVideoSection />
+        </Suspense> */}
 
-      {/* Why Choose Us - Trust & Benefits */}
-      <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
-        <WhyChooseUs />
-      </Suspense>
+        {/* Why Choose Us - Trust & Benefits */}
+        <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
+          <WhyChooseUs />
+        </Suspense>
 
-      {/* Testimonials - Customer Reviews */}
-      <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
-        <TestimonialsSection />
-      </Suspense>
+        {/* Featured Destinations */}
+        <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
+          <FeaturedDestinations />
+        </Suspense>
 
-      {/* FAQ Section - Common Questions */}
-      <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
-        <FAQ />
-      </Suspense>
-    </main>
+        {/* Testimonials - Customer Reviews */}
+        {/* <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
+          <TestimonialsSection />
+        </Suspense> */}
+
+        {/* FAQ Section - Common Questions */}
+        <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse" />}>
+          <FAQ />
+        </Suspense>
+      </main>
+    </ErrorBoundary>
   );
 }
